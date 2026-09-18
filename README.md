@@ -25,8 +25,11 @@ this in a banner, not in a footnote.
 - **The number of short answers is unpublished.** The mock deals written questions to **20 marks**
   (50 − 30, assuming one mark per multi-choice), spread one per topic, and says that is arithmetic,
   not knowledge. The formative mini exams in the revision sessions (21, 27, 28 Oct) may settle it.
-- **Modules 8, 9 and 10 are thin or absent** (Vaccines & Immunology beyond the ASCIA plan; Licit/
-  Illicit & Toxicology; CAM/Rongoā) — the material was not in the Canvas export. Examinable.
+- **The bank is Modules 1–7 — everything taught before the mid-semester break.** Modules 8, 9 and
+  10 have not been taught: Immunology, Vaccines & Allergy (Wed 7 Oct; only the ASCIA plan is here),
+  Socioeconomic Factors & CAM (Wed 14 Oct — a self-directed **Canvas quiz**, the first lecturer
+  questions this paper will ever have: capture the graded page), Licit & Illicit Drugs & Toxicology
+  (Tue 20 Oct). Examinable. Revision sessions with formative mini exams: 21, 27, 28 Oct.
 - **Deck 13, Drug Development & Marketing, was never lectured** — a self-directed online package.
 - The focus checklist is owed; slide images and warm-up chains are not ported yet.
 
