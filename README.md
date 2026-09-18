@@ -1,5 +1,7 @@
 # Pharm · Paper Sim — Final exam
 
+**Live: https://jeremyspm.github.io/pharm-final/** · sister sim: [INP](https://jeremyspm.github.io/inp-final/)
+
 A practice paper for **Introduction to Pharmacology (722.544)** in the Paper Sim format
 ([hs2-test2](https://jeremyspm.github.io/hs2-test2/) is the format of record).
 
