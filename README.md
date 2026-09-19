@@ -11,8 +11,9 @@ lines**, and she will **not ask about specific drugs**.
 
 ## The thing to know before anything else
 
-**There is no lecturer question bank for this paper.** Pharmacology has never had a Canvas quiz, so
-nothing here was captured. Every question is the tool's, from two sources, and each names the
+**There is no lecturer question bank for this paper.** Its only Canvas quizzes are medication-
+calculation practice tests (formative tests 1–5, answers on Canvas — not mined yet); nothing on
+pharmacology itself has ever been set, so nothing here was captured. Every question is the tool's, from two sources, and each names the
 slide or lecture moment that supplies its answer:
 
 - **75 short answers in Joan's stated format** — a definition plus an example, 2–3 marks, no

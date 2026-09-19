@@ -143,7 +143,7 @@ export const FOCUS = [
 
 { id:'socio-cam', sys:'cam', tier:2, t:'Socioeconomic factors and complementary/alternative medicines (Module 10, part 2)', flag:'untaught',
   done:'Not taught yet — Wed 14 Oct, as a self-directed CANVAS QUIZ.',
-  ask:'That quiz will be the first lecturer-written questions this paper has ever had. Sit it, submit it, and save the graded page.',
+  ask:'That quiz will be the first lecturer-written pharmacology questions this paper has had (its only Canvas quizzes so far are medication-calculation practice tests). Sit it, submit it, and save the graded page.',
   cap:'Nothing to build from until then.',
   src:'Canvas timetable' },
 
