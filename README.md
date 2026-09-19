@@ -12,18 +12,32 @@ lines**, and she will **not ask about specific drugs**.
 ## The thing to know before anything else
 
 **There is no lecturer question bank for this paper.** Pharmacology has never had a Canvas quiz, so
-nothing here was captured. All 289 questions — 100 multi-choice, 189 written — were written by the
-[intro-pharm](https://jeremyspm.github.io/intro-pharm/) hub from the 14 lecture decks and are
-carried across unchanged by `port-intro-pharm.mjs`. Each names the slide that supplies its answer;
-each multi-choice carries a short explanation that is the tool's, not Joan's. The home screen says
-this in a banner, not in a footnote.
+nothing here was captured. Every question is the tool's, from two sources, and each names the
+slide or lecture moment that supplies its answer:
+
+- **75 short answers in Joan's stated format** — a definition plus an example, 2–3 marks, no
+  question about a specific drug. Hand-written (19 Sep 2026) in `content/joan/`, one file per
+  topic, from her own Escape Room answer sheet, her recorded 16 Sep Legal & Ethical lecture (cited
+  by timestamp), deck 13 (the self-directed Drug Development package), the Rongoā Māori deck, and
+  the definitions in the Module 1–6 decks. Eight rows named "In Joan's format", listed first.
+- **289 questions — 100 multi-choice, 189 written — from the
+  [intro-pharm](https://jeremyspm.github.io/intro-pharm/) hub**, written from the 14 lecture decks
+  and carried across unchanged. Each multi-choice carries a short explanation that is the tool's.
+
+`port-intro-pharm.mjs` merges the two into the generated `content/authored-*.js`. The home screen
+says all this in a banner, not in a footnote.
 
 ## What is honest about its limits
 
-- **The written questions pre-date her description of the exam.** Many are longer multi-part
-  questions and some name specific drugs. They over-train rather than mis-train, but they are not
-  her format. Short definition-plus-example questions written from her recorded lectures
-  (9 Sep, 16 Sep, and every lecture recorded from here) are the next layer.
+- **The Joan-format questions are the tool's reading of her format, not her questions.** Her one
+  worked example ("what is the meaning of contraindication, and give an example") is the first of
+  them. The 9 Sep lecture was an essay briefing with no standalone pharmacology content, so nothing
+  was taken from it.
+- **intro-pharm's written questions pre-date her description of the exam.** They all stay under
+  Pick my rep, but a mock, which claims the paper's shape, leaves out 97 of the 189: any that carry
+  4+ marks, name a specific drug, ask for the lecture's own drug examples, or are worked
+  calculations. The rule is written down in `port-intro-pharm.mjs` (`--list` prints every hit);
+  the multi-choice are untouched.
 - **The number of short answers is unpublished.** The mock deals written questions to **20 marks**
   (50 − 30, assuming one mark per multi-choice), spread one per topic, and says that is arithmetic,
   not knowledge. The formative mini exams in the revision sessions (21, 27, 28 Oct) may settle it.
@@ -31,7 +45,7 @@ this in a banner, not in a footnote.
   10 have not been taught: Immunology, Vaccines & Allergy (Wed 7 Oct; only the ASCIA plan is here),
   Socioeconomic Factors & CAM (Wed 14 Oct — a self-directed **Canvas quiz**, the first lecturer
   questions this paper will ever have: capture the graded page; its Rongoā Māori part was lectured
-  15 Sep, deck now on disk, not yet in the bank), Licit & Illicit Drugs & Toxicology
+  15 Sep and IS in the bank, written from its deck), Licit & Illicit Drugs & Toxicology
   (Tue 20 Oct). Examinable. Revision sessions with formative mini exams: 21, 27, 28 Oct.
 - **Deck 13, Drug Development & Marketing, was never lectured** — a self-directed online package.
 - The focus checklist is owed; slide images and warm-up chains are not ported yet.
@@ -43,7 +57,8 @@ the shared files match the sibling sims byte for byte). With no captures, `PATHS
 `PATHS.cap` are null and every question comes from `content/authored-*.js`.
 
 ```
-node port-intro-pharm.mjs    # bank/intro-pharm.json -> content/authored-mcqs.js + authored-saqs.js
+node port-intro-pharm.mjs    # bank/intro-pharm.json + content/joan-saqs.js -> content/authored-*.js
+node port-intro-pharm.mjs --list   # every written question the noMock rule keeps out of a mock
 node build.mjs               # -> index.html, gates fail both ways
 node resplice.mjs            # only the template changed
 ```

@@ -102,7 +102,7 @@ a.btn{text-decoration:none}
 .tag.mixed,.tag.authored{color:var(--muted-fg)}
 /* one colour per group: written at load from META.hue (see "chrome") */
 /* sitting */
-.qhead{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.qhead{display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px;margin-bottom:8px}
 .qhead .n{font-weight:700}
 .qhead .timer{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--muted-fg)}
 .qhead .timer.low{color:var(--danger);font-weight:700}
@@ -311,6 +311,7 @@ const CLOSED = DATA.questions.filter(q=>!q.saq);
    MOCK paper — course-admin questions that are not exam material (sim.config.mjs NO_MOCK) */
 const MOCKABLE = CLOSED.filter(q=>!q.nm);
 const ESSAYS = DATA.questions.filter(q=>q.saq);
+const MOCK_ESSAYS = ESSAYS.filter(q=>!q.nm);   // written questions a mock may deal (authored noMock stays out)
 function pickN(pool, n, excl){
   const fresh = pool.filter(q=>!excl.has(q.id));
   /* Least-seen first: rank = times dealt, so nothing repeats an (n+1)th time
@@ -353,7 +354,7 @@ function dealFull(){
     /* the paper publishes marks, not a count: deal least-seen written questions, spread
        across the groups, until their marks reach the total (never past it by a whole question) */
     const out=[]; let m=0; const used=new Set();
-    const ranked=pickN(ESSAYS, ESSAYS.length, new Set());
+    const ranked=pickN(MOCK_ESSAYS, MOCK_ESSAYS.length, new Set());
     for(let pass=0; pass<2 && m<META.shape.saqMarks; pass++) for(const q of ranked){
       if(used.has(q.id)||m+q.pts>META.shape.saqMarks) continue;
       if(!pass && out.some(x=>x.quiz===q.quiz)) continue;      // first pass: one per topic
@@ -362,14 +363,14 @@ function dealFull(){
   }
   const saqs = (DATA.cases||[]).slice(0, META.shape.saq).map(c=>mkCaseQ(c, c.questions[nth % c.questions.length]));
   const rest = Math.max(0, META.shape.saq - saqs.length);
-  return closed.concat(saqs, shuffle(pickN(ESSAYS, rest, new Set())));
+  return closed.concat(saqs, shuffle(pickN(MOCK_ESSAYS, rest, new Set())));
 }
 function mkCaseQ(c, cq){
   return { id:'case-'+c.id+'-'+cq.q.slice(0,24).replace(/\W/g,''), quiz:'case:'+c.id, sys:c.sys, type:'essay',
     pts:cq.marks, q:cq.q, imgs:[], saq:{steps:cq.steps, src:c.name+' — model answer is the tool’s'},
     scenario: c.scenario };
 }
-const FULL_SAQ = () => Math.min(META.shape.saq||0, (DATA.cases||[]).length + ESSAYS.length);
+const FULL_SAQ = () => Math.min(META.shape.saq||0, (DATA.cases||[]).length + MOCK_ESSAYS.length);
 /* the misses pile, worst first: once four or more have been missed twice, only those */
 function missPool(){
   let ids = Object.keys(S.miss).filter(id=>S.miss[id]>=2);
@@ -732,7 +733,7 @@ function renderQ(){
   const open=chk&&learnOpen(q,chk);
   $('#view').innerHTML=`<div class="card">
     <div class="qhead"><span class="n">Q${SIT.i+1}/${SIT.deck.length}</span>
-      <span class="tag ${q.sys}">${esc(sysTag(q.sys))}</span><span class="tag">${q.pts} mk</span>${SIT.learn?'<span class="tag" style="color:var(--ok)">learn</span>':''}
+      <span class="tag ${q.sys}">${esc(sysTag(q.sys))}</span><span class="tag">${q.pts} mk</span>${q.authored&&DATA.stats.nAuthored<DATA.stats.n?'<span class="tag authored" title="written by this tool from the lecture decks — not one the lecturers set">tool’s question</span>':''}${SIT.learn?'<span class="tag" style="color:var(--ok)">learn</span>':''}
       <span class="timer" id="timer"></span>
       <button class="btn ghost" id="exitB" title="${SIT.learn?'stop learning':'abandon mock test'}" style="padding:2px 10px">✕</button></div>
     ${inlineBlanks?body:''}<div class="stem${q.qh?' rich':''}">${stemHTML}</div>${imgs}${inlineBlanks?'':body}
@@ -1138,7 +1139,7 @@ $('#themeBtn').onclick=()=>{const r=document.documentElement;
   const to=r.dataset.theme==='light'?'':'light';
   to?r.dataset.theme='light':delete r.dataset.theme;SV('theme',to)};
 if(LS('theme')==='light')document.documentElement.dataset.theme='light';
-$('#helpBtn').onclick=()=>{const H=META.help||{}, nAuth=DATA.questions.filter(q=>q.authored).length, nNm=CLOSED.length-MOCKABLE.length;
+$('#helpBtn').onclick=()=>{const H=META.help||{}, nAuth=DATA.questions.filter(q=>q.authored).length, nNm=CLOSED.length-MOCKABLE.length, nNmW=ESSAYS.length-MOCK_ESSAYS.length;
   $('#help').innerHTML=`
   <h2 style="margin-top:0">What is this?</h2>
   <p>${H.what||''}</p>
@@ -1148,7 +1149,8 @@ $('#helpBtn').onclick=()=>{const H=META.help||{}, nAuth=DATA.questions.filter(q=
   ${ESSAYS.some(q=>!q.authored)?`Written questions from Canvas have <b>model answers written by this tool</b> (Canvas publishes none), one mark per step, each naming its source. `:''}
   ${nAuth?(H.authored||`<b>${nAuth} written questions were written by this tool</b> from the lecture decks, because the real paper has a written section and the quizzes have none; each is labelled as the tool’s and names its deck. `):''}
   ${DATA.chains.length?'Warm-up chains are scaffolds built from the decks, not the lecturer’s material. ':''}
-  ${nNm?`${nNm} questions are about being a student on this course rather than the subject (attendance, extensions, online-exam rules); they stay under Pick my rep but are never dealt into a mock paper. `:''}</p>
+  ${nNm?`${nNm} questions are about being a student on this course rather than the subject (attendance, extensions, online-exam rules); they stay under Pick my rep but are never dealt into a mock paper. `:''}
+  ${nNmW?(H.noMockWritten||`${nNmW} written questions stay under Pick my rep but are never dealt into a mock paper. `):''}</p>
   ${H.groups?`<p>${H.groups}</p>`:''}
   <h3>Learn mode</h3>
   <p><b>Learn as you go</b> (and the <b>Learn</b> button beside each quiz) marks every question the moment you

@@ -194,7 +194,8 @@ for (const z of bank.quizzes) {
    whose quizzes carry no written questions still sits a written section, and a course with
    no quizzes at all still sits a paper. Every one is labelled as the tool's on the page and
    names its source. Each entry may name the quiz row it belongs under ({quiz, quizName});
-   without one it lands in a single "written practice" row. */
+   without one it lands in a single "written practice" row. An entry marked noMock stays in
+   the bank (Pick my rep, Learn) but is never dealt into a mock paper. */
 {
   const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const rows = new Map();   // quiz id -> {id,name,sys,n}
@@ -212,14 +213,14 @@ for (const z of bank.quizzes) {
     if (seen.has('m|' + a.q)) die('repeats a stem', a); seen.add('m|' + a.q);
     questions.push({ id: qid(a.quiz || 'authored', a.q, a.options[a.correct]), quiz: row(a), sys: a.sys, pts: 1, q: a.q,
       qh: '<p>' + esc(a.q) + '</p>', qt: a.q, imgs: [], type: 'mcq', authored: 1, opts: a.options, key: [a.options[a.correct]],
-      src: a.src, ...(a.why ? { why: a.why } : {}) });
+      src: a.src, ...(a.why ? { why: a.why } : {}), ...(a.noMock ? { nm: 1 } : {}) });
   }
   for (const a of AUTHORED_SAQS) {
     if (!a.q || !a.src || !META.sys[a.sys]) die('needs q, src and a META.sys group', a);
     if (!Array.isArray(a.steps) || a.steps.length < 2) die('needs 2+ model steps', a);
     if (seen.has('s|' + a.q)) die('repeats a stem', a); seen.add('s|' + a.q);
     questions.push({ id: qid(a.quiz || 'authored', a.q, a.steps), quiz: row(a), sys: a.sys, pts: a.pts || a.steps.length, q: a.q,
-      qh: '<p>' + esc(a.q) + '</p>', qt: a.q, imgs: [], type: 'essay', authored: 1, ...(a.fmt ? { fmt: a.fmt } : {}),
+      qh: '<p>' + esc(a.q) + '</p>', qt: a.q, imgs: [], type: 'essay', authored: 1, ...(a.fmt ? { fmt: a.fmt } : {}), ...(a.noMock ? { nm: 1 } : {}),
       saq: { steps: a.steps, src: 'Question and model answer are the tool’s · from ' + a.src } });
   }
   quizzes.push(...rows.values());
