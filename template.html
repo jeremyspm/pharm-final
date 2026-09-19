@@ -417,6 +417,7 @@ function focusCard(){
     (f.flag||'').split(' ').filter(Boolean).forEach(x=>{
       if(x==='tape') chips.push('<span class="fchip tape">🎤 said in class</span>');
       else if(x==='noquiz') chips.push('<span class="fchip tape">⚠ no quiz exists for this</span>');
+      else if(x==='untaught') chips.push('<span class="fchip tape">⏳ not taught yet</span>');
       else if(FLAGN[x]) chips.push(`<span class="fchip her">📌 ${FLAGN[x]}</span>`);
     });
     if(f.hl)  chips.push('<span class="fchip hl">🆘 on the helpline</span>');
@@ -427,7 +428,7 @@ function focusCard(){
       <input type="checkbox" class="fchk" ${on?'checked':''} aria-label="I can do this: ${esc(f.t)}">
       <details class="fbody"><summary>
         <span class="ft">${esc(f.t)}</span>
-        <span class="fmeta"><span class="fchip sys">${SYS[f.sys]}</span><span class="fchip">${f.n} question${f.n===1?'':'s'}</span>${f.pts!==f.n?`<span class="fchip">${f.pts} marks</span>`:''}${f.qz>1?`<span class="fchip">${f.qz} quizzes</span>`:''}${chips.join('')}</span>
+        <span class="fmeta"><span class="fchip sys">${SYS[f.sys]}</span><span class="fchip">${f.n} question${f.n===1?'':'s'}</span>${f.na&&f.na<f.n?`<span class="fchip">${f.na} of them the tool’s</span>`:''}${f.pts!==f.n?`<span class="fchip">${f.pts} marks</span>`:''}${f.qz>1?`<span class="fchip">${f.qz} quizzes</span>`:''}${chips.join('')}</span>
       </summary>
       <div class="fdet">
         <p><b>Done when you can:</b> ${esc(f.done)}</p>
@@ -440,7 +441,7 @@ function focusCard(){
       </div></details></div>`;
   }).join('');
   const tier = t => `<div class="ftier" style="color:${FTIER[t].c}">${FTIER[t].n}
-      <span class="fnum">· ${DATA.focus.filter(f=>f.tier===t).length} topics</span></div>
+      <span class="fnum">· ${DATA.focus.filter(f=>f.tier===t).length} topic${DATA.focus.filter(f=>f.tier===t).length===1?'':'s'}</span></div>
     <div class="fwhy">${FTIER[t].w}</div>${rows(t)}`;
   return `<div class="card" style="border-left:4px solid var(--warn)">
     <details>
@@ -1068,12 +1069,12 @@ function aiQuestionPrompt(q,withFig){
 /* topic-first: the focus row's own `done` / `ask` / `cap` become the AI's brief,
    plus her worked helpline answer where she posted one */
 function aiTopicPrompt(f){
-  const L=[AI_CTX+` Topic: ${f.t} (${SYS[f.sys]||f.sys}).`,'','My lecturer set the level. Here is exactly what I have to be able to DO, in her words:',`“${f.done}”`,`How she asks it in tests: “${f.ask}”`];
+  const L=[AI_CTX+` Topic: ${f.t} (${SYS[f.sys]||f.sys}).`,'','A study tool read my lecturers’ slides and their practice questions and wrote down the level. Here is what I have to be able to DO:',`“${f.done}”`,`How it gets asked: “${f.ask}”`];
   if(f.cap)L.push(`Where it ends — do NOT go past this: “${f.cap}”`);
   const h=(DATA.helpline||{})[f.id];
   if(h){let t=h.parts.map(p=>p.h+'\n'+p.t).join('\n');if(t.length>3000)t=t.slice(0,3000)+' …(trimmed)';
-    L.push('','Her own worked answer for this topic, verbatim (her CAPITALS are the mark-earning words):',t);}
-  L.push('',aiSteps('','in the shapes she uses (see “how she asks it” above)','Stay inside her level. Don’t teach past the “where it ends” line.'));
+    L.push('','My lecturer’s own worked answer for this topic, verbatim (the CAPITALS are the mark-earning words):',t);}
+  L.push('',aiSteps('','in the shapes described under “how it gets asked” above','Stay inside that level. Don’t teach past the “where it ends” line.'));
   return L.join('\n');
 }
 /* the question's own figures — or, when it has none, her slide (the build guarantees a

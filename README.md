@@ -48,7 +48,13 @@ says all this in a banner, not in a footnote.
   15 Sep and IS in the bank, written from its deck), Licit & Illicit Drugs & Toxicology
   (Tue 20 Oct). Examinable. Revision sessions with formative mini exams: 21, 27, 28 Oct.
 - **Deck 13, Drug Development & Marketing, was never lectured** — a self-directed online package.
-- The focus checklist is owed; slide images and warm-up chains are not ported yet.
+- **The focus checklist** (`content/focus.js`, 18 rows) is built: per topic what you must be able
+  to DO, the shape Joan described, where it stops. The build counts each row's questions and fails
+  unless every question sits in exactly one row. **Counts rank nothing here** (every question is
+  the tool's): the top band is what she said on tape on 16 Sep, then topics an assessed learning
+  outcome names, then the rest, then calculations. The page flags one contradiction: the syllabus
+  leaves the legal-standards outcome out of the exam's list, and she said on tape it is assessed.
+- Slide images and warm-up chains are not ported yet.
 
 ## How it is built
 

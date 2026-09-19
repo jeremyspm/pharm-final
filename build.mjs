@@ -309,6 +309,36 @@ for (const a of AUTHORED_STEMS) if (!authoredUsed.has(a)) fails.push(`authored-s
 for (const e of NO_IMAGE_OK) if (!noImgOkUsed.has(e)) fails.push(`no-image-ok matched NO question: ${e.quiz} "${e.k}"`);
 for (const e of NO_MOCK) if (!noMockUsed.has(e)) fails.push(`no-mock matched NO question: ${e.quiz} "${e.k}"`);
 for (const f of FOCUS) if (!META.sys[f.sys]) fails.push('focus row names a group META.sys does not have: ' + f.id);
+/* ── the focus checklist: counted here, never by hand ──
+   A row names where its questions come from — from: [{ quiz:[row ids], q?:RegExp (on the
+   stem), src?:RegExp (on the source line) }] — and the build fills n / pts / qz / saq / na
+   (na = how many are the tool's own). When any row carries `from`, EVERY question must land
+   in exactly one row, or the build fails and names it: that is what makes "12 questions,
+   18 marks" on a row a fact. A captured question the config keeps out of mocks (NO_MOCK: not
+   the subject) is assigned but not counted; a tool question marked noMock IS counted — it is
+   real study content under Pick my rep, just not the paper's shape.
+   A row without `from` (a topic with nothing in the bank yet) keeps n = 0 and must say why.
+   Rows with literal counts and no `from` anywhere (the older sims) pass through untouched. */
+let FOCUS_OUT = FOCUS;
+if (FOCUS.some(f => f.from)) {
+  const srcOf = q => (q.saq && q.saq.src) || q.src || '';
+  const hit = (f, q) => (f.from || []).some(c => c.quiz.includes(q.quiz) && (!c.q || c.q.test(q.qt || q.q)) && (!c.src || c.src.test(srcOf(q))));
+  const tally = new Map(FOCUS.map(f => [f.id, { n: 0, pts: 0, saq: 0, na: 0, qz: new Set() }]));
+  for (const q of questions) {
+    const rows = FOCUS.filter(f => hit(f, q));
+    if (rows.length !== 1) { fails.push(`focus: question sits in ${rows.length} rows (${rows.map(r => r.id).join(', ') || 'none'}): [${q.quiz}] ${q.q.slice(0, 80)}`); continue; }
+    if (q.nm && !q.authored) continue;
+    const t = tally.get(rows[0].id);
+    t.n++; t.pts += q.pts; t.qz.add(q.quiz); if (q.authored) t.na++;
+    if (q.type === 'essay' || q.type === 'cloze') t.saq++;
+  }
+  for (const f of FOCUS) for (const c of f.from || []) for (const z of c.quiz) if (!quizzes.some(x => x.id === z)) fails.push(`focus row ${f.id} names a quiz row that does not exist: ${z}`);
+  if (new Set(FOCUS.map(f => f.id)).size !== FOCUS.length) fails.push('focus: two rows share an id');
+  FOCUS_OUT = FOCUS.map(({ from, ...f }) => { const t = tally.get(f.id); return { ...f, n: t.n, all: t.n, pts: t.pts, qz: t.qz.size, saq: t.saq, na: t.na }; });
+  for (const f of FOCUS_OUT) if (!f.n && !/noquiz|untaught/.test(f.flag || '')) fails.push('focus row has no questions and no noquiz/untaught flag: ' + f.id);
+  console.log('focus checklist: ' + FOCUS_OUT.length + ' rows · ' + FOCUS_OUT.map(f => `${f.id} ${f.n}q/${f.pts}m`).join(' · '));
+}
+
 for (const q of questions) if (!q.qh) fails.push('no structured stem for ' + q.id + ' "' + q.q.slice(0, 60) + '"');
 for (const q of questions) if (q.qh && /\[\[(?!IMG:|BLANK:\d+\]\])/.test(q.qh)) fails.push('stray marker in ' + q.id);
 if (fails.length) { console.error('BUILD FAILED:\n  ' + fails.join('\n  ')); process.exit(1); }
@@ -331,7 +361,7 @@ const DATA = {
   quizzes: META.quizOrder
     ? quizzes.sort((a, b) => (META.quizOrder.indexOf(a.id) + 1 || 999) - (META.quizOrder.indexOf(b.id) + 1 || 999))
     : quizzes.sort((a, b) => a.sys.localeCompare(b.sys) || a.name.localeCompare(b.name)),
-  questions, chains: CHAINS, cases: CASES, focus: FOCUS, helpline: HELPLINE, held,
+  questions, chains: CHAINS, cases: CASES, focus: FOCUS_OUT, helpline: HELPLINE, held,
   meta: META,
 };
 const tpl = fs.readFileSync(path.join(HERE, 'template.html'), 'utf8');
