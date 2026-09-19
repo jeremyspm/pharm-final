@@ -30,7 +30,8 @@ this in a banner, not in a footnote.
 - **The bank is Modules 1–7 — everything taught before the mid-semester break.** Modules 8, 9 and
   10 have not been taught: Immunology, Vaccines & Allergy (Wed 7 Oct; only the ASCIA plan is here),
   Socioeconomic Factors & CAM (Wed 14 Oct — a self-directed **Canvas quiz**, the first lecturer
-  questions this paper will ever have: capture the graded page), Licit & Illicit Drugs & Toxicology
+  questions this paper will ever have: capture the graded page; its Rongoā Māori part was lectured
+  15 Sep, deck now on disk, not yet in the bank), Licit & Illicit Drugs & Toxicology
   (Tue 20 Oct). Examinable. Revision sessions with formative mini exams: 21, 27, 28 Oct.
 - **Deck 13, Drug Development & Marketing, was never lectured** — a self-directed online package.
 - The focus checklist is owed; slide images and warm-up chains are not ported yet.
