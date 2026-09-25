@@ -9,7 +9,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const SHARED = ['template.html', 'build.mjs', 'stem-html.mjs', 'bind-images.mjs', 'resplice.mjs',
-  'shared-check.mjs', 'content/explain.mjs'];
+  'shared-check.mjs', 'shorts.mjs', 'content/explain.mjs'];
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const parent = path.dirname(HERE);

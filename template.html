@@ -270,6 +270,52 @@ a{color:var(--primary)}
 .how>summary::before{content:'ⓘ '}
 .how[open]{border-left:2px solid var(--border);padding-left:10px;margin:4px 0 10px}
 .how p,.how .note{font-size:.86rem;color:var(--muted-fg);margin:.4rem 0}
+/* ── written answers, learned from a short version (ported from hs2-final, itself hs2-test3's SAQ Trainer) ── */
+.sdoor{border-left:4px solid var(--danger)}
+.slist{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.srow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;border:1px solid var(--border);border-radius:var(--radius);
+  padding:8px 10px;background:var(--muted);cursor:pointer}
+.srow b{flex:1 1 160px;font-size:.86rem;font-weight:600}
+.srow .m{color:var(--muted-fg);font-size:.74rem;white-space:nowrap}
+.sbadge{font-size:.7rem;padding:1px 8px;border-radius:99px;background:var(--accent);color:var(--muted-fg);white-space:nowrap}
+.sbadge.lock{background:hsl(158 64% 42% / .2);color:var(--ok);font-weight:650}
+.sbadge.go{background:hsl(38 92% 55% / .18);color:var(--warn)}
+#sqBack,.qhead .tag{white-space:nowrap;flex:0 0 auto}
+.sstages{display:flex;gap:4px;margin:0 0 12px}
+.sstage{flex:1;font:inherit;font-size:.74rem;font-weight:600;padding:5px 2px;border-radius:6px;background:var(--muted);
+  color:var(--muted-fg);border:1px solid var(--border);cursor:pointer}
+.sstage.on{background:var(--primary);color:var(--onprimary);border-color:var(--primary)}
+.sask{font-weight:650;margin:0 0 10px;line-height:1.45}
+.shook{border:1px dashed var(--primary);border-radius:8px;padding:8px 10px;font-size:.88rem;margin:10px 0;line-height:1.45}
+.ssteps{margin:0 0 6px;padding-left:1.5em}
+.ssteps li{margin:7px 0;line-height:1.5}
+.ssteps b,.scheck b{color:var(--warn);font-weight:700}
+.sprog{display:flex;align-items:center;gap:10px;margin:0 0 6px}
+.scheck label{display:flex;gap:9px;align-items:flex-start;margin:9px 0;cursor:pointer;line-height:1.45;font-size:.92rem}
+.scheck input{margin-top:3px;width:18px;height:18px;flex:0 0 auto;accent-color:var(--ok)}
+.sres{font-size:1.7rem;font-weight:800;text-align:center;margin:.2rem 0}
+.syou{white-space:pre-wrap;font-size:.86rem;background:var(--muted);border-radius:8px;padding:8px 10px;margin:6px 0 10px}
+.sheet .sheeti{border-top:1px solid var(--border);padding-top:10px;margin-top:12px}
+.sheet h3{margin:0 0 4px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.sgrp{margin:12px 0 0}
+.sgq{font-size:.8rem;font-weight:700;color:var(--muted-fg);margin:0 0 2px}
+.ssteps.sfacts{margin:0}
+.ssteps.sfacts li{margin:4px 0;line-height:1.4}
+.sgap{display:block;width:100%;text-align:left;font:inherit;font-size:.9rem;color:var(--muted-fg);background:transparent;
+  border:1px dashed var(--primary);border-radius:8px;padding:7px 10px;cursor:pointer;line-height:1.4}
+.sgap.open{border-style:solid;color:var(--fg);cursor:default}
+.sgap.ok{border:1px solid var(--ok);color:var(--fg);cursor:default}
+.sgap.miss{border:1px solid var(--danger);color:var(--fg);cursor:default}
+.sgmk{display:flex;gap:6px;margin:5px 0 2px}
+.sgmk .btn{flex:1;padding:7px 10px;font-size:.84rem}
+.how.sfull{margin-top:14px}
+/* a correction line's reason, and the list's sections (her cases, then each module folded) */
+.sfix{font-size:.78rem;color:var(--warn);line-height:1.4;margin:2px 0 4px}
+.ssec{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-fg);margin:16px 0 4px}
+.smod{margin:8px 0 0;border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px}
+.smod>summary{cursor:pointer;font-weight:650;font-size:.88rem}
+/* the last-look sheet's quiz-row headings */
+.qmod{margin:14px 0 4px;font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-fg)}
 </style>
 </head>
 <body>
@@ -296,6 +342,27 @@ const FC = META.focusCopy || {};
 for(const q of DATA.questions){ if(!q.refs) q.refs = q.ref ? [{k:q.ref.slide?'slide':'her', ...q.ref}] : []; }
 const REF = {slide:{ic:'📖',lbl:'Her slide'}, her:{ic:'✍',lbl:'Her notes'}, course:{ic:'📄',lbl:'Course file'}, patton:{ic:'📕',lbl:'Patton'}};
 for(const k in (META.refLbl||{})) if(REF[k]) REF[k].lbl = META.refLbl[k];
+/* short versions of the written answers (content/shorts.js, gated by shorts.mjs, 26 Sep 2026). His rule (estate memory
+   "saq-short-answers"): a written answer is learned from a SHORT version, a few words a line, cut from the full model answer.
+   So wherever a written question is marked (Learn mode, the mock) you tick its short lines; q.saq.full keeps the full answer,
+   folded underneath. A sim without content/shorts.js has none, and its written questions tick their full steps. */
+const SHORTS = /*@SHORTS@*/;
+for(const q of DATA.questions) if(SHORTS[q.id]){
+  q.short = SHORTS[q.id];
+  const F = q.short.groups.flatMap(g=>g.facts);
+  q.saq = {...q.saq, full:q.saq.steps, steps:F.map(f=>f.t.replace(/\*\*/g,'')+(f.fix?` (⚠ corrected: ${f.fix.split('. ')[0]})`:''))};
+  /* a step's quote (q.prefs, judged per step of the full answer) moves with its step: it shows under the FIRST short line
+     cut from that step (f.of), never under whichever line happens to share the step's number (hs2-final's 26 Sep bug). A
+     step with no line of its own (a sub-question heading) hands its quote to the answer that follows it; the same quote
+     twice under one line shows once. */
+  if(q.prefs){
+    const n = q.saq.full.length, line = s => F.findIndex(f=>f.of.includes(s)), seen = new Set();
+    const at = s => { for(let t=s; t<n; t++) if(line(t)>=0) return line(t); for(let t=s-1; t>=0; t--) if(line(t)>=0) return line(t); return -1; };
+    q.prefs = q.prefs.map(p=>({...p, i:at(p.i-1)+1})).filter(p=>{ const k=p.i+'|'+p.t; return p.i>0 && !seen.has(k) && seen.add(k); });
+  }
+}
+/* the full model answer, folded under a short answer's tick list (every model answer in this pipeline is the tool's) */
+const fullAns = q => q.saq&&q.saq.full ? `<details class="hlans"><summary>📄 The full answer (this tool’s)</summary><div class="hlbody">${q.saq.full.map(s=>esc(s)).join(String.fromCharCode(10))}</div></details>` : '';
 /* ── state ─────────────────────────────────────────────────────────── */
 const LS = k => { try { return JSON.parse(localStorage.getItem(META.prefix+k)) } catch(e){ return null } };
 const SV = (k,v) => { try { localStorage.setItem(META.prefix+k, JSON.stringify(v)) } catch(e){} };
@@ -542,9 +609,19 @@ const NOREF_HINT = HAS.ref
 /* what opens under a question depends on what this bank actually carries */
 const UNDER = 'the answer' + (HAS.ref?', the slide or notes that state it':'') + (HAS.vid?' and the matched video':'');
 const PEEK = HAS.ref||HAS.vid ? ` — you can open ${HAS.ref&&HAS.vid?'the slide or video':HAS.ref?'the slide':'the video'} <i>before</i> you answer, too` : '';
+/* the written questions that have a short version, one row each, in the order the quizzes are listed (the trainer is
+   further down, after the other screens) */
+const quizName = id => (DATA.quizzes.find(z=>z.id===id)||{}).name||id;
+/* a quiz row's name inside the written-answers list, where every answer is the tool's anyway */
+const rowName = s => String(s).replace(/\s+—\s+the tool’s questions$/,'');
+const qzIx = id => DATA.quizzes.findIndex(z=>z.id===id);
+const SAQD = DATA.questions.filter(q=>q.short)
+  .map(q=>({id:q.id, q, title:q.short.title, cse:quizName(q.quiz), quiz:q.quiz, marks:q.pts, ask:q.qt||q.q, steps:q.saq.full, src:q.saq.src, short:q.short}))
+  .sort((a,b)=>qzIx(a.quiz)-qzIx(b.quiz));
 const SCR = {
   learn:{t:'📖 Learn as you go',            html:()=>learnScreen()},
   pick: {t:'🗂 Pick my rep',                html:()=>pickScreen()},
+  ...(SAQD.length ? {saq:{t:'✍️ Written answers', html:()=>saqCard()}} : {}),
   mock: {t:'⏱ Mock test',                   html:()=>mockScreen()},
   miss: {t:'🔁 My misses',                  html:()=>missScreen()},
   ...(DATA.focus.length||FC.pending ? {focus:{t:'🎯 What to learn, and how far', html:()=>focusCard()}} : {}),
@@ -613,6 +690,7 @@ function launcher(){
   <div class="lsec">Practise</div>
   ${row('learn','📖','Learn as you go',`${seen} of ${CLOSED.length} seen${r&&r.ids&&r.ids.length?' · a run is waiting':' · marks itself as you go'}`)}
   ${row('pick','🗂','Pick my rep',`${DATA.quizzes.length} quizzes${S.pick.length?` · ${S.pick.length} ticked`:' · tick any, run them as one'}`)}
+  ${SCR.saq?row('saq','✍️','Written answers',`${SAQD.length} short answers · ${SAQD.filter(x=>sqS(x.id).lock).length} locked`):''}
   <div class="lsec">Test yourself</div>
   ${row('mock','⏱','Mock test',last?`Last ${last.got}/${last.tot} · ${Math.round(100*last.got/last.tot)}% · ${S.scores.length} sat`:`No sittings yet · mini ~${Math.round((shape.mini||12)*1.25)} min or full ${shape.minutes?shape.minutes+' min':'untimed'}`)}
   ${row('miss','🔁','My misses',nm?`${nm} in the pile`:'Empty so far · wrong answers land here')}
@@ -690,8 +768,220 @@ function vidScreen(){
     <a class="btn primary wide" href="${META.playlist}" target="_blank" rel="noopener">Open the video playlist ↗</a>
   </div>`;
 }
+/* ── ✍️ written answers, learned from their short versions (26 Sep 2026) ───────────────────────────────────────────────
+   hs2-final's trainer (itself hs2-test3's SAQ Trainer), ported over this paper's written questions, same rungs and same
+   marking help: 1 Read the short version (the full answer folds underneath) → 2 Fill the gaps (1, a quarter, half, then
+   every line hidden; say it, tap to check, mark yourself; a missed line stays hidden next round) → 3 Write it (the page
+   looks for each line's bold words in what was written, the student confirms, 80% locks it). Progress lives in this
+   browser under this sim's own prefix ('saqd'). */
+let SQ = LS('saqd') || {};            /* question id -> {read, gaps, best (0..1), lock, tries, last} */
+const sqS = id => SQ[id] || (SQ[id] = {});
+const sqSave = () => SV('saqd', SQ);
+const mdB = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+let SQR = null;                        /* the trainer run on screen */
+const sqNext = () => SAQD.find(x=>!sqS(x.id).lock);
+const sqPoints = x => x.short.groups.flatMap(g=>g.facts.map(f=>f.t));
+const sqFacts = x => x.short.groups.flatMap(g=>g.facts);
+const sqMk = n => `${n} mark${n===1?'':'s'}`;
+/* a correction line: the full answer slips there, and the line says why it teaches something else */
+const sqFix = f => f&&f.fix ? `<div class="sfix">⚠ ${esc(f.fix)}</div>` : '';
+const sqRows = xs => xs.map(x=>{
+  const s=sqS(x.id), b = s.lock ? `<span class="sbadge lock">✓ locked</span>`
+    : s.best!=null ? `<span class="sbadge go">written ${Math.round(s.best*100)}% · not yet</span>`
+    : s.gaps ? `<span class="sbadge go">gaps done</span>` : s.read ? `<span class="sbadge">read</span>` : `<span class="sbadge">new</span>`;
+  return `<div class="srow" data-sq="${x.id}"><b>${esc(x.title)}</b><span class="m">${sqMk(x.marks)}</span>${b}</div>`; }).join('');
+function saqCard(){
+  const nL = SAQD.filter(x=>sqS(x.id).lock).length, nx = sqNext(), nLines = SAQD.reduce((a,x)=>a+sqPoints(x).length,0);
+  const fold = z => { const xs=SAQD.filter(x=>x.quiz===z.id); if(!xs.length) return '';
+    return `<details class="smod"><summary>${esc(rowName(z.name))} · ${xs.length} question${xs.length===1?'':'s'} · ${xs.filter(x=>sqS(x.id).lock).length} locked</summary><div class="slist">${sqRows(xs)}</div></details>`; };
+  return `<div class="card sdoor">
+    <p class="lead">Every written question here has a <b>short version</b>: its answer, a few words a line. Learn the short lines; the full answer folds away underneath.</p>
+    <details class="how"><summary>How this works</summary>
+      <p>${SAQD.length} written questions, ${nLines} short lines between them, one fold per quiz row below. For each one: <b>1 Read</b> the short version (the <b style="color:var(--warn)">bold</b> words are the mark words; the full answer folds away underneath)
+      → <b>2 Fill the gaps</b>: the lines disappear a round at a time, 1, then a quarter, half, then all of them; say each one, tap to check
+      → <b>3 Write it</b> from memory → the page looks for each line's bold words in what you wrote, you confirm, and it shows what you missed
+      → write it again until you get 80% (then it's locked ✓). The same short lines are what you tick for a written question in Learn mode and in a mock test.</p>
+      ${META.saqNote?`<p>${META.saqNote}</p>`:''}
+      <p class="refsrc">The model answers are this tool’s (the course publishes none), each naming the deck or lecture it was written from. Each short version is cut from its full answer line by line, and the build checks every bold word against the step it came from. Progress is saved in this browser only.</p>
+    </details>
+    ${nx?`<button class="btn primary wide" data-sqgo="${nx.id}">▶ ${sqS(nx.id).read?'Continue':'Start'}: ${esc(nx.title)}</button>`
+       :`<p style="margin:.4rem 0"><b>All ${SAQD.length} locked.</b> Keep them warm with the last-look sheet.</p>`}
+    <button class="btn ghost wide" id="sqSheet">📄 Last-look sheet · every short answer on one page</button>
+    <div class="hist" style="margin-top:10px">${nL} of ${SAQD.length} locked</div>
+    ${DATA.quizzes.map(fold).join('')}
+  </div>`;
+}
+function bindSaq(){
+  document.querySelectorAll('[data-sqgo],[data-sq]').forEach(b=>b.onclick=()=>sqOpen(b.dataset.sqgo||b.dataset.sq));
+  const h=$('#sqSheet'); if(h) h.onclick=sqSheet;
+}
+function sqHome(){ SQR=null; home(); }     /* off the trainer run, back onto the written-answers screen it started from */
+function sqOpen(id,stage){
+  const x=SAQD.find(s=>s.id===id); if(!x) return;
+  enterSit('saq');
+  SQR={x, stage: stage || (sqS(id).lock ? 'cold' : 'read')};
+  sqRender(); window.scrollTo(0,0);
+}
+const SQ_ST = [['read','1 Read'],['gaps','2 Fill gaps'],['cold','3 Write it']];
+function sqHead(){
+  const x=SQR.x;
+  return `<div class="qhead"><button class="btn ghost" id="sqBack" style="padding:4px 10px">← List</button><span class="n">${esc(x.title)}</span><span class="tag" style="margin-left:auto">${sqMk(x.marks)}</span></div>
+    <div class="sstages">${SQ_ST.map(a=>`<button class="sstage${a[0]===SQR.stage?' on':''}" data-sqst="${a[0]}">${a[1]}</button>`).join('')}</div>`;
+}
+/* the question's own figure, where it has one */
+const sqFig = x => (x.q.imgs||[]).map(f=>`<img class="qimg" src="img/${f}" alt="question figure" loading="lazy">`).join('');
+/* marking help (hs2-test3's, unchanged): which of a line's bold (mark-earning) words appear in what was written. Generous
+   about form (a long word must match all but its last 3 letters; either side of a "(x)" or "a / b"), strict about substance
+   (half the bold words or more to pre-tick). It only suggests; the student ticks. */
+const sqNorm = s => String(s).toLowerCase().replace(/²⁺|2\+/g,'2').replace(/[^a-z0-9 ]+/g,' ');
+const SQ_STOP = new Set(['the','and','of','in','for','from','into','with','via','its','than','not','a','an','to','on']);
+function sqHit(term,text){
+  const t=' '+sqNorm(text).replace(/\s+/g,' ')+' ';
+  return term.split(/[()\/]| or /).map(s=>s.trim()).filter(Boolean).some(alt=>{
+    const ws=sqNorm(alt).split(/\s+/).filter(w=>w.length>1&&!SQ_STOP.has(w));
+    return ws.length>0 && ws.filter(w=>t.includes(' '+w.slice(0,w.length<=5?w.length:Math.max(5,w.length-3)))).length>=Math.ceil(ws.length/2);
+  });
+}
+function sqCheckStep(step,text){
+  const ts=[...step.matchAll(/\*\*(.+?)\*\*/g)].map(m=>m[1]), found=ts.filter(t=>sqHit(t,text));
+  return {ts, found, auto: ts.length>0 && found.length>=Math.ceil(ts.length/2)};
+}
+function sqBindHead(){
+  const b=$('#sqBack'); if(b) b.onclick=sqHome;
+  document.querySelectorAll('[data-sqst]').forEach(e=>e.onclick=()=>{SQR.stage=e.dataset.sqst;SQR.cold=null;SQR.gap=null;sqRender();window.scrollTo(0,0)});
+}
+function sqRender(){ const st=SQR.stage; if(st==='read') sqReadShort(); else if(st==='gaps') sqGaps(); else sqCold(); }
+/* the short version, grouped under the question's own parts, numbered straight through */
+function sqShortHTML(x, line){
+  let k=-1;
+  return x.short.groups.map(g=>`<div class="sgrp"><div class="sgq">${esc(g.q)}</div><ol class="ssteps sfacts">${g.facts.map(()=>line(++k)).join('')}</ol></div>`).join('');
+}
+/* rung 1: the short answer first; the full answer (and a worked helpline answer, where the lecturer posted one) folds away */
+function sqReadShort(){
+  const x=SQR.x, P=sqPoints(x), F=sqFacts(x); sqS(x.id).read=1; sqSave();
+  $('#view').innerHTML=`<div class="card">${sqHead()}
+    ${sqFig(x)}
+    <p class="sask">${esc(x.ask)}</p>
+    <div class="shook">🧠 ${esc(x.short.hook)}</div>
+    <p class="hist" style="margin:8px 0 0">The short version: ${P.length} line${P.length===1?'':'s'} for ${sqMk(x.marks)}, cut from the full answer. Learn these; the bold words are what earn the marks.</p>
+    ${sqShortHTML(x, i=>`<li value="${i+1}">${mdB(P[i])}${sqFix(F[i])}</li>`)}
+    <button class="btn primary wide" id="sqGaps" style="margin-top:14px">🕳 Fill the gaps →</button>
+    <button class="btn wide" id="sqGo">✍️ Write it from memory</button>
+    <details class="how sfull"><summary>The full answer (this tool’s)</summary>
+      <ol class="ssteps">${x.steps.map(t=>`<li>${esc(t)}</li>`).join('')}</ol>
+      ${x.q.hl&&hasHer(x.q)?herAnswer(x.q.hl):''}
+      <div class="src">${esc(x.src)}. The short version is cut from it line by line; the build checks every bold word against the step it came from${F.some(f=>f.fix)?', except the ⚠ correction lines, which say why they differ':''}.</div>
+    </details></div>`;
+  sqBindHead();
+  $('#sqGaps').onclick=()=>{SQR.stage='gaps';SQR.gap=null;sqRender();window.scrollTo(0,0)};
+  $('#sqGo').onclick=()=>{SQR.stage='cold';SQR.cold=null;sqRender();window.scrollTo(0,0)};
+}
+/* rung 2: the whole short answer on screen with lines punched out, one line, then a quarter, half, then all of them.
+   Say the missing line, tap to check, mark yourself; a missed line stays hidden next round. */
+function sqGaps(){
+  const x=SQR.x, P=sqPoints(x), n=P.length;
+  const L=[...new Set([1,Math.ceil(n/4),Math.ceil(n/2),n])].sort((a,b)=>a-b);
+  if(!SQR.gap) SQR.gap={lvl:0, carry:[]};
+  const g=SQR.gap;
+  if(!g.hide){
+    const want=L[g.lvl], pick=g.carry.slice(0,want);
+    for(const i of shuffle(P.map((_,i)=>i))) if(pick.length<want&&!pick.includes(i)) pick.push(i);
+    g.hide=pick; g.res={}; g.open={};
+  }
+  const line=i=>{
+    if(!g.hide.includes(i)) return `<li value="${i+1}">${mdB(P[i])}</li>`;
+    if(g.res[i]) return `<li value="${i+1}"><div class="sgap ${g.res[i]}">${mdB(P[i])}</div></li>`;
+    if(g.open[i]) return `<li value="${i+1}"><div class="sgap open">${mdB(P[i])}</div><div class="sgmk"><button class="btn" data-gok="${i}">✓ Had it</button><button class="btn" data-gmiss="${i}">✗ Missed it</button></div></li>`;
+    return `<li value="${i+1}"><button class="sgap" data-gopen="${i}">? Say it, then tap to check</button></li>`;
+  };
+  const done=g.hide.every(i=>g.res[i]), miss=g.hide.filter(i=>g.res[i]==='miss'), last=g.lvl===L.length-1, hid=k=>k===n?'every line':k+' line'+(k>1?'s':'');
+  $('#view').innerHTML=`<div class="card">${sqHead()}
+    ${sqFig(x)}
+    <div class="sprog"><div class="fbar"><i style="width:${Math.round(100*g.lvl/L.length)}%"></i></div><span class="hist">Round ${g.lvl+1} of ${L.length} · ${hid(L[g.lvl])} hidden</span></div>
+    <div class="shook">🧠 ${esc(x.short.hook)}</div>
+    ${sqShortHTML(x, line)}
+    ${!done?'':miss.length
+      ?`<div class="mk wrong"><p class="verdict">${miss.length} missed. ${miss.length>1?'They stay':'It stays'} hidden next time.</p></div><button class="btn primary wide" id="gAgain">Try this round again</button>`
+      :last?`<div class="mk right"><p class="verdict">✓ You said the whole answer.</p></div><button class="btn primary wide" id="gWrite">✍️ Now write it from memory →</button>`
+      :`<div class="mk right"><p class="verdict">${L[g.lvl]===1?'✓ Got it.':`✓ All ${L[g.lvl]} right.`}</p></div><button class="btn primary wide" id="gNext">Next round: ${hid(L[g.lvl+1])} hidden →</button>`}
+  </div>`;
+  sqBindHead();
+  document.querySelectorAll('[data-gopen]').forEach(b=>b.onclick=()=>{g.open[+b.dataset.gopen]=1;sqGaps()});
+  document.querySelectorAll('[data-gok]').forEach(b=>b.onclick=()=>{g.res[+b.dataset.gok]='ok';sqGaps()});
+  document.querySelectorAll('[data-gmiss]').forEach(b=>b.onclick=()=>{g.res[+b.dataset.gmiss]='miss';sqGaps()});
+  const a=$('#gAgain'); if(a) a.onclick=()=>{g.carry=miss;g.hide=null;sqGaps();window.scrollTo(0,0)};
+  const nx=$('#gNext'); if(nx) nx.onclick=()=>{g.lvl++;g.carry=[];g.hide=null;sqGaps();window.scrollTo(0,0)};
+  const w=$('#gWrite'); if(w) w.onclick=()=>{sqS(x.id).gaps=1;sqSave();SQR.stage='cold';SQR.cold=null;SQR.gap=null;sqRender();window.scrollTo(0,0)};
+}
+/* rung 3: write it from memory, then mark it against the short lines. The page pre-ticks a line when it finds that
+   line's bold words in what was written; the student confirms. */
+function sqCold(){
+  const x=SQR.x, P=sqPoints(x);
+  if(!SQR.cold) SQR.cold={text:'', marked:false};
+  const c=SQR.cold;
+  if(!c.marked){
+    $('#view').innerHTML=`<div class="card">${sqHead()}
+      ${sqFig(x)}
+      <p class="sask">${esc(x.ask)}</p>
+      <p class="hist" style="margin:0 0 8px">Write it from memory, like the exam: one point per line, using the proper terms. ${sqMk(x.marks)} ≈ ${P.length} short line${P.length===1?'':'s'}.</p>
+      <textarea id="sqTxt" style="min-height:200px" placeholder="1. …&#10;2. …&#10;3. …">${esc(c.text)}</textarea>
+      <button class="btn primary wide" id="sqMark">Mark my answer →</button>
+      <p class="hist" style="margin:8px 0 0">No keyboard handy? Say it out loud, leave the box empty and press Mark; you tick the lines yourself.</p></div>`;
+    sqBindHead();
+    const ta=$('#sqTxt'); ta.oninput=e=>{c.text=e.target.value};
+    $('#sqMark').onclick=()=>{c.marked=true;sqCold();window.scrollTo(0,0)};
+    return;
+  }
+  const typed=c.text.trim().length>0, chk=P.map(t=>sqCheckStep(t,c.text));
+  $('#view').innerHTML=`<div class="card">${sqHead()}
+    <p class="sask">${esc(x.ask)}</p>
+    ${typed?`<div class="hist">Your answer</div><div class="syou">${esc(c.text)}</div>`:''}
+    <p class="hist" style="margin:0 0 4px">${typed
+      ?'The page ticked every line where it found the <b style="color:var(--warn)">bold</b> mark words in your answer. Check it: untick a line you named but did not explain, and tick one you got in other words.'
+      :'Tick every line you said. The <b style="color:var(--warn)">bold</b> words are what earn the mark, so be honest.'}</p>
+    <div class="scheck">${P.map((t,i)=>{const k=chk[i];
+      return `<label><input type="checkbox" data-k="${i}" ${typed&&k.auto?'checked':''}><span>${mdB(t)}${typed&&k.ts.length?`<span class="refsrc" style="display:block;margin-top:2px">${k.ts.map(w=>k.found.includes(w)?`<span style="color:var(--ok)">✓ ${esc(w)}</span>`:`<span style="color:var(--danger)">✗ ${esc(w)}</span>`).join(' · ')}</span>`:''}</span></label>`}).join('')}</div>
+    <button class="btn primary wide" id="sqScore">Score it</button></div>`;
+  sqBindHead();
+  $('#sqScore').onclick=()=>sqColdResult([...document.querySelectorAll('.scheck input')].map(b=>b.checked));
+}
+function sqColdResult(ticks){
+  const x=SQR.x, P=sqPoints(x), s=sqS(x.id), n=ticks.filter(Boolean).length, pct=n/ticks.length, miss=ticks.map((t,i)=>t?-1:i).filter(i=>i>=0);
+  const pts=Math.round(pct*x.marks*2)/2;
+  s.tries=(s.tries||0)+1; s.best=Math.max(s.best||0,pct); if(pct>=0.8) s.lock=1; s.last=SQR.cold?SQR.cold.text:''; sqSave();
+  const nx=sqNext(), locked=pct>=0.8;
+  $('#view').innerHTML=`<div class="card">${sqHead()}
+    <p class="sres">≈${pts}/${x.marks}</p>
+    <p class="score-sub">${n} of ${ticks.length} lines · ${locked?'✓ Locked. That answer would score.':'not locked yet (80% locks it). What was missing:'}</p>
+    ${miss.length?`<ol class="ssteps">${miss.map(i=>`<li value="${i+1}">${mdB(P[i])}</li>`).join('')}</ol>`:''}
+    ${locked&&nx&&nx!==x?`<button class="btn primary wide" id="sqNx">▶ Next: ${esc(nx.title)}</button>`:''}
+    <button class="btn ${locked?'':'primary '}wide" id="sqAgainCold">✍️ Write it again${miss.length?' (read the missing lines first)':''}</button>
+    <button class="btn ghost wide" id="sqGapsAgain">🕳 Fill the gaps again</button>
+    <button class="btn ghost wide" id="sqHomeB">← All written answers</button></div>`;
+  sqBindHead(); window.scrollTo(0,0);
+  const b=$('#sqNx'); if(b) b.onclick=()=>sqOpen(nx.id,'read');
+  $('#sqAgainCold').onclick=()=>{SQR.cold=null;SQR.stage='cold';sqCold();window.scrollTo(0,0)};
+  $('#sqGapsAgain').onclick=()=>{SQR.cold=null;SQR.gap=null;SQR.stage='gaps';sqGaps();window.scrollTo(0,0)};
+  $('#sqHomeB').onclick=sqHome;
+}
+/* 📄 last-look sheet: every short answer on one page, quiz row by quiz row, for the final read-through */
+function sqSheet(){
+  enterSit('saq'); SQR=null;
+  let cur='', body='';
+  for(const x of SAQD){
+    if(x.quiz!==cur){ cur=x.quiz; body+=`<div class="qmod">${esc(rowName(x.cse))}</div>`; }
+    const P=sqPoints(x), F=sqFacts(x);
+    body+=`<div class="sheeti"><h3>${esc(x.title)} <span class="tag">${sqMk(x.marks)}</span></h3><div class="shook">🧠 ${esc(x.short.hook)}</div>${sqShortHTML(x, i=>`<li value="${i+1}">${mdB(P[i])}${sqFix(F[i])}</li>`)}</div>`;
+  }
+  $('#view').innerHTML=`<div class="card sheet"><div class="qhead"><button class="btn ghost" id="sqBack" style="padding:4px 10px">← List</button><span class="n">📄 Last-look sheet</span></div>
+    <p class="hist" style="margin:0">All ${SAQD.length} short answers, one fact a line, quiz row by quiz row. Bold = the words that earn the mark.</p>
+    ${body}
+    <button class="btn ghost wide" id="sqHomeB">← All written answers</button></div>`;
+  $('#sqBack').onclick=sqHome; $('#sqHomeB').onclick=sqHome; window.scrollTo(0,0);
+}
 function bindView(){
   bindFocus();
+  bindSaq();
   document.querySelectorAll('[data-scr]').forEach(b=>b.onclick=()=>nav(b.dataset.scr));
   const hb=$('[data-hero]'); if(hb) hb.onclick=()=>HERO[hb.dataset.hero]();
   const bk=$('#homeB'); if(bk) bk.onclick=()=>{ if(history.state&&history.state.scr&&!history.state.sit) history.back(); else nav('') };
@@ -955,13 +1245,13 @@ function saveLearnSaq(){
 function learnMkHTML(q,chk){
   const a=SIT.ans[q.id],r=chk.r;
   let verdict,cls;
-  if(!r){verdict='✍ Tick each model step you actually wrote';cls='saq'}
+  if(!r){verdict=q.short?'✍ Tick each short line you actually wrote':'✍ Tick each model step you actually wrote';cls='saq'}
   else if(!a){verdict='Skipped — read this one';cls='wrong'}
   else if(r.got>=r.tot){verdict=chk.peeked?'✓ Right (after a peek)':'✓ Right';cls='right'}
   else if(r.got>0){verdict=`Partly right · ${+r.got.toFixed(1)}/${r.tot}`;cls='wrong'}
   else{verdict='✗ Not quite';cls='wrong'}
   const body=!r
-    ? `${a&&a.text?'':'<div class="you">— nothing written — read the model, then say it out loud</div>'}<div class="steps">${q.saq.steps.map((s,i)=>`<label><input type="checkbox" data-lsaq ${chk.ticks.includes(i)?'checked':''}> <span>${esc(s)}</span></label>${partRefHTML(q,i)}`).join('')}</div><div class="refsrc">${esc(q.saq.src)}</div>`
+    ? `${a&&a.text?'':'<div class="you">— nothing written — read the model, then say it out loud</div>'}<div class="steps">${q.saq.steps.map((s,i)=>`<label><input type="checkbox" data-lsaq ${chk.ticks.includes(i)?'checked':''}> <span>${esc(s)}</span></label>${partRefHTML(q,i)}`).join('')}</div><div class="refsrc">${esc(q.saq.src)}</div>${fullAns(q)}`
     : keyHTML(q,a);
   const res=learnOpen(q,chk)?(hasHer(q)?herAnswer(q.hl):'')+refsHTML(q)+(q.vid?vidClipHTML(q.vid)+(q.vid.alt?vidRowHTML(q.vid.alt,'also · '):''):''):'';
   return `<div class="mk ${cls}"><div class="verdict">${verdict}</div>${body}${res}${r?`<button class="btn ghost askai" data-ask="${q.id}">${AI_LBL}</button>`:''}</div>`;
@@ -1053,7 +1343,7 @@ function mark(){
   const saqs=rows.filter(x=>x.saq);
   $('#view').innerHTML=`<div class="card">
     <div class="score-hero" id="hero"></div><div class="score-sub" id="heroSub"></div>
-    ${saqs.length?`<div class="note">Tick each model step your written answer actually hit — the score updates as you go. Model answers are the tool’s, not ${META.who}’s.</div>`:''}
+    ${saqs.length?`<div class="note">Tick each ${saqs.some(x=>x.q.short)?'short line':'model step'} your written answer actually hit — the score updates as you go. Model answers are the tool’s, not ${META.who}${/s$/.test(META.who)?'’':'’s'}${saqs.some(x=>x.q.short)?'; the full one folds under each':''}.</div>`:''}
     <div class="rev-ctl"><label class="wo"><input type="checkbox" id="wrongOnly" ${rows.some(x=>x.saq||(x.r&&x.r.got<x.r.tot))?'checked':''}> Wrong only</label><span class="systally" id="systally"></span></div>
     ${rows.map(({q,r,saq},i)=>{
       const btn=(k,lbl)=>`<button class="qa" data-act="${k}">${lbl}</button>`;
@@ -1062,6 +1352,7 @@ function mark(){
         <div class="qr-head"><span class="qr-mk mk-p" id="mk${i}">✍ /${q.pts}</span><span class="qr-stem">${esc(flatStem(q)).slice(0,140)}</span></div>
         ${a&&a.text?`<div class="you">You wrote: ${esc(a.text.slice(0,240)).replace(/\n/g,' ')}${a.text.length>240?'…':''}</div>`:'<div class="you">— no answer written —</div>'}
         <div class="steps">${q.saq.steps.map((s,si)=>`<label><input type="checkbox" data-saq="${i}" data-pt="${q.pts/q.saq.steps.length}"> <span>${esc(s)}</span></label>${partRefHTML(q,si)}`).join('')}</div>
+        ${q.saq.full?`<div style="padding:0 11px 6px">${fullAns(q)}</div>`:''}
         <div class="qr-acts"><span class="src">${esc(q.saq.src)}</span>${q.vid?btn('vid','▶ Video'):''}${refBtns(q,btn)}${hasHer(q)?btn('hl','✅ Her answer'):''}</div><div class="qr-pane" hidden></div></div>`}
       const pct=r.got/r.tot, cls=pct>=1?'right':pct>0?'partial':'wrong';
       return `<div class="qr ${cls}" data-qid="${q.id}" data-sys="${q.sys}" data-wrong="${pct<1?1:0}">
@@ -1173,8 +1464,8 @@ function keyHTML(q,a){
 /* the one line that states this part (q.prefs, judged + quote-gated per pair / blank / step);
    shown under a part the student got wrong or left blank, never under a right one */
 function partRefHTML(q,i){
-  const r=(q.prefs||[]).find(x=>x.i===i+1); if(!r)return '';
-  return `<div class="kref">${REF[r.k].ic} <i>“${esc(r.t)}”</i> <span class="refsrc">— ${esc(r.src)}</span></div>`;
+  /* every quote for this part: a short line cut from two steps can carry both steps' quotes */
+  return (q.prefs||[]).filter(x=>x.i===i+1).map(r=>`<div class="kref">${REF[r.k].ic} <i>“${esc(r.t)}”</i> <span class="refsrc">— ${esc(r.src)}</span></div>`).join('');
 }
 function keyText(q){
   if(q.type==='match')return q.pairs.map(p=>`${p.left} → ${p.right}`).join(' · ');
@@ -1204,7 +1495,7 @@ function aiQuestionPrompt(q,withFig){
   const you=a?(a.text||((a.sel||[]).map(i=>optLabel(q,q.opts[i])).join(', ')||Object.values(a.pick||{}).join(', '))):'';
   const L=[AI_CTX+(q.authored?' This is a practice question a study tool wrote from my lecturer’s slides.':' This is one of my lecturer’s own practice questions.')+' I want to understand it, not memorise the answer.','',`Question: ${flatStem(q)}`];
   if(q.opts&&q.opts.length)L.push(`Options: ${q.opts.map(o=>optLabel(q,o)).join(' | ')}`);
-  if(q.saq)L.push('The model answer, one mark per step: '+q.saq.steps.map((s,i)=>`(${i+1}) ${s}`).join(' '));
+  if(q.saq)L.push('The model answer, one mark per step: '+(q.saq.full||q.saq.steps).map((s,i)=>`(${i+1}) ${s}`).join(' '));
   else L.push(`Correct answer: ${keyText(q)}`);
   if(q.why)L.push(`The study tool’s explanation: ${q.why}${q.src?' (source: '+q.src+')':''}`);
   L.push(`My answer: ${you||'(none — I didn’t know)'}`);
@@ -1319,6 +1610,15 @@ $('#helpBtn').onclick=()=>{const H=META.help||{}, nAuth=DATA.questions.filter(q=
   tick any quizzes — or a whole group with the chips — and the bar at the bottom
   runs them as one deck, Learn or Sit, every question of every ticked quiz. A Learn run saves itself after every
   Check; stop partway (or lose the tab) and the home page offers to pick it up where you were.</p>
+  ${SAQD.length?`<h3>Written answers — the ✍️ row</h3>
+  <p>A full model answer is hard to remember, so every written question here also has a <b>short version</b>: the same
+  answer, one fact a line, a few words each, grouped under the question's own parts, with a memory hook. The
+  <b style="color:var(--warn)">bold</b> words are the ones that earn the marks. <b>Written answers</b> teaches them one question
+  at a time: <b>1 Read</b> the short version, <b>2 Fill the gaps</b> (the lines disappear a round at a time until you can say the
+  whole answer), <b>3 Write it</b> from memory — the page finds the bold words in what you wrote, you confirm, and 80% locks it.
+  The same short lines are what you tick for a written question in Learn mode and in a mock test; the full answer folds
+  underneath. Every short line is cut from its full answer, and the build checks each bold word against the step it came
+  from. The last-look sheet prints every short answer on one page.</p>`:''}
   ${H.explain?`<h3>Where the explanations come from</h3><p>${H.explain}</p>`:''}
   <h3>Ask an AI — the 🤖 buttons</h3>
   <p>Under every marked question${DATA.focus.length?', and inside every row of the focus list,':''} <b>${AI_LBL}</b> copies a

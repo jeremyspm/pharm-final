@@ -21,6 +21,7 @@ import { AUTHORED_STEMS } from './content/authored-stems.js';
 import { FOCUS } from './content/focus.js';
 import { HELPLINE } from './content/helpline.js';
 import { QTOPIC } from './content/qtopic.js';
+import { loadShorts, shortsJSON } from './shorts.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 /* a paper with no Canvas quizzes at all (PATHS.bank / PATHS.cap null) has no captured bank:
@@ -341,7 +342,12 @@ if (FOCUS.some(f => f.from)) {
 
 for (const q of questions) if (!q.qh) fails.push('no structured stem for ' + q.id + ' "' + q.q.slice(0, 60) + '"');
 for (const q of questions) if (q.qh && /\[\[(?!IMG:|BLANK:\d+\]\])/.test(q.qh)) fails.push('stray marker in ' + q.id);
+/* the written answers' short versions (content/shorts.js, gated by shorts.mjs): every written question needs one */
+const SH = loadShorts(questions);
+for (const f of SH.fails) fails.push('short version: ' + f);
 if (fails.length) { console.error('BUILD FAILED:\n  ' + fails.join('\n  ')); process.exit(1); }
+console.log(SH.none ? 'short versions: none yet (no content/shorts.js), so written questions tick their full model answers'
+  : `short versions: ${Object.keys(SH.shorts).length} of ${questions.filter(q => q.saq).length} written questions`);
 console.log(`her worked helpline answer under ${nHl} questions`);
 console.log(`structured stems: ${questions.filter(q => q.qh).length}/${questions.length} · blanks placed inline in ${nInline} cloze questions`);
 if (orderInferred.length) console.log(`blank order INFERRED from document order in ${orderInferred.length} question(s) — read each sentence with its answers:\n  ` + orderInferred.join('\n  '));
@@ -366,8 +372,8 @@ const DATA = {
 };
 const tpl = fs.readFileSync(path.join(HERE, 'template.html'), 'utf8');
 const marker = '/*@BANK@*/';
-if (tpl.split(marker).length !== 2) { console.error('BUILD FAILED: expected exactly one ' + marker); process.exit(1); }
-const out = tpl.replace(marker, () => JSON.stringify(DATA));   // function form: a `$'` inside the bank must not be a replacement pattern
+for (const mk of [marker, '/*@SHORTS@*/']) if (tpl.split(mk).length !== 2) { console.error('BUILD FAILED: expected exactly one ' + mk); process.exit(1); }
+const out = tpl.replace('/*@SHORTS@*/', () => shortsJSON(SH.shorts)).replace(marker, () => JSON.stringify(DATA));   // function form: a `$'` inside the bank must not be a replacement pattern
 fs.writeFileSync(path.join(HERE, 'index.html'), out);
 
 /* Parse-check the page's own inline script before it ships. A single bad escape
