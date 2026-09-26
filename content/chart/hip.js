@@ -1,6 +1,9 @@
 /* Margaret Wilson — a broken hip, two days after surgery. Teaches: a ceased order you must not sign, a dose withheld
    on the prescriber's instruction (D), a controlled-drug PRN and its 4-hourly gap, an 8-hourly PRN you cannot give
-   yet, a fluid bag finishing and the next going up, and signing the Sample Initials register first. */
+   yet, a fluid bag finishing and the next going up, and signing the Sample Initials register first. Day 2 (Thursday):
+   a withheld drug given again once the numbers allow, a stopped one still not given, and the 24-hour maximum as a
+   ROLLING 24 hours. The night staff's signatures between the rounds are written in (the chart shows them when
+   their moment comes). */
 export default {
   id: 'hip', t: 'Margaret Wilson, 82', sub: 'Broken hip (#NOF) — day 2 after surgery',
   story: 'Margaret fell at home on Monday and broke her left hip; it was pinned that afternoon. She has chronic kidney disease, high blood pressure and reflux. Overnight she was comfortable on oxycodone and had ondansetron for nausea at 0700. Yesterday her creatinine rose, so the house officer stopped her cilazapril and gave a dose of furosemide for crackles in her chest. It is Wednesday, 0730 — your first morning with her.',
@@ -21,26 +24,27 @@ export default {
   adverse: [{ med: 'CODEINE', rx: 'Vomiting, confusion', by: 'hr' }],
   special: ['renal'], supplementary: [],
   vte: { by: 'hr', day: 1, anticoag: true, stockings: true, ipc: false },
-  o2: { target: '92–96', rows: [{ start: 1, device: 'Nasal prongs', flow: '2 L/min', by: 'hr' }] },
+  o2: { target: '92–96', rows: [{ start: 1, device: 'Nasal prongs', flow: '2 L/min', by: 'hr', stop: 4, stopAt: '4@0700' }] },
   regular: [
     { L: 'I', day: 1, startT: '1800', med: 'PARACETAMOL', dose: '1', units: 'g', route: 'PO', freq: 'QID', times: '0600 1200 1800 2200', by: 'hr', inst: 'Max 4 g in 24 h from all sources',
-      given: { '1@1800': 'BW', '1@2200': 'BW', '2@0600': 'AK', '2@1200': '1215 LT', '2@1800': 'BW', '2@2200': 'R', '3@0600': 'AK' } },
+      given: { '1@1800': 'BW', '1@2200': 'BW', '2@0600': 'AK', '2@1200': '1215 LT', '2@1800': 'BW', '2@2200': 'R', '3@0600': 'AK', '3@1800': 'BW', '3@2200': 'BW', '4@0600': 'AK' } },
     { L: 'J', day: 2, startT: '0800', med: 'ENOXAPARIN', dose: '40', units: 'mg', route: 'SC', freq: 'daily', times: '1800', by: 'hr', inst: 'Check platelets and eGFR',
-      given: { '2@1800': 'BW' } },
+      given: { '2@1800': 'BW', '3@1800': 'BW' } },
     { L: 'K', day: 1, startT: '1400', med: 'METOPROLOL SUCCINATE CR', dose: '23.75', units: 'mg', route: 'PO', freq: 'mane', times: '0800', by: 'hr', inst: 'Withhold if HR < 55 or SBP < 100 — tell dr',
       given: { '2@0800': '0815 LT' } },
     { L: 'L', day: 1, startT: '1400', med: 'CILAZAPRIL', dose: '2.5', units: 'mg', route: 'PO', freq: 'mane', times: '0800', by: 'hr',
       given: { '2@0800': '0815 LT' }, cease: { at: '2@1030', by: 'sp' } },
     { L: 'M', day: 1, startT: '1400', med: 'DOCUSATE + SENNOSIDES', dose: '2', units: 'tab', route: 'PO', freq: 'nocte', times: '2000', by: 'hr',
-      given: { '1@2000': 'N', '2@2000': 'BW' } },
+      given: { '1@2000': 'N', '2@2000': 'BW', '3@2000': 'BW' } },
     { L: 'N', day: 1, startT: '1400', med: 'OMEPRAZOLE', dose: '20', units: 'mg', route: 'PO', freq: 'mane', times: '0800', by: 'hr',
       given: { '2@0800': '0815 LT' } },
   ],
   prn: [
     { L: 'A', day: 1, med: 'OXYCODONE', dose: '2.5', range: '2.5 – 5', units: 'mg', route: 'PO', freq: 'q4h', max: '20 mg', gapH: 4, maxAmount: 20, ind: 'Pain', by: 'hr', inst: 'Controlled drug. Hold if drowsy or RR < 10',
-      given: ['1@2130 5mg PO BW/JH', '2@0300 2.5mg PO AK/PM', '2@0930 5mg PO LT/JH', '2@1600 5mg PO BW/JH', '2@2230 2.5mg PO BW/JH', '3@0630 5mg PO AK/PM'] },
+      given: ['1@2130 5mg PO BW/JH', '2@0300 2.5mg PO AK/PM', '2@0930 5mg PO LT/JH', '2@1600 5mg PO BW/JH', '2@2230 2.5mg PO BW/JH', '3@0630 5mg PO AK/PM',
+        '3@1700 5mg PO BW/JH', '3@2130 2.5mg PO BW/JH', '4@0300 2.5mg PO AK/PM', '4@0700 5mg PO AK/PM'] },
     { L: 'B', day: 1, med: 'ONDANSETRON', dose: '4', units: 'mg', route: 'PO/IV', freq: 'q8h', max: '12 mg', gapH: 8, maxAmount: 12, ind: 'Nausea', by: 'hr',
-      given: ['2@1400 4mg PO LT', '3@0700 4mg IV AK/PM'] },
+      given: ['2@1400 4mg PO LT', '3@0700 4mg IV AK/PM', '3@1500 4mg PO BW'] },
     { L: 'C', day: 1, med: 'LACTULOSE', dose: '10', units: 'mL', route: 'PO', freq: 'BD', max: '20 mL', gapH: 8, maxAmount: 20, ind: 'Constipation', by: 'hr', given: [] },
   ],
   once: [
@@ -50,7 +54,7 @@ export default {
     { day: 1, time: '1800', vol: 1000, fluid: 'SODIUM CHLORIDE 0.9%', route: 'IV', rate: 83, by: 'hr', started: { at: '1@1810', by: 'BW', chk: 'JH' }, done: { at: '2@0610', vol: 1000 } },
     { day: 2, time: '0600', vol: 1000, fluid: 'PLASMA-LYTE 148', route: 'IV', rate: 83, by: 'sp', started: { at: '2@0615', by: 'AK', chk: 'PM' }, done: { at: '2@1815', vol: 1000 } },
     { day: 2, time: '2000', vol: 500, fluid: 'PLASMA-LYTE 148', route: 'IV', rate: 42, by: 'sp', started: { at: '2@2010', by: 'BW', chk: 'JH' } },
-    { day: 3, time: '0800', vol: 500, fluid: 'SODIUM CHLORIDE 0.9%', route: 'IV', rate: 42, by: 'sp' },
+    { day: 3, time: '0800', vol: 500, fluid: 'SODIUM CHLORIDE 0.9%', route: 'IV', rate: 42, by: 'sp', done: { at: '3@2015', vol: 500 } },
   ],
   questions: [
     { id: 'amox', tag: 'Front page', q: 'A new order for Margaret says amoxicillin. What do you do?', a: 'Hold it — amoxicillin is a penicillin. Tell the prescriber',
@@ -64,9 +68,8 @@ export default {
       show: ['reg.M.d1.s3.gc'], why: 'N on the chart’s key: “Not administered — document reason in notes”. (R is the code for refused.)' },
     { id: 'tapcancel', kind: 'tap', tag: 'Regular', q: 'Tap the box that says who stopped the cilazapril, and when.', accept: ['reg.L.cancel'],
       why: '“Sign, date and time to cancel” on row L — and the order and the days after it are crossed through.' },
-    { id: 'fluidnow', stage: 1, tag: 'Fluids', q: 'Which IV fluid is running now, and at what rate?', a: 'Sodium chloride 0.9%, 500 mL at 42 mL/hr (line 4)',
-      w: ['Plasma-Lyte 148, 500 mL at 42 mL/hr (line 3)', 'Sodium chloride 0.9%, 1000 mL at 83 mL/hr (line 1)', 'Plasma-Lyte 148, 1000 mL at 83 mL/hr (line 2)'],
-      show: ['fl.3.fluid', 'fl.3.rate', 'fl.3.astart'], why: 'The IV fluid record: the line with an actual commencing time and no completion time is the bag running now.' },
+    { id: 'o2stop', stage: 5, kind: 'tap', tag: 'Oxygen', q: 'Margaret came off oxygen this morning. Tap where the chart shows it.', accept: ['o2.0.stop'],
+      why: 'STOP DATE on the oxygen line. With no stop date, the oxygen is still prescribed.' },
   ],
   rounds: [
     { at: '3@0805', rn: 'LT', title: '0800 med round',
@@ -102,5 +105,24 @@ export default {
         { do: 'sign', c: 'reg.I.d3.s2', t: '1205' },
         { do: 'none', c: 'prn.B', what: 'Ondansetron (PRN B)', why: 'the last dose was 0700 and it is 8-hourly — not before 1500. Lisa asks the house officer to review Margaret’s nausea.' },
       ] },
+    { at: '4@0805', rn: 'LT', title: 'Thursday: 0800 med round',
+      brief: ['Thursday — your second morning with Margaret and Lisa (LT). She slept well, and came off oxygen at 0700.',
+        'Obs at 0745: heart rate 68, BP 124/70.',
+        '0805 — with Lisa checking, you give Margaret all of her 0800 tablets.'],
+      ask: [{ id: 'r4hr', tag: 'Judgement', q: 'Row K says withhold if HR < 55 or SBP < 100. Today: HR 68, BP 124/70. The metoprolol?', a: 'Give it — both are inside the limits on the order',
+        w: ['Hold it — it was held yesterday, so hold it again', 'Give half — her heart rate was low yesterday', 'Hold it until the doctor has seen her today'],
+        show: ['reg.K.inst', 'reg.K.d3.s1.gc'], why: 'The parameters on the order decide each dose, every time. Yesterday’s D was yesterday’s numbers.' }],
+      expect: [
+        { do: 'sign', c: 'reg.K.d4.s1', t: '0805' },
+        { do: 'sign', c: 'reg.N.d4.s1', t: '0805' },
+        { do: 'none', c: 'reg.L.d4', what: 'Cilazapril (row L)', why: 'still stopped — crossed through, with the cancel box signed. A stopped order stays stopped until it is written again on a new line.' },
+      ] },
+    { at: '4@1100', rn: 'LT', title: 'Before her walk',
+      brief: ['1055 — the physio is here to walk Margaret to the window and back. Her hip pain is 6/10, and she asks for her pain relief first.',
+        '1100 — after checking her chart with Lisa, you give her oxycodone PO.'],
+      ask: [{ id: 'r5max', tag: 'PRN', q: 'Since 1100 yesterday Margaret has had 15 mg of oxycodone. How much can she have now?', a: 'Up to 5 mg — 15 mg so far, and the max is 20 mg',
+        w: ['Up to 20 mg — the 24 hours started again at midnight', 'None — she has reached the 20 mg maximum', 'Up to 10 mg — the maximum is 20 mg per calendar day'],
+        show: ['prn.A.max', 'prn.A.7.time', 'prn.A.8.time', 'prn.A.9.time', 'prn.A.10.time'], why: 'Max dose/24hrs is a rolling 24 hours, not a calendar day: 5 (1700) + 2.5 (2130) + 2.5 (0300) + 5 (0700) = 15 mg. And 0700 + 4 h = 1100, so the gap is fine too.' }],
+      expect: [{ do: 'prn', L: 'A', dose: ['5mg', '5 mg', '5'], route: 'PO', t: '1100' }] },
   ],
 };

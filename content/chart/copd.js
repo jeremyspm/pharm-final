@@ -1,6 +1,8 @@
 /* Hemi Parata — a COPD flare. Teaches: SM (his own inhaler), U (away at X-ray), R already on the chart, a verbal
    order still unsigned past its 24 hours, an oxygen target of 88–92%, a stat nebuliser on the Once Only page, an
-   insulin chart that lives elsewhere, and a PRN whose 24-hour maximum the next dose reaches. */
+   insulin chart that lives elsewhere, and a PRN whose 24-hour maximum the next dose reaches. Day 2 (Thursday): his own
+   inhaler has run out, so a nurse gives it from ward stock and signs (SM only when HE takes it); his oxygen is stopped
+   inside his target; the verbal order finally signed. */
 export default {
   id: 'copd', t: 'Hemi Parata, 67', sub: 'COPD flare — day 3 on the medical ward',
   story: 'Hemi came in on Monday short of breath with a chest infection on top of his COPD. He has type 2 diabetes (his insulin is on its own chart) and high cholesterol. He is on prednisone and doxycycline, regular salbutamol nebs and 1 L/min of oxygen. Overnight on Monday he was wheezy, and the night nurse gave an extra neb on a phone order. It is Wednesday, 0730.',
@@ -20,7 +22,7 @@ export default {
   allergies: [], allergyBy: 'dm', adverse: [], adverseBy: 'dm',
   special: [], supplementary: ['insulin'],
   vte: { by: 'dm', day: 1, anticoag: true, stockings: false, ipc: false },
-  o2: { target: '88–92', rows: [{ start: 1, device: 'Nasal prongs', flow: '1 L/min', by: 'dm' }] },
+  o2: { target: '88–92', rows: [{ start: 1, device: 'Nasal prongs', flow: '1 L/min', by: 'dm', stop: 4, stopAt: '4@1000' }] },
   regular: [
     { L: 'I', day: 1, startT: '1400', med: 'PREDNISONE', dose: '40', units: 'mg', route: 'PO', freq: 'mane', times: '0800', by: 'dm', inst: '5 days — last dose 9/10/26. With food',
       given: { '2@0800': '0810 PS' } },
@@ -29,26 +31,26 @@ export default {
     { L: 'K', day: 1, startT: '1400', med: 'TIOTROPIUM', dose: '18', units: 'mcg', route: 'INH', freq: 'mane', times: '0800', by: 'dm', inst: 'Own inhaler — assessed to self-administer',
       given: { '2@0800': 'SM' } },
     { L: 'L', day: 1, startT: '1400', med: 'SALBUTAMOL', dose: '5', units: 'mg', route: 'NEB', freq: 'QID', times: '0600 1200 1800 2200', by: 'dm', inst: 'Nebulise with medical AIR, not oxygen',
-      given: { '1@1800': 'LF', '1@2200': 'LF', '2@0600': 'MT', '2@1200': '1210 PS', '2@1800': 'LF', '2@2200': 'LF', '3@0600': 'MT' } },
+      given: { '1@1800': 'LF', '1@2200': 'LF', '2@0600': 'MT', '2@1200': '1210 PS', '2@1800': 'LF', '2@2200': 'LF', '3@0600': 'MT', '3@1800': 'LF', '3@2200': 'LF', '4@0600': 'MT' } },
     { L: 'M', day: 1, startT: '1400', med: 'METFORMIN', dose: '500', units: 'mg', route: 'PO', freq: 'BD', times: '0800 1800', by: 'dm', inst: 'With food',
-      given: { '1@1800': 'LF', '2@0800': '0810 PS', '2@1800': 'LF' } },
+      given: { '1@1800': 'LF', '2@0800': '0810 PS', '2@1800': 'LF', '3@1800': 'LF' } },
     { L: 'N', day: 1, startT: '1400', med: 'ATORVASTATIN', dose: '40', units: 'mg', route: 'PO', freq: 'nocte', times: '2000', by: 'dm',
-      given: { '1@2000': 'LF', '2@2000': 'R' } },
+      given: { '1@2000': 'LF', '2@2000': 'R', '3@2000': 'LF' } },
     { L: 'O', day: 1, startT: '1400', med: 'ENOXAPARIN', dose: '40', units: 'mg', route: 'SC', freq: 'daily', times: '1800', by: 'dm',
-      given: { '1@1800': 'LF', '2@1800': 'LF' } },
+      given: { '1@1800': 'LF', '2@1800': 'LF', '3@1800': 'LF' } },
   ],
   prn: [
     { L: 'A', day: 1, med: 'PARACETAMOL', dose: '1', units: 'g', route: 'PO', freq: 'q4h', max: '4 g', gapH: 4, maxAmount: 4, ind: 'Pain / fever', by: 'kw',
-      given: ['2@0900 1g PO PS', '2@1500 1g PO PS', '2@2200 1g PO LF', '3@0400 1g PO MT'] },
+      given: ['2@0900 1g PO PS', '2@1500 1g PO PS', '2@2200 1g PO LF', '3@0400 1g PO MT', '3@2130 1g PO LF', '4@0430 1g PO MT'] },
     { L: 'B', day: 1, med: 'ZOPICLONE', dose: '3.75', units: 'mg', route: 'PO', freq: 'nocte', max: '3.75 mg', gapH: 20, maxAmount: 3.75, ind: 'Sleep', by: 'kw',
-      given: ['2@2215 3.75mg PO LF'] },
+      given: ['2@2215 3.75mg PO LF', '3@2230 3.75mg PO LF'] },
   ],
   once: [
     { day: 1, med: 'DOXYCYCLINE', dose: '200', units: 'mg', route: 'PO', by: 'dm', inst: 'Loading dose', given: { at: '1@1430', giv: 'LF', chk: '' } },
-    { day: 3, from: 1, med: 'IPRATROPIUM BROMIDE', dose: '500', units: 'mcg', route: 'NEB', by: 'dm', inst: 'Stat. Nebulise with medical AIR' },
+    { day: 3, at: '3@0900', med: 'IPRATROPIUM BROMIDE', dose: '500', units: 'mcg', route: 'NEB', by: 'dm', inst: 'Stat. Nebulise with medical AIR' },
   ],
   verbal: [
-    { at: '2@0310', med: 'SALBUTAMOL', dose: '5', units: 'mg', route: 'NEB', pname: 'Dr Kelly Wong', given: { at: '2@0315', nurse: 'MT', witness: 'TK' } },
+    { at: '2@0310', med: 'SALBUTAMOL', dose: '5', units: 'mg', route: 'NEB', pname: 'Dr Kelly Wong', signed: 'kw', signedAt: '3@1100', given: { at: '2@0315', nurse: 'MT', witness: 'TK' } },
   ],
   questions: [
     { id: 'air', kind: 'tap', tag: 'Regular', q: 'Tap where the chart says how Hemi’s salbutamol nebs must be run.', accept: ['reg.L.inst'],
@@ -56,8 +58,8 @@ export default {
     { id: 'sat97', tag: 'Oxygen', q: 'Hemi’s SpO₂ is 97% on 1 L/min. What does his chart tell you?', a: 'He is above his 88–92% target — tell the RN, who may turn it down',
       w: ['Nothing — 97% is a normal saturation, so leave the oxygen running', 'Turn the oxygen up — the higher his saturation, the better for COPD', 'Take the prongs off now — his target is to be off oxygen by day 3'],
       show: ['o2.target'], why: 'Target Oxygen Saturation on the oxygen section: 88–92%. Above target is a finding too, for someone who retains CO₂.' },
-    { id: 'ipra', stage: 1, kind: 'tap', tag: 'Once Only', q: 'Dr Mahe has just charted a stat nebuliser. Tap its order.', accept: ['once.1.*'],
-      why: 'The Once Only page, second order: IPRATROPIUM BROMIDE 500 mcg NEB, stat.' },
+    { id: 'ipra', stage: 2, kind: 'tap', tag: 'Once Only', q: 'Tap the order for the stat nebuliser you gave at 0920.', accept: ['once.1.*'],
+      why: 'The Once Only page, second order: IPRATROPIUM BROMIDE 500 mcg NEB, stat — with your initials and Jack’s in Given by / Checked by.' },
   ],
   rounds: [
     { at: '3@0810', rn: 'JB', title: '0800 med round',
@@ -88,5 +90,25 @@ export default {
         { do: 'code', c: 'reg.L.d3.s2', code: 'U', why: 'He was off the ward at X-ray — patient unavailable.' },
         { do: 'prn', L: 'A', dose: ['1g', '1 g', '1000mg', '1000 mg'], route: 'PO', t: '1405' },
       ] },
+    { at: '4@0810', rn: 'JB', title: 'Thursday: 0800 med round',
+      brief: ['Thursday — your second morning with Hemi and Jack (JB).',
+        '0805 — Hemi’s own tiotropium inhaler ran out overnight (his wife is bringing a new one this afternoon). Jack takes one from ward stock, and you give it at 0805, Jack checking.',
+        '0810 — with Jack checking, you give Hemi his other 0800 medicines with breakfast.'],
+      ask: [{ id: 'r4sm', tag: 'Codes', q: 'Hemi can’t use his own inhaler today. What goes in the 0800 tiotropium box?', a: 'Your initials and Jack’s — you gave it from ward stock',
+        w: ['SM — he is still assessed as self-medicating', 'R — he did not use his own inhaler this morning', 'Nothing until his wife brings the new inhaler'],
+        show: ['reg.K.d3.s1.gc'], why: 'SM means he took it himself. Today a nurse gave it, so it is signed like any other dose.' }],
+      expect: [
+        { do: 'sign', c: 'reg.K.d4.s1', t: '0805' },
+        { do: 'sign', c: 'reg.I.d4.s1', t: '0810' },
+        { do: 'sign', c: 'reg.J.d4.s1', t: '0810' },
+        { do: 'sign', c: 'reg.M.d4.s1', t: '0810' },
+      ] },
+    { at: '4@1210', rn: 'JB', title: 'Off oxygen',
+      brief: ['1000 — on the ward round Dr Mahe stops Hemi’s oxygen: his saturation is 90% on room air.',
+        '1210 — with Jack checking, you give Hemi his 1200 salbutamol neb, run with medical air.'],
+      ask: [{ id: 'r5sat', tag: 'Oxygen', q: 'Hemi’s SpO₂ is 90% on room air. Is that all right for him?', a: 'Yes — it is inside his 88–92% target',
+        w: ['No — anything under 94% needs oxygen', 'No — restart 2 L/min until he reaches 96%', 'Only while he is asleep, not awake'],
+        show: ['o2.target', 'o2.0.stop'], why: 'His chart’s target is 88–92%, set for his COPD. The oxygen line now has a stop date.' }],
+      expect: [{ do: 'sign', c: 'reg.L.d4.s2', t: '1210' }] },
   ],
 };

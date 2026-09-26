@@ -69,13 +69,18 @@ export function doseAmount(txt, units) {
 const who = (S, id) => (S.prescribers || []).find(p => p.id === id);
 const nurse = (S, init) => (S.nurses || []).find(n => n.init === init);
 
-/* ── compile: a scenario → every written cell (V) + facts ── */
+/* ── compile: a scenario → every written cell (V) + facts ──
+   The chart as it stood at S.now: an order, a signature, a record line, a bag started or finished, a cancel, shows
+   only once its moment has come. So a scenario can carry the whole of its days (the night nurse's 0600 signatures
+   included) and each stage shows exactly what had been written by then. */
 export function compile(S) {
   const V = {}, put = (id, v) => { if (v !== undefined && v !== null && v !== '') V[id] = v; };
   const date = d => dayDate(S, d), sig = id => (who(S, id) || {}).sig || id;
+  const nowM = parseAt(S.now).m, seen = m => m <= nowM, atM = (at, day, t = '0000') => at ? parseAt(at).m : abs(day, t);
   const P = S.patient;
   for (const [k, v] of Object.entries({ family: P.family, given: P.given, gender: P.gender, dob: P.dob, nhi: P.nhi })) put('pt.' + k, v);
   put('chart.no', '1'); put('chart.of', '1');
+  if (S.recharted) put('recharted', date(S.recharted));
   if (P.weight) { put('wt.0', P.weight); put('wt.0d', date(P.wday || 1)); }
   if (P.height) { put('ht', P.height); put('htd', date(P.wday || 1)); }
   /* front: allergies and adverse reactions — "No" ticked only when the list is empty */
@@ -103,45 +108,55 @@ export function compile(S) {
     if (v.ipc != null) put(v.ipc ? 'vte.ipc.y' : 'vte.ipc.n', { tick: 1 });
     if (v.none) put('vte.' + v.none, { tick: 1 });
   }
-  /* once only */
+  /* once only — `at` is when it was charted (else the start of its day) */
   const once = (S.once || []).map((o, i) => {
-    if ((o.from || 0) > (S.stage || 0)) return { ...o, i, hidden: 1 };   // charted later in the scenario (after round `from`)
-    const g = o.given ? parseAt(o.given.at) : null;
+    if (!seen(atM(o.at, o.day))) return { ...o, i, hidden: 1 };
+    const g0 = o.given ? parseAt(o.given.at) : null, g = g0 && seen(g0.m) ? g0 : null;
     put(`once.${i}.date`, date(o.day)); put(`once.${i}.med`, o.med); put(`once.${i}.dose`, o.dose); put(`once.${i}.units`, o.units);
     put(`once.${i}.route`, o.route); put(`once.${i}.calc`, o.calc); put(`once.${i}.psig`, sig(o.by)); put(`once.${i}.range`, o.range); put(`once.${i}.inst`, o.inst);
     if (g) { put(`once.${i}.dosedt`, date(g.day) + ' ' + g.t); put(`once.${i}.gc`, { giv: o.given.giv, chk: o.given.chk || '' }); if (o.given.tstart) put(`once.${i}.tstart`, o.given.tstart); if (o.given.tend) put(`once.${i}.tend`, o.given.tend); }
     return { ...o, i, givenAt: g };
   });
   const verbal = (S.verbal || []).map((o, i) => {
-    const a = parseAt(o.at), g = o.given ? parseAt(o.given.at) : null;
+    const a = parseAt(o.at);
+    if (!seen(a.m)) return { ...o, i, hidden: 1, atM: a };
+    const g0 = o.given ? parseAt(o.given.at) : null, g = g0 && seen(g0.m) ? g0 : null;
+    const signed = o.signed && seen(o.signedAt ? parseAt(o.signedAt).m : a.m) ? o.signed : null;
     put(`verb.${i}.dt`, date(a.day) + ' ' + a.t); put(`verb.${i}.med`, o.med); put(`verb.${i}.dose`, o.dose); put(`verb.${i}.units`, o.units); put(`verb.${i}.route`, o.route);
-    put(`verb.${i}.pname`, o.pname); if (o.signed) put(`verb.${i}.psig`, sig(o.signed));
+    put(`verb.${i}.pname`, o.pname); if (signed) put(`verb.${i}.psig`, sig(signed));
     if (g) { put(`verb.${i}.dosedt`, date(g.day) + ' ' + g.t); put(`verb.${i}.nurse`, o.given.nurse); put(`verb.${i}.witness`, o.given.witness); put(`verb.${i}.gc`, { giv: o.given.nurse, chk: o.given.witness }); }
-    return { ...o, i, atM: a, givenAt: g };
-  });
+    return { ...o, i, atM: a, givenAt: g, signed };
+  }).filter(o => !o.hidden);
+  /* oxygen: a line shows from its start day; its stop date once `stopAt` (or the stop day) has come */
+  const o2 = [];
   if (S.o2) {
     put('o2.target', S.o2.target);
-    S.o2.rows.forEach((r, i) => { put(`o2.${i}.start`, date(r.start)); put(`o2.${i}.device`, r.device); put(`o2.${i}.flow`, r.flow); put(`o2.${i}.sig`, sig(r.by)); if (r.stop) put(`o2.${i}.stop`, date(r.stop)); });
+    S.o2.rows.forEach((r, i) => {
+      if (!seen(abs(r.start, '0000'))) return;
+      const stopped = r.stop && seen(atM(r.stopAt, r.stop));
+      put(`o2.${i}.start`, date(r.start)); put(`o2.${i}.device`, r.device); put(`o2.${i}.flow`, r.flow); put(`o2.${i}.sig`, sig(r.by)); if (stopped) put(`o2.${i}.stop`, date(r.stop));
+      o2.push({ ...r, i, stopped });
+    });
   }
   /* PRN */
-  const prn = (S.prn || []).map(o => {
-    const L = o.L, rec = (o.given || []).map(parsePrn).sort((a, b) => a.m - b.m);
+  const prn = (S.prn || []).filter(o => seen(atM(o.at, o.day))).map(o => {
+    const L = o.L, rec = (o.given || []).map(parsePrn).filter(r => seen(r.m)).sort((a, b) => a.m - b.m);
     for (const f of ['med', 'dose', 'units', 'route', 'freq', 'calc', 'range', 'ind', 'inst']) put(`prn.${L}.${f}`, o[f]);
     put(`prn.${L}.date`, date(o.day)); put(`prn.${L}.max`, o.max); put(`prn.${L}.psig`, sig(o.by));
     let cease = null;
-    if (o.cease) { cease = parseAt(o.cease.at); put(`prn.${L}.cancel`, `${sig(o.cease.by)} ${date(cease.day)} ${cease.t}`); put(`prn.${L}.x`, { day: cease.day }); }
+    if (o.cease && seen(parseAt(o.cease.at).m)) { cease = parseAt(o.cease.at); put(`prn.${L}.cancel`, `${sig(o.cease.by)} ${date(cease.day)} ${cease.t}`); put(`prn.${L}.x`, { day: cease.day }); }
     rec.forEach((r, j) => { r.line = j; put(`prn.${L}.${j}.date`, date(r.day)); put(`prn.${L}.${j}.time`, r.t); put(`prn.${L}.${j}.dose`, r.dose); put(`prn.${L}.${j}.route`, r.route); put(`prn.${L}.${j}.gc`, { giv: r.giv, chk: r.chk }); });
     return { ...o, rec, ceaseAt: cease };
   });
   /* regular: the order, its time rows, its 8 days of boxes */
   for (let d = 1; d <= 8; d++) put(`reg.day${d}`, date(d));
-  const reg = (S.regular || []).map(o => {
+  const reg = (S.regular || []).filter(o => seen(atM(o.at, o.day, o.startT))).map(o => {
     const L = o.L, slots = slotsFor(o.times);
     for (const f of ['med', 'dose', 'units', 'route', 'freq', 'calc', 'range', 'inst']) put(`reg.${L}.${f}`, o[f]);
     put(`reg.${L}.date`, date(o.day)); put(`reg.${L}.psig`, sig(o.by));
     slots.forEach((s, k) => { if (s) put(`reg.${L}.s${k}`, s.circled ? { circle: 1 } : s.t); });
     let cease = null;
-    if (o.cease) {
+    if (o.cease && seen(parseAt(o.cease.at).m)) {
       cease = parseAt(o.cease.at); put(`reg.${L}.cancel`, `${sig(o.cease.by)} ${date(cease.day)} ${cease.t}`);
       /* "cross through order and administration": the rest of the cease day's rows, then every day after */
       put(`reg.${L}.x`, { day: cease.day, rows: slots.map((q, k) => q && toMin(q.t) > toMin(cease.t) ? k : -1).filter(k => k >= 0) });
@@ -151,6 +166,9 @@ export function compile(S) {
       const a = parseAt(key), k = slots.findIndex(s => s && s.t === a.t);
       if (k < 0) throw new Error(`regular ${L} ${o.med}: nothing is due at ${a.t} (times: ${o.times})`);
       const e = { ...parseAdmin(v, a.t), day: a.day, slot: k, due: a.t, m: a.m };
+      /* when it was actually written: the time given (a 2400 dose given at 0005 belongs to the day before) */
+      if (!e.code) { let g = abs(a.day, e.t); if (g < a.m - 720) g += 1440; e.given = g; }
+      if (!seen(e.code ? a.m : e.given)) continue;
       adm.push(e);
       const base = `reg.${L}.d${a.day}.s${k}`;
       if (e.code) put(base + '.gc', { code: e.code });
@@ -160,15 +178,19 @@ export function compile(S) {
     return { ...o, slots, adm, ceaseAt: cease, start: abs(o.day, o.startT || '0000') };
   });
   const fluids = (S.fluids || []).map((f, i) => {
+    if (!seen(atM(f.at, f.day))) return { ...f, i, hidden: 1 };
     put(`fl.${i}.date`, date(f.day)); put(`fl.${i}.time`, f.time); put(`fl.${i}.vol`, f.vol); put(`fl.${i}.fluid`, f.fluid); put(`fl.${i}.route`, f.route);
     put(`fl.${i}.rate`, f.rate); put(`fl.${i}.psig`, sig(f.by));
-    if (f.started) { const a = parseAt(f.started.at); put(`fl.${i}.astart`, a.t); put(`fl.${i}.gc`, { giv: f.started.by, chk: f.started.chk || '' }); }
-    if (f.done) { const a = parseAt(f.done.at); put(`fl.${i}.tend`, a.t); put(`fl.${i}.avol`, f.done.vol); }
-    return { ...f, i };
+    const st = f.started && seen(parseAt(f.started.at).m) ? f.started : null, dn = st && f.done && seen(parseAt(f.done.at).m) ? f.done : null;
+    if (st) { put(`fl.${i}.astart`, parseAt(st.at).t); put(`fl.${i}.gc`, { giv: st.by, chk: st.chk || '' }); }
+    if (dn) { put(`fl.${i}.tend`, parseAt(dn.at).t); put(`fl.${i}.avol`, dn.vol); }
+    return { ...f, i, running: !!st && !dn, started: st, done: dn };
   });
   const now = parseAt(S.now);
-  return { S, V, now, once, verbal, prn, reg, fluids, dates: [1, 2, 3, 4, 5, 6, 7, 8].map(date) };
+  return { S, V, now, once, verbal, prn, reg, fluids, o2, dates: [1, 2, 3, 4, 5, 6, 7, 8].map(date) };
 }
+/* the chart as the round finds it: its moment, not the last stage's */
+export const atRound = (S, R) => ({ ...S, now: R.at });
 
 /* ── timing facts ── */
 /* a regular order's next due dose after a moment: {day, t, slot} — null when ceased first or past day 8 */
@@ -233,16 +255,19 @@ export function questions(C, rnd) {
     ['adr.0.med', 'adr.0.rx'], 'Adverse Reactions is the right-hand box, separate from Allergies: a known bad effect that is not an immune reaction. The prescriber weighs it; it still matters.');
   /* special care + supplementary */
   const SCN = { renal: 'Renal impairment', preg: 'Pregnancy', hep: 'Hepatic impairment', bf: 'Breastfeeding' };
+  const SCW = { renal: 'Renal impairment changes the dose of every medicine the kidneys clear.', hep: 'Hepatic impairment changes the dose of medicines the liver clears — paracetamol’s maximum among them.',
+    preg: 'Pregnancy rules out some medicines altogether.', bf: 'Breastfeeding: some medicines pass into breast milk.' };
   if ((S.special || []).length) mcq('sc', 'Front page', 'Which “Special Care Required” box is ticked?', SCN[S.special[0]] || S.special[0],
-    Object.values(SCN).concat('None — the “No” box is ticked'), [`sc.${S.special[0] === 'renal' ? 'renal' : S.special[0] === 'hep' ? 'hep' : S.special[0] === 'bf' ? 'bf' : 'preg'}`],
-    'Special Care Required, front page. Renal impairment changes the dose of every medicine the kidneys clear.');
+    Object.values(SCN).concat('None — the “No” box is ticked'), [`sc.${S.special[0]}`], `Special Care Required, front page. ${SCW[S.special[0]] || ''}`);
   const SUN = { insulin: 'Diabetic/Insulin', analgesia: 'Specialised analgesia', heparin: 'Heparin', warfarin: 'Warfarin' };
-  if ((S.supplementary || []).length) {
-    const s = S.supplementary[0];
-    mcq('sup', 'Front page', `Where would you find ${first}’s ${s === 'analgesia' ? 'PCA or epidural' : s}?`, `On a separate ${SUN[s]} chart — the front page ticks it`,
+  for (const s of S.supplementary || []) {
+    mcq(`sup-${s}`, 'Front page', `Where would you find ${first}’s ${s === 'analgesia' ? 'PCA or epidural' : s}?`, `On a separate ${SUN[s]} chart — the front page ticks it`,
       ['In the PRN section', 'On the Regular Medicine page, row I', 'It is not prescribed', 'In the Once Only section'],
       [`sup.${s === 'analgesia' ? 'analg' : s}`], 'Supplementary Charts, front page: those medicines live on their own chart, so the main chart will not show them.');
   }
+  if (S.recharted) mcq('recharted', 'Front page', `The front page has a Date Recharted: ${dayDate(S, S.recharted)}. What does it tell you?`, 'The orders were rewritten onto this chart that day — earlier doses are on the old chart',
+    ['That is the day the patient was admitted to the ward', 'The chart must be rewritten again by that day', 'A pharmacist checked every order on that day'],
+    ['recharted'], 'Date Recharted, top left of the front page. An 8-day chart runs out on a long stay, so the prescriber rewrites the current orders onto a new one; the old chart is kept with the notes.');
   mcq('nhi', 'Front page', `What is ${first}’s NHI number?`, S.patient.nhi,
     [S.patient.nhi.slice(0, 3) + S.patient.nhi.slice(4) + S.patient.nhi[3], S.patient.nhi.slice(0, 5) + String((+S.patient.nhi[5] + 3) % 10) + S.patient.nhi.slice(6), 'ZZZ0000', S.patient.nhi.split('').reverse().join('').toUpperCase()],
     ['pt.nhi'], 'Every page carries the patient label; the NHI is one of the three identifiers you check against the ID band.');
@@ -330,12 +355,15 @@ export function questions(C, rnd) {
     const t = S.o2.target;
     mcq('o2target', 'Oxygen', `What is ${first}’s target oxygen saturation?`, t + '%', ['88–92%', '92–96%', '94–98%', 'Above 90%', '100%'].filter(x => x !== t + '%'), ['o2.target'],
       'Oxygen Therapy & Medical Gases: the target saturation sits at the top of the section.');
-    const cur = S.o2.rows.find(r => !r.stop || r.stop > C.now.day);
-    mcq('o2now', 'Oxygen', `Is ${first} still prescribed oxygen, as of ${nowTxt}?`, cur ? `Yes — ${cur.device}, ${cur.flow}` : 'No — a stop date has been written',
-      [cur ? 'No — a stop date has been written' : `Yes — ${S.o2.rows[0].device}, ${S.o2.rows[0].flow}`, 'Yes — via a non-rebreather at 15 L/min', 'Only at night'],
-      S.o2.rows.map((_, i) => `o2.${i}.stop`), 'START DATE and STOP DATE on each oxygen line.');
+    const cur = C.o2.find(r => !r.stopped);
+    if (C.o2.length) mcq('o2now', 'Oxygen', `Is ${first} still prescribed oxygen, as of ${nowTxt}?`, cur ? `Yes — ${cur.device}, ${cur.flow}` : 'No — a stop date has been written',
+      [cur ? 'No — a stop date has been written' : `Yes — ${C.o2[0].device}, ${C.o2[0].flow}`, 'Yes — via a non-rebreather at 15 L/min', 'Only at night'],
+      C.o2.map(r => `o2.${r.i}.stop`), 'START DATE and STOP DATE on each oxygen line.');
   }
-  for (const f of C.fluids) mcq(`fl-${f.i}`, 'Fluids', `At what rate is the ${f.vol} mL of ${f.fluid} prescribed?`, `${f.rate} mL/hr`,
+  const flv = C.fluids.filter(f => !f.hidden), run = flv.filter(f => f.running), flTxt = f => `${f.vol} mL ${f.fluid} at ${f.rate} mL/hr (line ${f.i + 1})`;
+  if (run.length === 1) mcq('flnow', 'Fluids', `Which IV fluid is running now, as of ${nowTxt}?`, flTxt(run[0]), [...flv.filter(f => f !== run[0]).map(flTxt), 'None — the IV fluids have finished'],
+    [`fl.${run[0].i}.astart`, `fl.${run[0].i}.fluid`, `fl.${run[0].i}.rate`], 'The IV fluid record: the line with an actual commencing time and no completion time is the bag running now.');
+  for (const f of flv) mcq(`fl-${f.i}`, 'Fluids', `At what rate is the ${f.vol} mL of ${f.fluid} prescribed?`, `${f.rate} mL/hr`,
     [`${Math.round(f.vol / 8)} mL/hr`, `${f.rate * 2} mL/hr`, `${Math.round(f.rate / 2)} mL/hr`, `${f.vol} mL/hr`].filter(x => x !== `${f.rate} mL/hr`),
     [`fl.${f.i}.rate`], 'Rate (mL/hr) on the IV & subcut fluid record. Volume ÷ hours = rate.');
   /* the scenario's own questions (judgement the chart alone cannot generate) */
@@ -356,7 +384,9 @@ export const ownQ = (q, shuffle) => q.kind === 'tap' ? { ...q, own: 1, show: q.s
      {do:'fluid', i:1}                           — fluids: actual commencing time, commenced by, checked by
      {do:'fluidend', i:1, vol:1000}              — a bag finished: completion time, actual volume
      {do:'reg', name}                            — your line in the Sample Initials register
-     {do:'none', c:'prn.B', why}                 — must NOT be written (e.g. a PRN given too soon)
+     {do:'none', c:'prn.B', what, why}           — must NOT be written (e.g. a PRN given too soon)
+     {do:'rn', c:'reg.J.d3.s2' | L:'B', …}       — the RN gives it and signs; the student writes nothing there
+     {do:'sign', c, dose:['15 mL', …]}           — a variable dose: the dose given goes in the Dose column too
    returns [{ok, part, msg, cells}] — every expectation, then every entry no expectation asked for. */
 export function checkRound(C, R, entries) {
   const out = [], used = new Set(), at = parseAt(R.at), date = dayDate(C.S, at.day);
@@ -373,6 +403,9 @@ export function checkRound(C, R, entries) {
         else if (gc.giv !== R.you) res(false, `${label}: the “given by” initials must be yours (${R.you}).`, [x.c + '.gc']);
         else if (gc.chk !== R.rn) res(false, `${label}: given ✓, but ${gc.chk ? `the check initials (${gc.chk}) should be your RN’s` : 'the check initials are missing'} — a student’s dose carries the RN’s (${R.rn}).`, [x.c + '.gc']);
         else if (!near(t)) res(false, `${label}: signed ✓, but record the actual time given (24-hour clock, within 30 minutes of ${at.t}).`, [x.c + '.t']);
+        else if (x.dose && !x.dose.map(q => q.replace(/\s/g, '').toLowerCase()).includes(txt(entries[x.c + '.dose']).replace(/\s/g, '').toLowerCase()))
+          res(false, `${label}: signed ✓, but it is a variable dose — write the dose you gave (${x.dose[0]}) in the Dose column.`, [x.c + '.dose']);
+        else if (x.dose) res(true, `${label}: given, ${txt(entries[x.c + '.dose'])}, signed ${R.you}/${R.rn} at ${txt(t)}.`, [x.c + '.gc']);
         else res(true, `${label}: given, signed ${R.you}/${R.rn} at ${txt(t)}.`, [x.c + '.gc']);
       } else {
         if (gc && gc.code === x.code) res(true, `${label}: not given — ${x.code} (${CODES[x.code]}).${x.why ? ' ' + x.why : ''}`, [x.c + '.gc']);
@@ -411,6 +444,10 @@ export function checkRound(C, R, entries) {
       ['name', 'init', 'reg'].forEach(k => used.add(`${b}.${k}`));
       const okI = txt(entries[b + '.init']) === R.you, okN = txt(entries[b + '.name']).length >= 3;
       res(okI && okN, okI && okN ? `Sample Initials register: you are on it (${R.you}).` : `Sample Initials register: add your name & designation and your initials (${R.you}) on the next free line — everyone who signs the chart must.`, [b + '.init']);
+    } else if (x.do === 'rn') {
+      const pre = x.c ? x.c + '.' : `prn.${x.L}.`, hits = Object.keys(entries).filter(k => k.startsWith(pre) && !used.has(k));
+      hits.forEach(k => used.add(k));
+      res(!hits.length, hits.length ? `${x.what}: leave it for your RN to sign — ${x.why}` : `${x.what}: left for your RN to sign — ${x.why}`, hits);
     } else if (x.do === 'none') {
       const hits = Object.keys(entries).filter(k => k.startsWith(x.c + '.') && txt(JSON.stringify(entries[k])) !== '' && !used.has(k));
       hits.forEach(k => used.add(k));
@@ -440,7 +477,7 @@ export function modelEntries(C, R) {
   const at = parseAt(R.at), date = dayDate(C.S, at.day), E = {}, gc = { giv: R.you, chk: R.rn };
   for (const x of R.expect) {
     const t = x.t || at.t;
-    if (x.do === 'sign') { E[x.c + '.t'] = t; E[x.c + '.gc'] = gc; }
+    if (x.do === 'sign') { E[x.c + '.t'] = t; E[x.c + '.gc'] = gc; if (x.dose) E[x.c + '.dose'] = x.dose[0]; }
     else if (x.do === 'code') E[x.c + '.gc'] = { code: x.code };
     else if (x.do === 'prn') { const b = `prn.${x.L}.${C.prn.find(p => p.L === x.L).rec.length}`; Object.assign(E, { [b + '.date']: date, [b + '.time']: t, [b + '.dose']: x.dose[0], [b + '.route']: x.route, [b + '.gc']: gc }); }
     else if (x.do === 'once') { E[`once.${x.i}.dosedt`] = `${date} ${t}`; E[`once.${x.i}.gc`] = gc; }
@@ -459,14 +496,20 @@ export function applyRound(S, R) {
     const t = x.t || at.t;
     if (x.do === 'sign' || x.do === 'code') {
       const c = regCell(x.c), o = S.regular.find(r => r.L === c.L), slotT = slotsFor(o.times)[c.s].t;
-      o.given = { ...(o.given || {}), [`${c.d}@${slotT}`]: x.do === 'sign' ? `${t} ${R.you}/${R.rn}` : x.code };
-    } else if (x.do === 'prn') { const o = S.prn.find(p => p.L === x.L); o.given = [...(o.given || []), `${at.day}@${t} ${x.dose[0].replace(/\s/g, '')} ${x.route} ${R.you}/${R.rn}`]; }
+      o.given = { ...(o.given || {}), [`${c.d}@${slotT}`]: x.do === 'sign' ? `${t} ${R.you}/${R.rn}${x.dose ? ' dose=' + x.dose[0].replace(/\s/g, '') : ''}` : x.code };
+    } else if (x.do === 'rn' && x.c) {
+      const c = regCell(x.c), o = S.regular.find(r => r.L === c.L), slotT = slotsFor(o.times)[c.s].t;
+      o.given = { ...(o.given || {}), [`${c.d}@${slotT}`]: `${t} ${R.rn}` };
+    } else if (x.do === 'rn') { const o = S.prn.find(p => p.L === x.L); o.given = [...(o.given || []), `${at.day}@${t} ${x.dose[0].replace(/\s/g, '')} ${x.route} ${R.rn}`]; }
+    else if (x.do === 'prn') { const o = S.prn.find(p => p.L === x.L); o.given = [...(o.given || []), `${at.day}@${t} ${x.dose[0].replace(/\s/g, '')} ${x.route} ${R.you}/${R.rn}`]; }
     else if (x.do === 'once') S.once[x.i].given = { at: `${at.day}@${t}`, giv: R.you, chk: R.rn };
     else if (x.do === 'fluid') S.fluids[x.i].started = { at: `${at.day}@${t}`, by: R.you, chk: R.rn };
     else if (x.do === 'fluidend') S.fluids[x.i].done = { at: `${at.day}@${t}`, vol: x.vol };
     else if (x.do === 'reg') S.nurses = [...(S.nurses || []), { name: R.name, init: R.you, reg: '' }];
   }
-  S.now = R.at; S.stage = (S.stage || 0) + 1;
+  /* the chart's clock moves to the round's last entry, so everything written in it shows */
+  const last = Math.max(at.m, ...R.expect.filter(x => x.t).map(x => abs(at.day, x.t)));
+  S.now = `${Math.floor(last / 1440) + 1}@${hhmm(last)}`; S.stage = (S.stage || 0) + 1;
   return S;
 }
 
@@ -478,7 +521,7 @@ export function roundKey(C, R) {
     const t = x.t || at.t;
     if (x.do === 'sign' || x.do === 'code') {
       const c = regCell(x.c), o = C.reg.find(r => r.L === c.L), label = `${o.med} · ${dayDate(C.S, c.d)} · ${o.slots[c.s].t} line`;
-      out.push(x.do === 'sign' ? { label, need: [x.c + '.t', x.c + '.gc'], may: [x.c + '.dose'], model: `Time ${t} · Giv/Chck ${who}` }
+      out.push(x.do === 'sign' ? { label, need: [x.c + '.t', x.c + '.gc', ...(x.dose ? [x.c + '.dose'] : [])], may: x.dose ? [] : [x.c + '.dose'], model: `Time ${t}${x.dose ? ' · Dose ' + x.dose[0] : ''} · Giv/Chck ${who}` }
         : { label, need: [x.c + '.gc'], may: [x.c + '.t'], model: `${x.code} — ${CODES[x.code]}` });
     } else if (x.do === 'prn') {
       const o = C.prn.find(p => p.L === x.L), j = o.rec.length, b = `prn.${x.L}.${j}`;
@@ -488,6 +531,7 @@ export function roundKey(C, R) {
     else if (x.do === 'fluidend') out.push({ label: `${C.fluids[x.i].fluid} (IV fluids line ${x.i + 1}) finished`, need: [`fl.${x.i}.tend`, `fl.${x.i}.avol`], model: `Completion: ${t} · ${x.vol} mL` });
     else if (x.do === 'reg') { const i = (C.S.nurses || []).length; out.push({ label: 'Sample Initials register', need: [`siga.${i}.name`, `siga.${i}.init`], may: [`siga.${i}.reg`], model: `${R.name} · ${R.you}` }); }
     else if (x.do === 'none') out.push({ label: x.what, none: x.c + '.', why: x.why, model: 'nothing' });
+    else if (x.do === 'rn') out.push({ label: x.what, none: x.c ? x.c + '.' : `prn.${x.L}.`, why: x.why, model: 'nothing — your RN signs' });
   }
   return out;
 }

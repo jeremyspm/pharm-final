@@ -108,8 +108,22 @@ nothing in a sim without it.
 8-Day National Medication Chart** (NMC8D, 2012 edition) redrawn box for box from the booklet's own pages — front page
 (allergies, adverse reactions, special care, supplementary charts, both registers), Once Only / Verbal Orders /
 Oxygen, PRN orders facing their record, VTE + Regular orders facing their 8 days, the IV fluid record, and the key
-printed inside the chart. Three invented patients (a broken hip, a COPD flare, leg cellulitis), each part-charted
-like a chart picked up on the ward, with 2–3 med rounds.
+printed inside the chart. Six invented patients, each part-charted like a chart picked up on the ward, with 4–5 med
+rounds each (28 in all), most running into a second day:
+
+| Patient | What it teaches |
+|---|---|
+| Margaret, 82 — broken hip | a stopped order you must not sign; D on the prescriber's word, then given next day once the numbers allow; a controlled-drug PRN; the 24-hour maximum as a rolling 24 hours |
+| Hemi, 67 — COPD flare | SM for his own inhaler, then signed when a nurse gives it from ward stock; U at X-ray; a verbal order unsigned past 24 h; an 88–92% oxygen target |
+| Grace, 58 — leg cellulitis | a therapy change is a ceased line plus a new line; N with its reason in the notes; CP for her husband's eye drops on an afternoon shift |
+| Tom, 74 — Parkinson's + UTI | time-critical levodopa at his own times (the 30-minute window works both ways); an IV dose the RN gives and signs, so the student signs nothing; R; metoclopramide on his Adverse Reactions |
+| Daniel, 48 — liver disease | a recharted chart; hepatic impairment; a variable dose (the dose given goes in the Dose column); N when pharmacy has not supplied it; a 2 g paracetamol maximum — a round where the right move is to give nothing |
+| Sione, 58 — day 1 after bowel surgery | two supplementary charts (PCA, insulin); D written on the order itself; an aspirin allergy that matters for NSAIDs; two antiemetics where the 8-hour gap decides; a fluid bag with KCl |
+
+**The chart keeps time.** Everything written carries its moment and the chart shows only what had been written by
+then, so a scenario scripts its whole timeline (the night nurse's 0600 signatures, a verbal order signed late, an
+oxygen stop date) and a round the next morning finds them. Reading shows the chart as the last round left it;
+charting shows it as the next round finds it.
 
 - **Read**: questions generated from the chart itself (so they cannot disagree with it) — allergies, doses, times,
   who gave what (via the Sample Initials register), what a code means, what is due next, whether a PRN can be given
@@ -140,9 +154,11 @@ node build-chart.mjs   # content/chart/*.js + chart-engine.mjs + chart-render.mj
 The build fails if a scenario writes a box the chart does not have or a row letter off the sheet; if any question
 it deals (every stage, 30 times) shows its answer twice, repeats an option, or points at a box that is not there; if
 a patient's own question gives its answer away by length; if a round's model answer fails its own check, or passes
-with nothing written, with the wrong day, without the RN's check, or with stray ink; if the story contradicts the
-chart (a PRN the round gives that the chart says cannot be given then, or one it withholds that could be); or if a
-stroke drawn across a box is not placed in it. The modules are inlined as namespaces (never retyped) and the page's
+with nothing written, with the wrong day, without the RN's check, with the student signing a dose the RN gave, or
+with stray ink; if the story contradicts the chart (a PRN the round gives that the chart says cannot be given then,
+or that would take the 24-hour total past the maximum, or one it withholds that could be given); if a scripted
+signature sits in a box a round asks the student to fill; if, after the round, anything the model wrote is not
+where it put it; or if a stroke drawn across a box is not placed in it. The modules are inlined as namespaces (never retyped) and the page's
 script is parsed before it ships. Progress lives under `phf.chart.*`; `phf.more.chart` feeds the home row.
 
 ## How it is built

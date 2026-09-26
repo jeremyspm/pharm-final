@@ -184,7 +184,10 @@ const P = () => (PROG[SC.id] = PROG[SC.id] || { stage: 0, rounds: {}, read: {} }
 const round = () => SC.rounds[P().stage];
 const rctx = R => ({ ...R, you: meInit() || 'ST', name: (ME.name || 'Student Nurse').trim() });
 function stageScenario(k) { let S = SC; for (let i = 0; i < k; i++) S = CE.applyRound(S, rctx(SC.rounds[i])); return S; }
-function load(stage) { ST = stageScenario(stage); C = CE.compile(ST); }
+function load(stage) { ST = stageScenario(stage); syncC(); }
+/* reading shows the chart as the last round left it; charting shows it as the next round finds it — the night's
+   signatures written in, if the round is the next morning */
+function syncC() { const R = SC && round(); C = MODE === 'chart' && R ? CE.compile(CE.atRound(ST, R)) : CE.compile(ST); }
 const dayLabel = d => `${CE.WEEKDAY(C.S, d)} ${CE.dayDate(C.S, d)}`;
 const nowLabel = () => `${dayLabel(C.now.day)} · ${C.now.t} · day ${C.now.day} of the chart`;
 
@@ -232,7 +235,7 @@ function home() {
 
 /* ── the patient ── */
 function openPatient(id, mode) {
-  SC = BYID.get(id); load(P().stage);
+  SC = BYID.get(id); load(P().stage); $('#toast').hidden = true;
   document.body.classList.add('simon'); $('#view').hidden = true; $('#sim').hidden = false;
   MODE = mode || 'read'; PAGE = 'front'; HL = []; GHOST = null; PK = null;
   const saved = LS('chart.w.' + SC.id);
@@ -245,7 +248,7 @@ function openPatient(id, mode) {
 }
 function saveWork() { SV('chart.w.' + SC.id, { stage: P().stage, ent: ENT, ink: STROKES }); }
 function setMode(m) {
-  MODE = m; PK = null; HL = []; GHOST = null;
+  MODE = m; PK = null; HL = []; GHOST = null; syncC(); drawPage();
   document.querySelectorAll('#modeSeg button').forEach(b => b.classList.toggle('on', b.dataset.mode === m));
   $('#sNow').textContent = nowLabel();
   if (m === 'read') { if (!RQ || RQ.stage !== P().stage) newRead(); showRead(); }
@@ -356,7 +359,8 @@ function showRead() {
     return;
   }
   const q = RQ.list[RQ.i];
-  const head = `<div class="meta"><span>Read · ${esc(q.tag || '')}</span><span>${RQ.i + 1} / ${RQ.list.length}</span></div><p class="q">${esc(q.q)}</p>`;
+  const hand = P().stage === 0 ? `<details class="hand" ${RQ.i === 0 ? 'open' : ''}><summary class="small">Handover</summary><p class="small" style="margin:.3rem 0 .6rem">${esc(SC.story)}</p></details>` : '';
+  const head = `${hand}<div class="meta"><span>Read · ${esc(q.tag || '')}</span><span>${RQ.i + 1} / ${RQ.list.length}</span></div><p class="q">${esc(q.q)}</p>`;
   if (q.kind === 'tap') {
     panel(`${head}<div class="tapnote">👆 Tap the box on the chart. The tabs above change the page; pinch or ± to zoom.</div>
       <div class="acts"><button class="btn ghost" id="qSkip">I can’t find it — show me</button></div>`);

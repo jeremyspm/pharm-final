@@ -102,68 +102,88 @@ for (const S0 of SCENARIOS) {
     }
     for (const q of S0.questions || []) if (q.kind !== 'tap' && (q.stage || 0) === st) lenGate(`${WS} own question ${q.id}`, q.a, q.w);
     if (st === S0.rounds.length) break;
-    /* the round */
+    /* the round — checked against the chart as the round finds it (its own moment, the night's signatures in) */
     const Rd = { ...S0.rounds[st], ...STUDENT }, WR = `${W} round ${st + 1}`, at = E.parseAt(Rd.at);
     nRounds++;
     if (!inits.includes(Rd.rn)) fail(`${WR}: the RN ${Rd.rn} is not in the register`);
-    if (at.m < E.parseAt(S.now).m) fail(`${WR}: happens before the chart’s “now”`);
+    if (at.m < E.parseAt(S.now).m) fail(`${WR}: happens before the chart’s “now” (${S.now})`);
+    if (!Rd.title || !(Rd.brief || []).length) fail(`${WR}: needs a title and a brief`);
+    let RC;
+    try { RC = E.compile(E.atRound(S, Rd)); } catch (e) { fail(`${WR}: does not compile — ${e.message}`); break; }
     for (const q of Rd.ask || []) { lenGate(`${WR} ask ${q.id}`, q.a, q.w); for (const id of q.show || []) if (!exists(id)) fail(`${WR} ask ${q.id}: shows ${id}, not on the chart`); }
+    const rawReg = L => (S0.regular || []).find(r => r.L === L) || {};
     for (const x of Rd.expect) {
       nExpect++;
-      if ((x.do === 'sign' || x.do === 'code')) {
+      if (x.t && (!/^\d{4}$/.test(x.t) || Math.abs(E.toMin(x.t) - E.toMin(at.t)) > 30)) fail(`${WR}: an entry at ${x.t} is not within 30 min of the round (${at.t}) — its own check would reject it`);
+      if (x.do === 'sign' || x.do === 'code' || (x.do === 'rn' && x.c)) {
         const m = /^reg\.([A-Z]{1,2})\.d(\d)\.s(\d)$/.exec(x.c || ''); if (!m) { fail(`${WR}: ${x.do} needs c = reg.L.dD.sK`); continue; }
-        const o = C.reg.find(r => r.L === m[1]), slot = o && o.slots[+m[3]];
+        const o = RC.reg.find(r => r.L === m[1]), slot = o && o.slots[+m[3]];
         if (!o || !slot) { fail(`${WR}: ${x.c} — no order or nothing due on that line`); continue; }
         const due = E.abs(+m[2], slot.t);
         if (o.ceaseAt && due >= o.ceaseAt.m) fail(`${WR}: ${x.c} — that dose is after the order was stopped`);
         if (due < o.start) fail(`${WR}: ${x.c} — that dose is before the order started`);
         /* a dose is signed near its time; a code can be written when the patient is back (U after X-ray) */
-        if (Math.abs(due - at.m) > (x.do === 'sign' ? 120 : 240)) fail(`${WR}: ${x.c} — due ${slot.t} on day ${m[2]}, far from the round (${Rd.at})`);
+        if (Math.abs(due - at.m) > (x.do === 'code' ? 240 : 120)) fail(`${WR}: ${x.c} — due ${slot.t} on day ${m[2]}, far from the round (${Rd.at})`);
         if (x.do === 'code' && !E.CODES[x.code]) fail(`${WR}: ${x.code} is not on the chart’s key`);
+        const scripted = (rawReg(m[1]).given || {})[`${m[2]}@${slot.t}`];
+        if (scripted != null) fail(`${WR}: ${x.c} is already scripted in the scenario ("${scripted}") — it would collide with the round`);
+        if (x.dose) {
+          if (!o.range) fail(`${WR}: a variable dose on row ${m[1]}, but the order has no dose range`);
+          if (x.dose.some(q => isNaN(E.doseAmount(q.replace(/\s/g, ''), o.units)))) fail(`${WR}: variable dose ${x.dose.join('/')} is not in ${o.units}`);
+        }
       }
-      if (x.do === 'prn') {
-        const o = C.prn.find(p => p.L === x.L); if (!o) { fail(`${WR}: no PRN ${x.L}`); continue; }
-        const st2 = E.prnStatus(o, E.abs(at.day, x.t || at.t));
+      if (x.do === 'prn' || (x.do === 'rn' && x.L)) {
+        const o = RC.prn.find(p => p.L === x.L); if (!o) { fail(`${WR}: no PRN ${x.L}`); continue; }
+        const st2 = E.prnStatus(o, E.abs(at.day, x.t || at.t)), dA = E.doseAmount(x.dose[0].replace(/\s/g, ''), o.units);
         if (!st2.can) fail(`${WR}: the round gives PRN ${x.L} (${o.med}) but the chart says it cannot be given then`);
-        if (isNaN(E.doseAmount(x.dose[0].replace(/\s/g, ''), o.units))) fail(`${WR}: PRN ${x.L} dose ${x.dose[0]} is not in ${o.units}`);
+        if (isNaN(dA)) fail(`${WR}: PRN ${x.L} dose ${x.dose[0]} is not in ${o.units}`);
+        else if (o.maxAmount != null && st2.amount + dA > o.maxAmount + 1e-9) fail(`${WR}: PRN ${x.L} ${x.dose[0]} takes the 24-hour total to ${st2.amount + dA} ${o.units}, over the max (${o.max})`);
         if (!String(o.route).split('/').includes(x.route)) fail(`${WR}: PRN ${x.L} route ${x.route} is not what the order allows (${o.route})`);
       }
+      if ((x.do === 'rn' || x.do === 'none') && (!x.what || !x.why)) fail(`${WR}: a "${x.do}" needs what and why`);
       if (x.do === 'none') {
-        if (!x.what || !x.why) fail(`${WR}: a "none" needs what and why`);
         const mp = /^prn\.([A-H])$/.exec(x.c), mr = /^reg\.([A-Z]{1,2})\.d(\d)$/.exec(x.c);
-        if (mp) { const o = C.prn.find(p => p.L === mp[1]); if (!o) fail(`${WR}: no PRN ${mp[1]}`); else if (E.prnStatus(o, at.m).can) fail(`${WR}: withholds PRN ${mp[1]}, but the chart says it could be given at ${at.t}`); }
-        else if (mr) { const o = C.reg.find(r => r.L === mr[1]); if (!o) fail(`${WR}: no regular ${mr[1]}`); else if (!o.ceaseAt || o.ceaseAt.m > at.m) notes.push(`${WR}: "none" on active row ${mr[1]}`); }
+        if (mp) { const o = RC.prn.find(p => p.L === mp[1]); if (!o) fail(`${WR}: no PRN ${mp[1]}`); else if (E.prnStatus(o, at.m).can) fail(`${WR}: withholds PRN ${mp[1]}, but the chart says it could be given at ${at.t}`); }
+        else if (mr) { const o = RC.reg.find(r => r.L === mr[1]); if (!o) fail(`${WR}: no regular ${mr[1]}`); else if (!o.ceaseAt || o.ceaseAt.m > at.m) notes.push(`${WR}: "none" on active row ${mr[1]}`); }
         else fail(`${WR}: "none" c must be prn.X or reg.L.dD`);
       }
-      if ((x.do === 'once' && !C.once[x.i]) || ((x.do === 'fluid' || x.do === 'fluidend') && !C.fluids[x.i])) fail(`${WR}: ${x.do} ${x.i} does not exist`);
-      if (x.do === 'once' && C.once[x.i] && (C.once[x.i].hidden || C.once[x.i].givenAt)) fail(`${WR}: once ${x.i} is hidden or already given`);
-      if (x.do === 'fluid' && C.fluids[x.i] && C.fluids[x.i].started) fail(`${WR}: fluid ${x.i} is already running`);
-      if (x.do === 'fluidend' && C.fluids[x.i] && (!C.fluids[x.i].started || C.fluids[x.i].done)) fail(`${WR}: fluid ${x.i} is not running`);
+      const onc = RC.once[x.i], fl = RC.fluids[x.i], raw = x.do === 'once' ? (S0.once || [])[x.i] : (S0.fluids || [])[x.i];
+      if (x.do === 'once' && (!onc || onc.hidden || onc.givenAt || (raw && raw.given))) fail(`${WR}: once ${x.i} is missing, not charted yet, or already given`);
+      if (x.do === 'fluid' && (!fl || fl.hidden || fl.started || (raw && raw.started))) fail(`${WR}: fluid ${x.i} is missing, not charted yet, or already started`);
+      if (x.do === 'fluidend' && (!fl || !fl.running || (raw && raw.done))) fail(`${WR}: fluid ${x.i} is not running then, or its end is already scripted`);
     }
-    const M = E.modelEntries(C, Rd);
+    const M = E.modelEntries(RC, Rd);
     for (const k of Object.keys(M)) if (!IDX.has(k)) fail(`${WR}: the model answer writes ${k}, not a box on the chart`);
-    for (const k of Object.keys(M)) if (C.V[k] != null) fail(`${WR}: the model answer writes over ${k}, which is already written`);
-    const good = E.checkRound(C, Rd, M);
+    for (const k of Object.keys(M)) if (RC.V[k] != null) fail(`${WR}: the model answer writes over ${k}, which is already written`);
+    const good = E.checkRound(RC, Rd, M);
     for (const r of good) if (!r.ok) fail(`${WR}: the model answer fails its own check — ${r.msg}`);
-    const empty = E.checkRound(C, Rd, {});
-    Rd.expect.forEach((x, i) => { if (x.do !== 'none' && empty[i].ok) fail(`${WR}: expectation ${i + 1} (${x.do}) passes with nothing written`); });
+    const empty = E.checkRound(RC, Rd, {});
+    Rd.expect.forEach((x, i) => { if (!['none', 'rn'].includes(x.do) && empty[i].ok) fail(`${WR}: expectation ${i + 1} (${x.do}) passes with nothing written`); });
     /* misplaced: every administration a day late, and no check initials */
     const late = {}, nochk = {};
     for (const [k, v] of Object.entries(M)) { late[k.replace(/^(reg\.[A-Z]{1,2}\.d)(\d)/, (_, a, d) => a + (+d % 8 + 1))] = v; nochk[k] = v && v.giv ? { giv: v.giv, chk: '' } : v; }
-    if (Rd.expect.some(x => x.do === 'sign' || x.do === 'code') && E.checkRound(C, Rd, late).every(r => r.ok)) fail(`${WR}: signing the wrong day passes`);
-    if (Rd.expect.some(x => ['sign', 'prn', 'once', 'fluid'].includes(x.do)) && E.checkRound(C, Rd, nochk).every(r => r.ok)) fail(`${WR}: leaving out the RN’s check passes`);
+    if (Rd.expect.some(x => x.do === 'sign' || x.do === 'code') && E.checkRound(RC, Rd, late).every(r => r.ok)) fail(`${WR}: signing the wrong day passes`);
+    if (Rd.expect.some(x => ['sign', 'prn', 'once', 'fluid'].includes(x.do)) && E.checkRound(RC, Rd, nochk).every(r => r.ok)) fail(`${WR}: leaving out the RN’s check passes`);
+    /* signing a dose the RN gave fails */
+    for (const x of Rd.expect.filter(x => x.do === 'rn')) {
+      const k = x.c ? x.c + '.gc' : `prn.${x.L}.${RC.prn.find(p => p.L === x.L).rec.length}.gc`;
+      if (E.checkRound(RC, Rd, { ...M, [k]: { giv: 'QQ', chk: Rd.rn } }).every(r => r.ok)) fail(`${WR}: signing the dose the RN gave passes`);
+    }
     /* handwriting: ink in exactly the needed boxes passes; ink in a box nobody asked for fails */
-    const need = new Set(E.roundKey(C, Rd).flatMap(k => k.need || []));
+    const need = new Set(E.roundKey(RC, Rd).flatMap(k => k.need || []));
     for (const id of need) if (!IDX.has(id)) fail(`${WR}: the handwriting key needs ${id}, not a box on the chart`);
-    if (!E.checkInk(C, Rd, need).every(r => r.ok)) fail(`${WR}: ink in the right boxes does not pass the handwriting check`);
-    if (E.checkInk(C, Rd, new Set([...need, 'reg.O.d8.s4.t'])).every(r => r.ok)) fail(`${WR}: stray ink passes the handwriting check`);
+    if (!E.checkInk(RC, Rd, need).every(r => r.ok)) fail(`${WR}: ink in the right boxes does not pass the handwriting check`);
+    if (E.checkInk(RC, Rd, new Set([...need, 'reg.O.d8.s4.t'])).every(r => r.ok)) fail(`${WR}: stray ink passes the handwriting check`);
     /* and a stroke drawn through the middle of each needed box lands in it */
     for (const id of need) {
       const { cell } = IDX.get(id) || {}; if (!cell) continue;
       const stroke = { pts: [0.25, 0.4, 0.55, 0.7].map(f => [cell.x + cell.w * f, cell.y + cell.h * (0.35 + f / 3), 0.5]) };
       if (INK.strokeCell(stroke, R.layout(IDX.get(id).page).cells) !== id) fail(`${WR}: a stroke across ${id} is not placed in it`);
     }
-    S = E.applyRound(S, Rd);
+    /* after the round, every entry the model made shows where the model put it (nothing scripted took its line) */
+    const next = E.applyRound(S, Rd), NC = E.compile(next), norm = v => typeof v === 'object' ? JSON.stringify(v) : String(v).replace(/\s/g, '').toLowerCase();
+    for (const [k, v] of Object.entries(M)) if (NC.V[k] == null || norm(NC.V[k]) !== norm(v)) fail(`${WR}: after the round ${k} shows ${JSON.stringify(NC.V[k])}, not the model’s ${JSON.stringify(v)}`);
+    S = next;
   }
 }
 for (const [i, n] of allStaff) if (n > 1) notes.push(`initials ${i} are on ${n} charts (fine — different patients)`);

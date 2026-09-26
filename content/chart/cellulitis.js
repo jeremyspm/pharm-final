@@ -1,6 +1,8 @@
 /* Grace Liu — leg cellulitis, switched from IV to oral antibiotics this morning. Teaches: a therapy change is a
    ceased line plus a NEW line (sign the new one), N with its reason in the notes, CP (her husband's eye drops),
-   q6h times including 2400, a warfarin chart that lives elsewhere, and two PRN painkillers checked together. */
+   q6h times including 2400, a warfarin chart that lives elsewhere, and two PRN painkillers checked together. Day 2
+   (Thursday) is an afternoon shift: her husband's eye drops (CP — you didn't give them, so you don't sign), and a
+   bedtime PRN checked against the 24 hours. */
 export default {
   id: 'cell', t: 'Grace Liu, 58', sub: 'Leg cellulitis — IV to oral antibiotics today',
   story: 'Grace came in through ED on Monday with cellulitis of her left lower leg. She has type 2 diabetes, atrial fibrillation (her warfarin is on its own chart) and glaucoma. She has had IV flucloxacillin 6-hourly; the 0600 dose was missed because her cannula had tissued. On this morning’s ward round the leg looked much better, so the house officer switched her to oral flucloxacillin. It is Wednesday, 1030; her 0800 tablets are done.',
@@ -27,19 +29,20 @@ export default {
     { L: 'I', day: 1, startT: '1800', med: 'FLUCLOXACILLIN', dose: '2', units: 'g', route: 'IV', freq: 'q6h', times: '0600 1200 1800 2400', by: 'ao', inst: 'In 100 mL NaCl 0.9% over 30 min',
       given: { '1@1800': 'NB/TL', '1@2400': 'KS/MF', '2@0600': 'KS/MF', '2@1200': '1215 RA/NB', '2@1800': 'NB/TL', '2@2400': 'KS/MF', '3@0600': 'N' },
       cease: { at: '3@1000', by: 'kj' } },
-    { L: 'J', day: 3, startT: '1000', med: 'FLUCLOXACILLIN', dose: '1', units: 'g', route: 'PO', freq: 'QID', times: '0600 1200 1800 2200', by: 'kj', inst: 'Empty stomach, 1 h before food. Oral switch from row I' },
+    { L: 'J', day: 3, startT: '1000', med: 'FLUCLOXACILLIN', dose: '1', units: 'g', route: 'PO', freq: 'QID', times: '0600 1200 1800 2200', by: 'kj', inst: 'Oral switch from row I (IV stopped 14/10)',
+      given: { '3@1800': 'NB', '3@2200': 'NB', '4@0600': 'KS', '4@1200': '1210 RA' } },
     { L: 'K', day: 1, startT: '1400', med: 'METFORMIN', dose: '1', units: 'g', route: 'PO', freq: 'BD', times: '0800 1800', by: 'ao', inst: 'With food',
-      given: { '1@1800': 'NB', '2@0800': '0810 RA', '2@1800': 'NB', '3@0800': '0805 RA' } },
+      given: { '1@1800': 'NB', '2@0800': '0810 RA', '2@1800': 'NB', '3@0800': '0805 RA', '3@1800': 'NB', '4@0800': '0805 RA' } },
     { L: 'L', day: 1, startT: '1400', med: 'LATANOPROST 0.005%', dose: '1', units: 'drop', route: 'EYE', freq: 'nocte', times: '2000', by: 'ao', inst: 'BOTH eyes. Husband puts them in, as at home',
-      given: { '1@2000': 'CP', '2@2000': 'CP' } },
+      given: { '1@2000': 'CP', '2@2000': 'CP', '3@2000': 'CP' } },
     { L: 'M', day: 1, startT: '1400', med: 'LOSARTAN', dose: '50', units: 'mg', route: 'PO', freq: 'mane', times: '0800', by: 'ao',
-      given: { '2@0800': '0810 RA', '3@0800': '0805 RA' } },
+      given: { '2@0800': '0810 RA', '3@0800': '0805 RA', '4@0800': '0805 RA' } },
   ],
   prn: [
     { L: 'A', day: 1, med: 'PARACETAMOL', dose: '1', units: 'g', route: 'PO', freq: 'q6h', max: '4 g', gapH: 6, maxAmount: 4, ind: 'Pain / fever', by: 'ao',
-      given: ['2@1000 1g PO RA', '2@2100 1g PO NB', '3@0500 1g PO KS'] },
+      given: ['2@1000 1g PO RA', '2@2100 1g PO NB', '3@0500 1g PO KS', '3@2030 1g PO NB', '4@0630 1g PO KS', '4@1300 1g PO RA'] },
     { L: 'B', day: 1, med: 'TRAMADOL', dose: '50', range: '50 – 100', units: 'mg', route: 'PO', freq: 'q6h', max: '400 mg', gapH: 6, maxAmount: 400, ind: 'Pain', by: 'ao',
-      given: ['2@1400 50mg PO RA', '3@0200 100mg PO KS'] },
+      given: ['2@1400 50mg PO RA', '3@0200 100mg PO KS', '3@2130 50mg PO NB', '4@1000 100mg PO RA'] },
   ],
   once: [
     { day: 1, med: 'FLUCLOXACILLIN', dose: '2', units: 'g', route: 'IV', by: 'ed', inst: 'Stat in ED', given: { at: '1@1310', giv: 'AP', chk: 'NB' } },
@@ -63,7 +66,7 @@ export default {
   rounds: [
     { at: '3@1205', rn: 'RA', title: 'Midday',
       brief: ['Your day with Rawiri Anaru (RN, initials RA). You have not signed Grace’s chart before.',
-        '1205 — with Rawiri checking, you give Grace her first dose of oral flucloxacillin, an hour before lunch.'],
+        '1205 — with Rawiri checking, you give Grace her first dose of oral flucloxacillin.'],
       ask: [{ id: 'r1line', tag: 'Regular', q: 'Which line do you sign for the 1200 flucloxacillin?', a: 'Row J — the new oral order',
         w: ['Row I — the IV order, in its 1200 box', 'Both rows — it is the same medicine', 'Neither — write it in the notes'],
         show: ['reg.J.med', 'reg.I.cancel'], why: 'Row I was stopped at 1000 and crossed through; row J is the order you are giving from.' }],
@@ -80,6 +83,32 @@ export default {
       expect: [
         { do: 'prn', L: 'A', dose: ['1g', '1 g', '1000mg', '1000 mg'], route: 'PO', t: '1400' },
         { do: 'prn', L: 'B', dose: ['50mg', '50 mg', '50'], route: 'PO', t: '1400' },
+      ] },
+    { at: '4@1805', rn: 'TL', title: 'Thursday: afternoon shift',
+      brief: ['Thursday — you are on the afternoon shift with Tanya Lee (RN, initials TL).',
+        '1805 — with Tanya checking, you give Grace her 1800 flucloxacillin and her metformin.'],
+      ask: [{ id: 'r3line', tag: 'Regular', q: 'Two flucloxacillin lines are on Grace’s chart. Which is the one to give from tonight?', a: 'Row J — 1 g PO; row I (IV) is crossed through',
+        w: ['Row I — 2 g IV, the stronger dose', 'Either — both are flucloxacillin', 'Neither — ask for a third line to be written'],
+        show: ['reg.J.med', 'reg.I.cancel'], why: 'A stopped order is crossed through with its cancel box signed. Row J, the oral line, is the one in use.' }],
+      expect: [
+        { do: 'sign', c: 'reg.J.d4.s3', t: '1805' },
+        { do: 'sign', c: 'reg.K.d4.s3', t: '1805' },
+      ] },
+    { at: '4@2005', rn: 'TL', title: 'Her husband visits',
+      brief: ['1945 — Grace’s husband visits and puts in her eye drops, as he does at home. Tanya checks with Grace that both eyes are done.'],
+      ask: [{ id: 'r4cp', tag: 'Codes', q: 'Grace’s husband has just put in her latanoprost. What goes in the 2000 box?', a: 'CP — carer/parent',
+        w: ['Your initials — you were in the room', 'SM — Grace self-medicated', 'Nothing — a visitor’s dose is not charted'],
+        show: ['reg.L.d3.s3.gc', 'reg.L.inst'], why: 'CP, carer/parent, from the chart’s key. It is charted — so the next nurse knows it was done — but not with your initials, because you did not give it.' }],
+      expect: [{ do: 'code', c: 'reg.L.d4.s3', code: 'CP', why: 'Her husband gave them — carer/parent. You write CP, not your initials: you did not give them.' }] },
+    { at: '4@2205', rn: 'TL', title: 'Bedtime',
+      brief: ['2205 — with Tanya checking, you give Grace her 2200 flucloxacillin.',
+        '2210 — her leg aches and she asks for something to help her sleep. After checking her chart with Tanya, you give her paracetamol 1 g PO.'],
+      ask: [{ id: 'r5para', tag: 'PRN', q: 'Can Grace have paracetamol at 2210?', a: 'Yes — 2 g in 24 hours; last dose at 1300',
+        w: ['No — she has already had 4 g today', 'No — it is only 3 hours since her last dose', 'Yes — but only 500 mg, because it is night'],
+        show: ['prn.A.max', 'prn.A.5.time', 'prn.A.6.time'], why: 'Since 2210 last night: 0630 and 1300 — 2 g (the 2030 dose last night is just outside the 24 hours). And 1300 + 6 h = 1900.' }],
+      expect: [
+        { do: 'sign', c: 'reg.J.d4.s4', t: '2205' },
+        { do: 'prn', L: 'A', dose: ['1g', '1 g', '1000mg', '1000 mg'], route: 'PO', t: '2210' },
       ] },
   ],
 };
