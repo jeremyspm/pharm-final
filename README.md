@@ -60,22 +60,24 @@ says all this in a banner, not in a footnote.
 ## Chart Speak — every med-chart term, drilled (`terms.html`)
 
 **Live: https://jeremyspm.github.io/pharm-final/terms.html**, and a row on the home screen under
-*Read a med chart*. A trainer for reading a medication chart before placement: **414 abbreviations,
+*Read a med chart*. A trainer for reading a medication chart before placement: **420 abbreviations,
 symbols and terms** in 11 topics (when & how often · routes · forms & release · doses, units & rates ·
 the chart itself · the danger list · IV, lines, tubes & oxygen · obs & labs · notes shorthand ·
 the course's pharmacology words · law, regulators & roles), **35 real-looking orders** to decode,
-**17 dangerous ways of writing** to spot, and **31 chart-rule scenarios** (which section, which
+**17 dangerous ways of writing** to spot, and **33 chart-rule scenarios** (which section, which
 not-given code, PRN maths, the 30-minute window).
 
 - **Every term says where it comes from.** 19 are the course's own Must-Know abbreviations list
-  (Concepts (2) slides 77–80). 155 name the course deck and slide they come from — the
+  (Concepts (2) slides 77–80). 14 are printed on the NZ chart itself. 155 name the course deck and slide they come from — the
   pharmacology words use the decks' definitions, the same ones the Joan-format short answers teach.
-  217 are everyday NZ ward usage in the tool's words, and 23 come from the international
+  209 are everyday NZ ward usage in the tool's words, and 23 come from the international
   error-prone list. The page says the hospital's own list wins where they differ.
-- **The not-given codes** (A absent · F fasting · L leave · N not available · R refused ·
-  S self-administered · V vomiting · W withheld) are the national-chart letters; the page says the
-  key printed on the chart wins. HQSC's own user guide could not be read while this was built —
-  check a code or rule there if it matters.
+- **The not-given codes are the NZ chart's own key** — U patient unavailable · SM self-medicating ·
+  CP carer/parent · R refused · D prescriber's instructions · N not administered (reason in notes) —
+  with its recommended times (mane 0800 · nocte 1800 or 2000 · BD 0800/2000 · TDS 0800/1400/2000 ·
+  QID 0600/1200/1800/2200 · q8h 0600/1400/2200 · q6h 0600/1200/1800/2400), taken from the 8-Day
+  National Medication Chart (NMC8D, 2012 edition, page 11). The first version shipped the Australian
+  chart's letters (A F L N R S V W) — corrected 26 Sep 2026 once the real chart was in hand.
 - **Not a dosing guide.** The orders use typical adult doses so they look like a real chart, and
   every order says so.
 - **How it drills.** A wrong option is a real trap (the term's listed confusions first, then its

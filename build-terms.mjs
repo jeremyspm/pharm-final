@@ -30,7 +30,7 @@ for (const t of TERMS) {
   for (const f of ['t', 'm']) if (typeof t[f] !== 'string' || !t[f].trim()) fail(`${where}: needs ${f}`);
   if (t.m && t.m.length > 110) fail(`${where}: meaning is ${t.m.length} chars — keep it to one line (≤110)`);
   if (t.kd && !['abbr', 'term'].includes(t.kd)) fail(`${where}: kd must be abbr or term`);
-  if (t.k && !['must', 'deck', 'ward', 'safe'].includes(t.k)) fail(`${where}: unknown provenance ${t.k}`);
+  if (t.k && !['must', 'deck', 'ward', 'safe', 'nmc'].includes(t.k)) fail(`${where}: unknown provenance ${t.k}`);
   if (t.k === 'deck' && !t.src) fail(`${where}: a deck term must name its source (src)`);
   if (t.a && (!Array.isArray(t.a) || t.a.some(x => typeof x !== 'string' || !x.trim()))) fail(`${where}: a must be a list of spellings`);
   for (const s of t.also || []) if (!scopeIds.has(s)) fail(`${where}: also names unknown scope ${s}`);
@@ -209,7 +209,7 @@ try { new Function(scripts[0]); } catch (e) { console.error('BUILD FAILED: the p
 fs.writeFileSync(path.join(HERE, 'terms.html'), out);
 
 const byCat = CATS.map(c => `${c.id} ${TERMS.filter(t => t.c === c.id).length}`).join(' · ');
-const prov = ['must', 'deck', 'ward', 'safe'].map(k => `${k} ${TERMS.filter(t => (t.k || 'ward') === k).length}`).join(' · ');
+const prov = ['must', 'deck', 'nmc', 'ward', 'safe'].map(k => `${k} ${TERMS.filter(t => (t.k || 'ward') === k).length}`).join(' · ');
 const tu = Object.values(tierUse).reduce((a, b) => a + b, 0);
 console.log(`terms: ${TERMS.length} (${byCat})`);
 console.log(`provenance: ${prov}`);

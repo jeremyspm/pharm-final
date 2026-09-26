@@ -12,7 +12,8 @@
      kd    'abbr' (default) or 'term' (a word with a definition) — decides how the question is asked
      k     provenance: 'must' the course’s Must-Know abbreviations list (Must Know: Medication & Prescription
            Abbreviations 01.26 · Concepts (2) slides 77–80) · 'deck' a course deck, named in src ·
-           'ward' standard NZ ward usage, in this tool’s words · 'safe' the international error-prone list
+           'ward' standard NZ ward usage, in this tool’s words · 'safe' the international error-prone list ·
+           'nmc' printed on the NZ 8-Day National Medication Chart itself (NMC8D, 2012 ed.)
      src   where it comes from (required for 'deck')
      also  extra scopes a term belongs to (e.g. OD and SC are on the danger list as well as their own) */
 import { TERMS as when } from './when.js';

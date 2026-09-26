@@ -231,35 +231,39 @@ export const ORDERS = [
 /* Chart rules & codes — scenarios. k: 'sec' (options = the chart’s sections), 'code' (options = the not-given
    codes), or 'mcq' (its own options, the first is the answer — the page shuffles them; the build fails if the
    answer is much longer than the others, the classic way a right answer gives itself away). */
-export const SECTION_OPTS = ['Regular medicines', 'PRN (as required)', 'Once-only (stat)', 'Verbal orders', 'Fluid & infusion orders', 'Oxygen & medical gases'];
-export const CODE_OPTS = ['A — Absent', 'F — Fasting', 'L — On leave', 'N — Not available', 'R — Refused', 'S — Self-administered', 'V — Vomiting', 'W — Withheld'];
+export const SECTION_OPTS = ['Regular Medicine', 'As Required (PRN) Medicines', 'Once Only', 'Verbal Orders', 'IV & Subcut Fluids', 'Oxygen Therapy & Medical Gases'];
+/* the NZ 8-Day National Medication Chart's own non-administration key (NMC8D, 2012 ed., p. 11) */
+export const CODE_OPTS = ['U — Patient unavailable', 'SM — Self-medicating', 'CP — Carer/Parent', 'R — Patient refused', 'D — Prescriber’s instructions', 'N — Not administered (reason in notes)'];
+const NMC = 'NZ 8-Day National Medication Chart (NMC8D, 2012 ed.), p. 11';
 const MA1 = 'Med Admin (1) 2026, ';
 export const SCENES = [
-  { id: 's-adr', k: 'sec', q: 'Adrenaline 0.5 mg IM stat — anaphylaxis.', a: 'Once-only (stat)', why: 'A stat dose is a single dose, now — the once-only section.', src: MA1 + 'slides 54–55' },
-  { id: 's-phone', k: 'sec', q: 'The registrar phones the ward: “Give furosemide 40 mg IV now — I’ll sign it when I’m up.”', a: 'Verbal orders',
-    why: 'A phone order is a verbal order: its own section, and the prescriber signs it within the time your policy sets.', src: MA1 + 'slides 13–14 & 54–55' },
-  { id: 's-arrest', k: 'sec', q: 'In a cardiac arrest the doctor calls out “adrenaline 1 mg IV” and you draw it up and give it.', a: 'Verbal orders',
+  { id: 's-adr', k: 'sec', q: 'Adrenaline 0.5 mg IM stat — anaphylaxis.', a: 'Once Only', why: 'A stat dose is a single dose, now — the once-only section.', src: MA1 + 'slides 54–55' },
+  { id: 's-phone', k: 'sec', q: 'The registrar phones the ward: “Give furosemide 40 mg IV now — I’ll sign it when I’m up.”', a: 'Verbal Orders',
+    why: 'A phone order is a verbal order. The NZ chart’s Verbal Orders section: “must be signed as soon as possible or within 24 hours of order”.', src: MA1 + 'slides 13–14 & 54–55; NMC8D p. 3' },
+  { id: 's-arrest', k: 'sec', q: 'In a cardiac arrest the doctor calls out “adrenaline 1 mg IV” and you draw it up and give it.', a: 'Verbal Orders',
     why: 'An order given aloud in an emergency is a verbal order — written up and signed afterwards.', src: MA1 + 'slides 13–14' },
-  { id: 's-paraprn', k: 'sec', q: 'Paracetamol 1 g PO q4–6h PRN pain — max 4 g/24 h.', a: 'PRN (as required)', why: 'Given only when needed, with its reason and its 24-hour maximum.', src: MA1 + 'slides 54–55' },
-  { id: 's-ator', k: 'sec', q: 'Atorvastatin 40 mg PO nocte.', a: 'Regular medicines', why: 'A scheduled dose every night — a regular medicine.' },
-  { id: 's-cefaz', k: 'sec', q: 'Cefazolin 2 g IV q8h.', a: 'Regular medicines', why: 'An IV medicine given on a schedule is still a regular medicine; the fluids section is for fluids and infusions.' },
-  { id: 's-nacl', k: 'sec', q: 'Sodium chloride 0.9% 1000 mL IV over 8 hours.', a: 'Fluid & infusion orders', why: 'IV fluids are ordered in the fluid & infusion section.', src: MA1 + 'slides 54–55' },
-  { id: 's-o2', k: 'sec', q: 'Oxygen via nasal prongs 2 L/min, target SpO₂ 92–96%.', a: 'Oxygen & medical gases', why: 'Oxygen is a medicine, prescribed in its own section.', src: MA1 + 'slides 54–55' },
-  { id: 's-entonox', k: 'sec', q: 'Entonox (nitrous oxide and oxygen), self-administered for dressing changes.', a: 'Oxygen & medical gases', why: 'A medical gas.', src: MA1 + 'slides 54–55' },
-  { id: 's-salb', k: 'sec', q: 'Salbutamol 5 mg NEB q4h PRN wheeze.', a: 'PRN (as required)',
+  { id: 's-paraprn', k: 'sec', q: 'Paracetamol 1 g PO q4–6h PRN pain — max 4 g/24 h.', a: 'As Required (PRN) Medicines', why: 'Given only when needed, with its reason and its 24-hour maximum.', src: MA1 + 'slides 54–55' },
+  { id: 's-ator', k: 'sec', q: 'Atorvastatin 40 mg PO nocte.', a: 'Regular Medicine', why: 'A scheduled dose every night — a regular medicine.' },
+  { id: 's-cefaz', k: 'sec', q: 'Cefazolin 2 g IV q8h.', a: 'Regular Medicine', why: 'An IV medicine given on a schedule is still a regular medicine; the fluids section is for fluids and infusions.' },
+  { id: 's-nacl', k: 'sec', q: 'Sodium chloride 0.9% 1000 mL IV over 8 hours.', a: 'IV & Subcut Fluids', why: 'IV fluids are ordered in the fluid & infusion section.', src: MA1 + 'slides 54–55' },
+  { id: 's-o2', k: 'sec', q: 'Oxygen via nasal prongs 2 L/min, target SpO₂ 92–96%.', a: 'Oxygen Therapy & Medical Gases', why: 'Oxygen is a medicine, prescribed in its own section.', src: MA1 + 'slides 54–55' },
+  { id: 's-entonox', k: 'sec', q: 'Entonox (nitrous oxide and oxygen), self-administered for dressing changes.', a: 'Oxygen Therapy & Medical Gases', why: 'A medical gas.', src: MA1 + 'slides 54–55' },
+  { id: 's-salb', k: 'sec', q: 'Salbutamol 5 mg NEB q4h PRN wheeze.', a: 'As Required (PRN) Medicines',
     why: 'Salbutamol is a medicine given as a mist, when needed — a PRN order. The oxygen section is for the gas itself.' },
-  { id: 's-ondstat', k: 'sec', q: 'Ondansetron 4 mg IV stat.', a: 'Once-only (stat)', why: 'stat = one dose, now.' },
-  { id: 's-dex', k: 'sec', q: 'Glucose 5% 500 mL IV over 6 hours.', a: 'Fluid & infusion orders', why: 'An IV fluid.' },
-  { id: 'c-xray', k: 'code', q: 'Mr T’s 0800 metoprolol is due, but he is down in X-ray.', a: 'A — Absent', why: 'He is off the ward. Follow it up when he is back.' },
-  { id: 'c-theatre', k: 'code', q: 'Mrs K is nil by mouth for theatre, and the anaesthetist has said her 0800 tablets are not to be given.', a: 'F — Fasting', why: 'Withheld because she is fasting — code F.' },
-  { id: 'c-leave', k: 'code', q: 'Sione has gone home for the weekend on approved leave.', a: 'L — On leave', why: 'Away from hospital on leave.' },
-  { id: 'c-pharm', k: 'code', q: 'The new antibiotic has not come up from pharmacy yet.', a: 'N — Not available', why: 'Not available — chase it and tell the prescriber; a missed antibiotic dose matters.' },
-  { id: 'c-refuse', k: 'code', q: 'Aroha understands what it is for, but says she does not want her sleeping tablet tonight.', a: 'R — Refused',
+  { id: 's-ondstat', k: 'sec', q: 'Ondansetron 4 mg IV stat.', a: 'Once Only', why: 'stat = one dose, now.' },
+  { id: 's-dex', k: 'sec', q: 'Glucose 5% 500 mL IV over 6 hours.', a: 'IV & Subcut Fluids', why: 'An IV fluid.' },
+  { id: 'c-xray', k: 'code', q: 'Mr T’s 0800 metoprolol is due, but he is down in X-ray.', a: 'U — Patient unavailable', why: 'He is off the ward when it is due — U. Follow it up when he is back.', src: NMC },
+  { id: 'c-theatre', k: 'code', q: 'Mrs K is nil by mouth for theatre, and the anaesthetist has said her 0800 tablets are not to be given.', a: 'D — Prescriber’s instructions', why: 'The anaesthetist — a prescriber — said not to give them: D. (Only the prescriber decides which tablets still go with a sip of water.)', src: NMC },
+  { id: 'c-leave', k: 'code', q: 'Sione has gone home for the weekend on approved leave.', a: 'U — Patient unavailable', why: 'Away from the ward — U.', src: NMC },
+  { id: 'c-pharm', k: 'code', q: 'The new antibiotic has not come up from pharmacy yet.', a: 'N — Not administered (reason in notes)', why: 'Not given for another reason: N, with the reason in the notes — then chase it and tell the prescriber; a missed antibiotic dose matters.', src: NMC },
+  { id: 'c-refuse', k: 'code', q: 'Aroha understands what it is for, but says she does not want her sleeping tablet tonight.', a: 'R — Patient refused',
     why: 'A competent refusal: explain, document the reason, inform the prescriber and the next shift, and discard the dose.', src: MA1 + 'slide 39' },
-  { id: 'c-self', k: 'code', q: 'The patient uses her own inhaler and records her doses herself, as ward policy allows.', a: 'S — Self-administered', why: 'Self-administered.' },
-  { id: 'c-vomit', k: 'code', q: 'Mr L has vomited twice this morning and his 0800 tablets are due.', a: 'V — Vomiting', why: 'An oral dose would not stay down — tell the prescriber; another route may be needed.' },
-  { id: 'c-hr', k: 'code', q: 'The order says “withhold if HR < 60”. The apical pulse is 54.', a: 'W — Withheld', why: 'Withheld for a clinical reason: code W, the reason in the notes, and tell the RN or prescriber.' },
-  { id: 'c-sbp', k: 'code', q: 'An antihypertensive says “withhold if SBP < 100”. The BP is 92/58.', a: 'W — Withheld', why: 'The systolic (92) is under 100 — withheld, documented and reported.' },
+  { id: 'c-self', k: 'code', q: 'The patient uses her own inhaler and records her doses herself, as ward policy allows.', a: 'SM — Self-medicating', why: 'The patient takes this one themselves, as agreed — SM.', src: NMC },
+  { id: 'c-vomit', k: 'code', q: 'Mr L has vomited twice this morning and his 0800 tablets are due.', a: 'N — Not administered (reason in notes)', why: 'N, and the notes say why (vomiting). Tell the prescriber — another route may be needed.', src: NMC },
+  { id: 'c-hr', k: 'code', q: 'The order says “withhold if HR < 60”. The apical pulse is 54.', a: 'D — Prescriber’s instructions', why: 'The prescriber’s own hold parameter says not to give it: D, the reason (HR 54) in the notes, and tell the RN. Some wards use N with a note for a hold parameter — follow yours.', src: NMC },
+  { id: 'c-sbp', k: 'code', q: 'An antihypertensive says “withhold if SBP < 100”. The BP is 92/58.', a: 'D — Prescriber’s instructions', why: 'The systolic (92) is under 100, so the prescriber’s hold parameter applies: D, documented and reported.', src: NMC },
+  { id: 'c-parent', k: 'code', q: 'On the children’s ward, Lily’s mum gives her 1400 paracetamol liquid while you watch.', a: 'CP — Carer/Parent', why: 'Given by the carer or parent — CP.', src: NMC },
+  { id: 'c-warf', k: 'code', q: 'The registrar asks you to hold tonight’s warfarin — the INR is 4.2.', a: 'D — Prescriber’s instructions', why: 'Not given because the prescriber said so — D, with the reason in the notes.', src: NMC },
   { id: 'r-blank', k: 'mcq', q: 'The allergy box on the chart is blank. Before giving the first dose you…',
     opts: ['Ask the patient, and get it documented first', 'Take it to mean no known allergies', 'Give it and watch closely for a reaction', 'Write NKDA in the box yourself'],
     why: 'A blank box is not “no allergies” — it means nobody has asked. Allergies, or confirmation of none, must be documented, and the nurse still asks.', src: MA1 + 'slide 43' },

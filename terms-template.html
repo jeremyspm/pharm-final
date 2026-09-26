@@ -97,7 +97,7 @@ let SCOPE = LS('cs.scope'); if (!SCOPES.some(s => s.id === SCOPE)) SCOPE = 'all'
 const inScope = (t, sc) => sc === 'all' || (sc === 'must' ? t.k === 'must' : t.c === sc || (t.also || []).includes(sc));
 const poolOf = sc => TERMS.filter(t => inScope(t, sc));
 const scopeName = sc => (SCOPES.find(s => s.id === sc) || SCOPES[0]).n;
-const SEC = { reg: 'Regular medicines', prn: 'PRN (as required)', once: 'Once-only (stat)', fluid: 'Fluid & infusion orders', o2: 'Oxygen & medical gases' };
+const SEC = { reg: 'Regular Medicine', prn: 'As Required (PRN) Medicines', once: 'Once Only', fluid: 'IV & Subcut Fluids', o2: 'Oxygen Therapy & Medical Gases' };
 const ORD = new Map(ORDERS.map(o => [o.id, o])), SCN = new Map(SCENES.map(s => [s.id, s])), DNG = new Map(DANGERS.map(d => [d.id, d]));
 
 function statusLine() {
@@ -112,6 +112,7 @@ const PROV = {
   deck: '📘 From the course',
   ward: '🏥 Everyday NZ ward usage, in this tool’s words — your hospital’s own list is the one that counts',
   safe: '⚠️ On the international error-prone list — your hospital’s “do not use” list is the one that binds you',
+  nmc: '📄 Printed on the NZ 8-Day National Medication Chart itself',
 };
 function provLine(t) {
   const k = t.k || 'ward';
@@ -225,7 +226,7 @@ function rulesScreen() {
   return `<div class="card" style="border-left:4px solid var(--ok)">
     <p class="lead">Ward situations: which part of the chart an order goes in, which code goes in the dose box, and the rules (the 30-minute window, a blank allergy box, PRN maths).</p>
     <details class="how"><summary>How this works</summary>
-      <p>The chart’s sections are the course’s own (Med Admin (1), slides 54–55). The not-given codes are the letters used on the national charts — <b>your chart prints its own key, and that key wins</b>. Two right in a row and a scenario is ✓.</p>
+      <p>The sections are the NZ 8-Day National Medication Chart’s own (the course lists them on Med Admin (1), slides 54–55). The not-given codes are the chart’s printed key — <b>U</b> unavailable, <b>SM</b> self-medicating, <b>CP</b> carer/parent, <b>R</b> refused, <b>D</b> prescriber’s instructions, <b>N</b> not administered (reason in the notes). If your ward’s chart prints a different key, that key wins. Two right in a row and a scenario is ✓.</p>
     </details>
     ${sizeChips()}
     <button class="btn primary wide" id="goRules">▶ ${N === 'all' ? p.n : Math.min(N, p.n)} scenarios</button>
@@ -413,7 +414,7 @@ function answerX(k) {
       <p class="verdict">${right ? '✓ Right' : '✗ Not this one'} ${lockBadge(st, LOCK.x)}</p>
       ${right ? '' : `<p><b>Answer:</b> ${esc(a)}</p>`}<p>${esc(s.why)}</p>
       ${s.src ? `<div class="refsrc">📘 From the course: ${esc(s.src)}</div>` : ''}
-      ${s.k === 'code' ? '<div class="refsrc">The letters used on the national charts — your chart prints its own key, and that key wins.</div>' : ''}
+      ${s.k === 'code' ? '<div class="refsrc">📄 The key printed on the NZ 8-Day National Medication Chart (2012 edition). If your ward’s chart prints a different key, that key wins.</div>' : ''}
     </div>${showNext()}`;
   bindNext();
 }
@@ -483,7 +484,7 @@ $('#helpBtn').onclick = () => {
   <p><b>🔤 Terms & abbreviations</b> — a term as a chart writes it; pick what it means (and, once you have seen it, the other way round). The wrong options are the real traps (BD beside TDS, SC beside SL, mg beside mcg). What you miss comes back a few questions later and leads your next run; <b>2 right in a row locks a term</b> (the second at least 10 minutes after the first), and a locked term comes back after a week to check it stuck.</p>
   <p><b>📋 Read the chart</b> — a whole order, laid out like a chart line. Three of the four readings get exactly one thing wrong, so you have to read every part. <b>⚠️ Spot the danger</b> — tap the one part of an order that is written dangerously. <b>🧭 Chart rules & codes</b> — which section an order goes in, which not-given code goes in the dose box, and the rules around them.</p>
   <h3>Where it comes from</h3>
-  <p>📌 <b>${n('must')}</b> are on the course’s own Must-Know abbreviations list (Concepts (2), slides 77–80) — know these cold. 📘 <b>${n('deck')}</b> come from the course’s decks, each naming its slide; the pharmacology words use the decks’ own definitions, the same ones the Joan-format short answers teach. 🏥 <b>${n('ward')}</b> are everyday NZ ward usage in this tool’s words, and ⚠️ <b>${n('safe')}</b> come from the international error-prone list — where your hospital’s list says different, <b>your hospital wins</b>. The not-given codes are the letters used on the national charts; your chart prints its own key.</p>
+  <p>📌 <b>${n('must')}</b> are on the course’s own Must-Know abbreviations list (Concepts (2), slides 77–80) — know these cold. 📘 <b>${n('deck')}</b> come from the course’s decks, each naming its slide; the pharmacology words use the decks’ own definitions, the same ones the Joan-format short answers teach. 🏥 <b>${n('ward')}</b> are everyday NZ ward usage in this tool’s words, and ⚠️ <b>${n('safe')}</b> come from the international error-prone list — where your hospital’s list says different, <b>your hospital wins</b>. 📄 <b>${n('nmc')}</b> are printed on the NZ 8-Day National Medication Chart itself — its codes, recommended times and instructions. The not-given codes are that chart’s key (U, SM, CP, R, D, N); if your ward’s chart prints a different one, it wins.</p>
   <p><b>Not a dosing guide.</b> The orders use typical adult doses so they look like a real chart. They are practice in reading only — the chart, the NZ Formulary and your preceptor decide what is given.</p>
   <h3>Your data</h3>
   <p>Progress lives in this browser only, under the Paper Sim’s own name, and the Paper Sim’s home row shows a one-line summary of it. Nothing is sent anywhere. Clearing site data wipes it.</p>

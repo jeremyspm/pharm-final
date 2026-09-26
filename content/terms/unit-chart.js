@@ -3,6 +3,7 @@ const U = { c: 'unit' };
 const H = { c: 'chart' };
 const CALC = 'Medication Calculations 2026, ';
 const MA1 = 'Med Admin (1) 2026, ';
+const NMC = 'NZ 8-Day National Medication Chart (NMC8D, 2012 ed.), p. 11';
 
 export const TERMS = [
   /* ── mass ── */
@@ -74,32 +75,38 @@ export const TERMS = [
     x: 'The main part of the chart: each order has its times across the top and a box per dose to sign or code.', cf: ['secprn', 'seconce'] },
   { ...H, s: 'sec', kd: 'term', id: 'seconce', t: 'once-only section', m: 'Where stat and single doses are charted', k: 'deck', src: MA1 + 'slides 54–55', cf: ['secprn', 'secverbal'] },
   { ...H, s: 'sec', kd: 'term', id: 'secverbal', t: 'verbal order', m: 'Given by phone or in person — the prescriber signs it afterwards', k: 'deck', src: MA1 + 'slides 13–14 & 54–55',
-    x: 'An RN may give a medicine on a verbal order, e.g. a phone order or in an emergency. It has its own section, and the prescriber must sign it within the time your hospital’s policy sets.', cf: ['seconce'] },
+    x: 'An RN may give a medicine on a verbal order, e.g. a phone order or in an emergency. The NZ chart’s Verbal Orders section says it “must be signed as soon as possible or within 24 hours”, and a nurse and a witness initial it.', cf: ['seconce'] },
   { ...H, s: 'sec', kd: 'term', id: 'secprn', t: 'PRN section', m: 'Where as-needed medicines go, each with its reason and 24-hour max', k: 'deck', src: MA1 + 'slides 54–55', cf: ['secreg'] },
   { ...H, s: 'sec', kd: 'term', id: 'secfluid', t: 'fluid & infusion orders', m: 'Where drips and bags for a vein are prescribed, with volume and rate', k: 'deck', src: MA1 + 'slides 54–55', cf: ['seco2'] },
   { ...H, s: 'sec', kd: 'term', id: 'seco2', t: 'oxygen & medical gases', m: 'O₂ is a medicine, so it has its own section, with a target range', k: 'deck', src: MA1 + 'slides 54–55',
-    x: 'Usually with a delivery device, a flow rate and a target saturation range.', cf: ['secfluid'] },
+    x: 'The NZ chart’s section has the target oxygen saturation (%) at the top, then start date, device/delivery, flow rate, signature and stop date.', cf: ['secfluid'] },
   { ...H, s: 'sec', kd: 'term', id: 'samplesig', t: 'sample signature', m: 'A specimen of each prescriber’s handwriting, so every order can be traced', k: 'deck', src: MA1 + 'slide 53', cf: ['checkinit'] },
   { ...H, s: 'sec', kd: 'term', id: 'checkinit', t: 'check initial', m: 'What the supervising RN writes beside a dose a student gave', k: 'deck', src: MA1 + 'slide 55',
     x: 'The course: student nurses also need the “check” initial.', cf: ['samplesig'] },
 
   /* ── not-given codes. Letters as on the national charts; YOUR chart prints its own key, and that key wins. ── */
   { ...H, s: 'code', kd: 'term', id: 'nonadmin', t: 'non-administration code', m: 'A letter in the dose box saying why a dose was not given', k: 'deck', src: MA1 + 'slide 55',
-    x: 'Every dose box gets either a signature or a code — never left blank. The chart prints the key.', cf: ['withhold'] },
-  { ...H, s: 'code', id: 'cA', t: 'A', m: 'Absent — the patient is off the ward', x: 'e.g. in X-ray or theatre when the dose is due. Follow it up when they are back.', cf: ['cL'] },
-  { ...H, s: 'code', id: 'cF', t: 'F', m: 'Fasting — nil by mouth', x: 'e.g. before theatre. Check which medicines should still be given with a sip of water.', cf: ['cW'] },
-  { ...H, s: 'code', id: 'cL', t: 'L', m: 'On leave', x: 'The patient is away from the hospital on approved leave.', cf: ['cA'] },
-  { ...H, s: 'code', id: 'cN', t: 'N', m: 'Not available — get it, or tell the prescriber', x: 'Chase it (pharmacy, another ward) — a missed dose can matter.', cf: ['cR'] },
-  { ...H, s: 'code', id: 'cR', t: 'R', m: 'Refused — tell the prescriber', x: 'Explain the consequences, document the reason, inform the prescriber and the next shift, and discard the dose.', src: MA1 + 'slide 39', cf: ['cW'] },
-  { ...H, s: 'code', id: 'cS', t: 'S', m: 'Self-administered', x: 'The patient manages this medicine themselves, where policy allows.', cf: ['cN'] },
-  { ...H, s: 'code', id: 'cV', t: 'V', m: 'Vomiting', x: 'An oral dose would not stay down. Tell the prescriber — another route may be needed.', cf: ['cF'] },
-  { ...H, s: 'code', id: 'cW', t: 'W', m: 'Withheld — write the reason in the notes', x: 'e.g. a hold parameter was met (“withhold if HR < 60”). Document why and tell the RN or prescriber.', cf: ['cR', 'cF'] },
+    x: 'Every dose box gets either initials or a code — never left blank. The NZ 8-day chart’s key (page 11): U unavailable, SM self-medicating, CP carer/parent, R refused, D prescriber’s instructions, N not administered (reason in the notes).', cf: ['withhold'] },
+  /* the codes as printed on the NZ 8-Day National Medication Chart's own key (NMC8D, 2012 ed., p. 11) */
+  { ...H, s: 'code', id: 'cU', t: 'U', m: 'Patient unavailable — off the ward when it was due', k: 'nmc', src: NMC,
+    x: 'e.g. in X-ray, theatre, the physio gym or on leave. Follow it up when they are back: with the RN, decide whether the dose is still given.',
+    w: 'On this chart U means patient unavailable — one more reason never to write U for units.', cf: ['cN'] },
+  { ...H, s: 'code', id: 'cSM', t: 'SM', m: 'Self-medicating — the patient takes this one themselves', k: 'nmc', src: NMC,
+    x: 'Only where policy allows and it has been agreed — e.g. their own inhaler.', cf: ['cCP'] },
+  { ...H, s: 'code', id: 'cCP', t: 'CP', m: 'Given by the carer or parent', k: 'nmc', src: NMC,
+    x: 'e.g. a parent giving a child’s dose while the nurse supervises.', cf: ['cSM'] },
+  { ...H, s: 'code', id: 'cR', t: 'R', m: 'Patient refused', k: 'nmc', src: NMC + '; Med Admin (1) slide 39',
+    x: 'Explain the consequences, document the reason, inform the prescriber and the next shift, and discard the dose.', cf: ['cD'] },
+  { ...H, s: 'code', id: 'cD', t: 'D', m: 'Not given on the prescriber’s instructions', k: 'nmc', src: NMC,
+    x: 'e.g. the doctor has said to hold it, or the order’s own hold parameter is met (“withhold if HR < 60”). Document why. Some wards use N with a note for a hold parameter — follow yours.', cf: ['cN', 'cR'] },
+  { ...H, s: 'code', id: 'cN', t: 'N', m: 'Not administered — the reason goes in the notes', k: 'nmc', src: NMC,
+    x: 'For any other reason — vomiting, the medicine not on the ward, no IV access. The code alone is not enough: the notes say why, and the prescriber is told if it matters.', cf: ['cD', 'cU'] },
 
   /* ── charting rules and ward words ── */
   { ...H, s: 'rule', kd: 'term', id: 'charted', t: 'charted', a: ['written up'], m: 'Prescribed — written up by a prescriber',
     x: '“Is there any pain relief charted?” = has anything been prescribed? “Can you chart it?” = please prescribe it.', cf: ['cease'] },
   { ...H, s: 'rule', kd: 'term', id: 'cease', t: 'cease', m: 'Stopped by the prescriber — ruled off, dated and signed',
-    x: 'A ceased order is never given again from that line, even if doses are still in the drawer. Write “cease” — not D/C.', cf: ['withhold'] },
+    x: 'The NZ chart’s prescriber instructions: to stop a medicine, enter the stop date and time, sign, and cross through the order and its administration boxes; to change a dose, stop it and prescribe on a new line. A ceased order is never given again from that line. Write “cease” — not D/C.', cf: ['withhold'] },
   { ...H, s: 'rule', kd: 'term', id: 'withhold', t: 'withhold', a: ['held'], m: 'Do not give this dose — for a reason you document',
     x: 'e.g. a hold parameter is met, or the patient is nil by mouth. Code W, the reason in the notes, and tell someone if it matters.', cf: ['cease'] },
   { ...H, s: 'rule', kd: 'term', id: 'holdparam', t: 'hold parameters', m: 'Obs limits written on an order: outside them, the dose is withheld',
@@ -118,6 +125,22 @@ export const TERMS = [
     x: 'Ask the patient to state their full name and date of birth; don’t read it out for them to agree with.', cf: ['threechecks'] },
   { ...H, s: 'rule', kd: 'term', id: 'rights', t: '8 Rights + 2 Checks', m: 'Patient, medication, dose, time, route, to refuse, indication, documentation — plus expiry and allergies', k: 'deck', src: MA1 + 'slide 23',
     x: 'The course teaches 8 Rights and 2 Checks, and says the textbooks’ five rights are not enough to practise safely.', cf: ['threechecks'] },
+  { ...H, s: 'nmc', id: 'givchk', t: 'Giv/Chck', m: 'Given by / checked by — two sets of initials in one dose box', k: 'nmc', src: NMC,
+    x: 'Each dose box is split by a diagonal: whoever gave it initials one half, whoever checked it the other. A student’s dose carries the supervising RN’s check initials too.', cf: ['checkinit'] },
+  { ...H, s: 'nmc', kd: 'term', id: 'circletime', t: 'circle or actual time', m: 'Where the prescriber marks the times a regular dose is due', k: 'nmc', src: 'NZ 8-Day National Medication Chart (NMC8D), Regular Medicine pages',
+    x: 'Beside every regular order the chart prints 0600, 0800, 1400, 1800 and 2200; the prescriber circles the ones wanted, or writes an actual time in the box beside one.', cf: ['secreg'] },
+  { ...H, s: 'nmc', kd: 'term', id: 'blockcaps', t: 'block capitals', m: 'How a medicine is prescribed on the chart — its generic name, in capitals', k: 'nmc', src: NMC,
+    x: 'The chart’s prescriber instructions: approved or generic names only, in block capitals, with a full signature.', cf: ['indelible'] },
+  { ...H, s: 'nmc', kd: 'term', id: 'indelible', t: 'indelible pen', m: 'The only kind of pen allowed on the chart', k: 'nmc', src: NMC,
+    x: 'So nothing can be rubbed out or changed. Everyone who writes on the chart also fills in the sample signature/initials register on the front.', cf: ['blockcaps'] },
+  { ...H, s: 'nmc', kd: 'term', id: 'vardose', t: 'variable dose', m: 'A dose that can change — you record the actual dose given', k: 'nmc', src: NMC,
+    x: 'The chart’s administrator instructions: for a variable dose, record the actual dose given; for a variable route, the actual route used; always the time on the 24-hour clock.', cf: ['circletime'] },
+  { ...H, s: 'nmc', kd: 'term', id: 'suppcharts', t: 'supplementary charts', m: 'Separate charts that hold some medicines — insulin, heparin, warfarin…', k: 'nmc', src: 'NZ 8-Day National Medication Chart (NMC8D), front page',
+    x: 'The front page ticks which exist: Diabetic/Insulin, Heparin, Specialised analgesia, Warfarin, Other. Those medicines are on that chart, not the main one — so always check the ticks.', cf: ['specialcare'] },
+  { ...H, s: 'nmc', kd: 'term', id: 'specialcare', t: 'special care required', m: 'Front-page flags: renal or hepatic impairment, pregnancy, breastfeeding', k: 'nmc', src: 'NZ 8-Day National Medication Chart (NMC8D), front page',
+    x: 'Any tick changes how medicines are chosen and dosed — renal impairment above all, since so many drugs leave through the kidneys.', cf: ['suppcharts'] },
+  { ...H, s: 'nmc', kd: 'term', id: 'recharted', t: 'recharted', m: 'All current orders rewritten onto a new chart', k: 'nmc', src: 'NZ 8-Day National Medication Chart (NMC8D), front page',
+    x: 'An 8-day chart runs out: its last day says “prescriber to re-write medication chart”. The front records the date recharted and “Chart 2 of 2”.', cf: ['cease'] },
   { ...H, s: 'rule', kd: 'term', id: 'secondcheck', t: 'second check', a: ['double check'], m: 'Another nurse independently verifies a high-risk dose before it is given',
     x: 'Your hospital’s policy lists which medicines need one — typically controlled drugs, insulin, IV medicines and anticoagulants — and whether a student can be the second checker (usually not).', cf: ['threechecks'] },
 ];

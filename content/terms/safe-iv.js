@@ -6,7 +6,7 @@ const S = { c: 'safe', k: 'safe' };
 const V = { c: 'iv' };
 
 export const TERMS = [
-  { ...S, s: 'unit', id: 'U', t: 'U', m: 'Units', g: 'units', w: 'Read as a 0 or a 4: “10U” has been given as 100 units. Write “units”.', cf: ['IU', 'ug'] },
+  { ...S, s: 'unit', id: 'U', t: 'U', m: 'Units', g: 'units', w: 'Read as a 0 or a 4: “10U” has been given as 100 units — and on the NZ chart’s own code key, U means patient unavailable. Write “units”.', cf: ['IU', 'ug'] },
   { ...S, s: 'unit', id: 'IU', t: 'IU', m: 'International units', g: 'units', w: 'Read as IV, or as 10. Write “units”.', cf: ['U', 'cc'] },
   { ...S, s: 'unit', id: 'ug', t: 'µg', a: ['ug'], m: 'Microgram', g: 'mcg', w: 'A handwritten µ looks like an m — the dose becomes 1000 times bigger. Write “microgram” or “mcg”.', cf: ['U', 'cc'] },
   { ...S, s: 'unit', id: 'cc', t: 'cc', m: 'Millilitre (cubic centimetre)', g: 'ml', w: 'Read as “u” or as 00. Write “mL”.', cf: ['ug', 'U'] },
