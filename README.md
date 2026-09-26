@@ -102,6 +102,49 @@ its answer twice, repeats an option, offers two right answers, or biases where t
 The home row is `META.more` in `sim.config.mjs`, a generic hook in the shared template that does
 nothing in a sim without it.
 
+## Chart Sim — read a real NZ chart, then chart on it (`chart.html`)
+
+**Live: https://jeremyspm.github.io/pharm-final/chart.html**, the second row under *Read a med chart*. The **NZ
+8-Day National Medication Chart** (NMC8D, 2012 edition) redrawn box for box from the booklet's own pages — front page
+(allergies, adverse reactions, special care, supplementary charts, both registers), Once Only / Verbal Orders /
+Oxygen, PRN orders facing their record, VTE + Regular orders facing their 8 days, the IV fluid record, and the key
+printed inside the chart. Three invented patients (a broken hip, a COPD flare, leg cellulitis), each part-charted
+like a chart picked up on the ward, with 2–3 med rounds.
+
+- **Read**: questions generated from the chart itself (so they cannot disagree with it) — allergies, doses, times,
+  who gave what (via the Sample Initials register), what a code means, what is due next, whether a PRN can be given
+  now (gap and 24-hour maximum), what was stopped, oxygen targets, fluid rates — plus each patient's own judgement
+  questions. Some are answered by tapping the right box. Tap any box, any time, to see what it is.
+- **Chart it**: a round happens ("0805 — you give all her 0800 tablets except the metoprolol…"); the student writes it
+  in, is marked, and the chart moves on with the right answer written in, so the next round and the next questions
+  start from a correct chart.
+- **How it marks.** Every box is a named rectangle (`chart-render.mjs`), and each round has an answer key.
+  *Tap to fill* is marked for you (`checkRound`): the right box (medicine, day, time line), the right thing in it
+  (initials or which code), the student's initials AND the RN's check, a time within 30 minutes, a PRN line with a
+  dose and route the order allows, the register line on a first signature — and anything written where nothing
+  should be, by name. *Handwrite* (pen, drawing tablet, or finger if chosen): nothing reads handwriting. Where the
+  ink landed is marked for you (`checkInk`; a stroke belongs to the box holding most of its points); what it says is
+  self-marked against the right entry drawn beside it. The page says so.
+- **The ink is Giga's.** `ink.mjs` carries `inkPathFromOutline` and `sketchStrokePath` from gigastudyapp
+  `lib/ink-path.js` byte for byte (the build diffs them whenever `../gigastudyapp` is checked out), and the pointer
+  handling follows its SketchNodeView (pressure rule, coalesced samples, a dot for a tap, whole-stroke eraser) on the
+  vendored **perfect-freehand 1.2.3** (MIT, pinned by sha256). Pen writes; one finger pans; two fingers zoom; a palm
+  is ignored while the pen is busy.
+- **Not a dosing guide.** Typical adult doses so the chart looks real; invented people. A hospital's own policy (who
+  checks what, where a code is written) wins where it differs.
+
+```
+node build-chart.mjs   # content/chart/*.js + chart-engine.mjs + chart-render.mjs + ink.mjs + vendor/ -> chart.html
+```
+
+The build fails if a scenario writes a box the chart does not have or a row letter off the sheet; if any question
+it deals (every stage, 30 times) shows its answer twice, repeats an option, or points at a box that is not there; if
+a patient's own question gives its answer away by length; if a round's model answer fails its own check, or passes
+with nothing written, with the wrong day, without the RN's check, or with stray ink; if the story contradicts the
+chart (a PRN the round gives that the chart says cannot be given then, or one it withholds that could be); or if a
+stroke drawn across a box is not placed in it. The modules are inlined as namespaces (never retyped) and the page's
+script is parsed before it ships. Progress lives under `phf.chart.*`; `phf.more.chart` feeds the home row.
+
 ## How it is built
 
 Template + `sim.config.mjs` + `content/`, on the shared pipeline (`node shared-check.mjs` proves

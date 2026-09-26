@@ -1,0 +1,775 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Chart Sim</title>
+<style>
+/* the Paper Sim's own stylesheet, copied in by build-chart.mjs from template.html (never retyped here) */
+/*@PAPERSIM_CSS@*/
+/* ── Chart Sim's own ─────────────────────────────────────────────── */
+:root{--hand:"Bradley Hand","Segoe Print","Chalkboard SE","Comic Sans MS","Comic Neue",system-ui,sans-serif;--ink:#0b3ea8;--pen:#1d2433}
+header a.d{color:var(--primary);text-decoration:none;font-weight:600}
+.kick{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-fg);margin:0}
+.intro h2{margin:.1rem 0 .4rem;font-size:1.3rem}
+.intro p{margin:.3rem 0 .5rem;font-size:.93rem}
+details.how{border:1px solid var(--border);border-radius:var(--radius);background:var(--muted);padding:0 10px;margin-top:8px}
+details.how>summary{cursor:pointer;padding:9px 0;font-weight:650;font-size:.9rem}
+details.how p{font-size:.88rem;margin:.2rem 0 .6rem}
+.fld{margin:10px 0}
+.fld>span,.fld>label>span{display:block;font-size:.74rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted-fg);margin-bottom:4px}
+.fld small{display:block;color:var(--muted-fg);font-size:.8rem;margin-top:4px}
+input.tx{font:inherit;font-size:16px;color:var(--fg);background:var(--muted);border:1px solid var(--border);border-radius:8px;padding:9px 10px;width:100%}
+input.tx.time{width:7.5em;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.08em}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:99px;overflow:hidden;flex:0 0 auto}
+.seg button{font:inherit;font-size:.84rem;font-weight:650;border:0;background:transparent;color:var(--fg);padding:8px 13px;cursor:pointer;white-space:nowrap}
+.seg button.on{background:var(--primary);color:var(--onprimary)}
+label.chk{display:flex;gap:8px;align-items:center;font-size:.9rem;margin:10px 0 2px;cursor:pointer}
+label.chk input{width:18px;height:18px;accent-color:var(--primary)}
+.warnln{color:var(--danger);font-size:.86rem;margin:6px 0 0}
+.pcard{display:block;width:100%;text-align:left;font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--border);border-left:4px solid var(--tool,var(--primary));border-radius:var(--radius);padding:12px 14px;margin:0 0 10px;cursor:pointer}
+.pcard b{display:block;font-size:1.02rem}
+.pcard small{display:block;color:var(--muted-fg);font-size:.86rem;margin:2px 0 6px}
+.pcard .pp{font-size:.8rem;font-weight:650;color:var(--primary)}
+.foot{color:var(--muted-fg);font-size:.8rem;text-align:center;margin:16px 0 0}
+/* the simulator: header, a bar, the page tabs, then the chart beside (wide) or above (narrow) the panel */
+body.simon{overflow:hidden;height:100vh;height:100dvh;display:flex;flex-direction:column}
+body.simon header{position:static;flex:0 0 auto}
+body.simon main{display:none}
+#sim{flex:1 1 auto;min-height:0;display:grid;grid-template-rows:auto auto minmax(0,1fr)}
+.sbar{display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid var(--border)}
+.sbar .who{flex:1 1 auto;min-width:0;line-height:1.25}
+.sbar .who b{display:block;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sbar .who small{display:block;color:var(--muted-fg);font-size:.74rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btn.sm{padding:6px 9px;font-size:.84rem}
+.tabs{display:flex;gap:5px;align-items:center;padding:6px 8px;overflow-x:auto;border-bottom:1px solid var(--border);scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;border:1px solid var(--border);border-radius:8px;padding:6px 10px;background:transparent;color:var(--fg);font:inherit;font-size:.82rem;font-weight:650;cursor:pointer;white-space:nowrap;position:relative}
+.tab.on{background:var(--accent);border-color:var(--primary)}
+.tab.dot::after{content:'';position:absolute;top:3px;right:3px;width:7px;height:7px;border-radius:50%;background:var(--warn)}
+.zm{margin-left:auto;display:flex;gap:4px;flex:0 0 auto;padding-left:6px}
+.zm button{min-width:36px;padding:6px 8px}
+.stage{min-height:0;display:grid;grid-template-rows:minmax(0,1fr) auto;position:relative}
+.vp{overflow:auto;touch-action:none;background:#5b616c;overscroll-behavior:contain;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;position:relative}
+.vp.pen{cursor:crosshair}
+.vp svg{display:block;margin:10px auto;background:#fff;box-shadow:0 2px 14px rgb(0 0 0/.4)}
+.vp svg text{font-family:Arial,Helvetica,sans-serif}
+.vp svg .en{fill:var(--pen);font-family:var(--hand)}
+.vp svg .me{fill:var(--ink);font-family:var(--hand)}
+.vp svg .gh{fill:#067a52;font-family:var(--hand);opacity:.9}
+.vp svg .ty{fill:#111;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.vp svg path.en,.vp svg ellipse.en{fill:none;stroke:var(--pen)}
+.vp svg path.me,.vp svg ellipse.me{fill:none;stroke:var(--ink)}
+.vp svg path.gh,.vp svg ellipse.gh{fill:none;stroke:#067a52}
+.vp svg .inkp{fill:var(--ink)}
+.vp svg .hl{fill:rgb(245 158 11/.16);stroke:#f59e0b;stroke-width:1.8}
+.vp svg .hl.ok{fill:rgb(16 185 129/.16);stroke:#10b981}
+.vp svg .hl.bad{fill:rgb(239 68 68/.14);stroke:#ef4444}
+.vp svg .hl.sel{fill:rgb(59 130 246/.14);stroke:#3b82f6}
+.vp svg .hl.pulse{animation:pulse 1.2s ease-in-out 3}
+@keyframes pulse{50%{stroke-width:4}}
+.panel{border-top:1px solid var(--border);background:var(--card);max-height:46vh;max-height:46dvh;overflow:auto;overscroll-behavior:contain;position:relative}
+.panel .grab{position:sticky;top:0;z-index:2;display:flex;width:100%;justify-content:center;align-items:center;gap:6px;border:0;border-bottom:1px solid var(--border);background:var(--card);color:var(--muted-fg);font:inherit;font-size:.78rem;padding:4px 0;cursor:pointer}
+.panel.min #pbody{display:none}
+#pbody{padding:10px 14px 16px}
+#pbody h3{margin:.2rem 0 .3rem;font-size:1.02rem}
+#pbody .sub{color:var(--muted-fg);font-size:.84rem;margin:0 0 6px}
+#pbody .q{font-weight:700;font-size:1.02rem;margin:.3rem 0 .6rem;line-height:1.35}
+.meta{display:flex;justify-content:space-between;gap:8px;font-size:.76rem;color:var(--muted-fg);font-weight:650}
+.opts{display:flex;flex-direction:column;gap:6px}
+button.opt{width:100%;margin:0;text-align:left;font:inherit;font-size:.93rem;color:var(--fg);line-height:1.35;min-height:44px;background:var(--muted);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;cursor:pointer}
+button.opt.ok{border-color:var(--ok);box-shadow:inset 0 0 0 1px var(--ok)}
+button.opt.bad{border-color:var(--danger);box-shadow:inset 0 0 0 1px var(--danger)}
+button.opt:disabled{cursor:default}
+button.opt.dim{opacity:.55}
+.fb{margin:.6rem 0;padding:8px 10px;border-radius:8px;background:var(--muted);font-size:.9rem}
+.fb.ok{border-left:3px solid var(--ok)} .fb.bad{border-left:3px solid var(--danger)}
+.acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.acts .btn{flex:1 1 auto}
+.tapnote{border:1px dashed var(--primary);border-radius:8px;padding:8px 10px;font-size:.88rem;margin:.4rem 0}
+ul.brief{margin:.4rem 0;padding-left:1.1rem;font-size:.9rem}
+ul.brief li{margin:.25rem 0}
+.youare{font-size:.82rem;background:var(--muted);border-radius:8px;padding:6px 9px;margin:6px 0}
+.chipset{display:flex;flex-wrap:wrap;gap:6px}
+.chipset .chip{font-size:.86rem;padding:6px 11px}
+.chip.code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.elist{list-style:none;margin:6px 0;padding:0}
+.elist li{display:flex;gap:6px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:6px 8px;margin:0 0 5px;font-size:.85rem;background:var(--muted)}
+.elist li span{flex:1 1 auto;min-width:0}
+.elist li button{flex:0 0 auto}
+.res{list-style:none;margin:6px 0;padding:0}
+.res li{display:flex;gap:8px;align-items:flex-start;font-size:.88rem;padding:7px 8px;border-radius:8px;margin:0 0 5px;background:var(--muted);cursor:pointer;border-left:3px solid var(--danger)}
+.res li.ok{border-left-color:var(--ok)}
+.res li i{font-style:normal;flex:0 0 auto}
+.score{font-size:1.25rem;font-weight:800;margin:.2rem 0}
+.self{border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin:0 0 6px;font-size:.88rem}
+.self .mdl{font-family:var(--hand);color:#067a52;font-size:1rem;margin:3px 0 6px}
+.self .chipset .chip.on.no{background:var(--danger);border-color:var(--danger)}
+.tools{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.tools .btn{padding:8px 11px}
+.tools .btn.on{border-color:var(--primary);box-shadow:inset 0 0 0 1px var(--primary)}
+.small{font-size:.82rem;color:var(--muted-fg)}
+.toast{position:absolute;left:0;right:0;top:8px;margin:0 auto;width:max-content;max-width:calc(100% - 20px);background:rgb(15 18 25/.92);color:#fff;border-radius:10px;padding:8px 12px;font-size:.86rem;line-height:1.35;z-index:4;pointer-events:none;box-shadow:0 4px 16px rgb(0 0 0/.35)}
+@media (min-width:900px){
+  .stage{grid-template-columns:minmax(0,1fr) 390px;grid-template-rows:minmax(0,1fr)}
+  .panel{max-height:none;border-top:0;border-left:1px solid var(--border)}
+  .panel .grab{display:none}
+  .panel.min #pbody{display:block}
+  .toast{right:390px}
+}
+@media (max-width:560px){ .sbar .seg button{padding:7px 10px} }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="h1">Chart Sim</h1>
+  <a class="d" id="backLink" href="./">‹ Back to the Paper Sim</a>
+  <button class="btn ghost" id="themeBtn" title="theme">◐</button>
+  <button class="btn ghost" id="helpBtn" title="what is this?">?</button>
+</header>
+<main id="view"></main>
+<section id="sim" hidden>
+  <div class="sbar">
+    <button class="btn ghost sm" id="simBack" title="all patients">‹</button>
+    <div class="who"><b id="sWho"></b><small id="sNow"></small></div>
+    <div class="seg" id="modeSeg"><button data-mode="read">Read</button><button data-mode="chart">Chart it</button></div>
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div class="stage">
+    <div class="vp" id="vp"><svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg></div>
+    <aside class="panel" id="panel"><button class="grab" id="grab">▾ hide</button><div id="pbody"></div></aside>
+    <div class="toast" id="toast" hidden></div>
+  </div>
+</section>
+<dialog id="help"></dialog>
+<script>
+const D = /*@DATA@*/;
+/*@LIBS@*/
+/* ── Chart Sim: the page. The chart is chart-render.mjs (CR), what is written on it and every check is
+   chart-engine.mjs (CE), the handwriting is Giga's ink (INK) on perfect-freehand (PF) — all inlined by
+   build-chart.mjs, never retyped here. Progress lives in this browser under the Paper Sim's own prefix. ── */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const LS = k => { try { return JSON.parse(localStorage.getItem(D.prefix + k)); } catch (e) { return null; } };
+const SV = (k, v) => { try { localStorage.setItem(D.prefix + k, JSON.stringify(v)); } catch (e) {} };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const r1 = v => Math.round(v * 10) / 10;
+const SCN = D.scenarios, BYID = new Map(SCN.map(s => [s.id, s]));
+const STAFF = new Set(SCN.flatMap(s => (s.nurses || []).map(n => n.init)));
+const IDX = CR.cellIndex();
+const ME = Object.assign({ name: '', init: '', input: 'tap', finger: false }, LS('chart.me') || {});
+const PROG = LS('chart.p') || {};
+const saveMe = () => SV('chart.me', ME);
+function statusLine() {
+  const tot = SCN.reduce((a, s) => a + s.rounds.length, 0), done = SCN.reduce((a, s) => a + ((PROG[s.id] || {}).stage || 0), 0);
+  let r = 0, n = 0; for (const p of Object.values(PROG)) for (const st of Object.values(p.read || {})) for (const v of Object.values(st)) { n++; r += v ? 1 : 0; }
+  return `${done}/${tot} med rounds charted${n ? ` · ${r}/${n} chart questions right` : ' · read a real NZ chart, then chart it'}`;
+}
+const saveProg = () => { SV('chart.p', PROG); SV('more.chart', statusLine()); };
+const meInit = () => String(ME.init || '').toUpperCase().replace(/[^A-Z]/g, '');
+const meProblem = () => {
+  const i = meInit();
+  if ((ME.name || '').trim().length < 3) return 'Add your name as you would write it in the chart’s register.';
+  if (!/^[A-Z]{2,3}$/.test(i)) return 'Your initials: two or three letters.';
+  if (STAFF.has(i)) return `${i} belongs to one of the nurses on these charts — add a middle initial so yours are yours.`;
+  return '';
+};
+
+/* ── the state of the open patient ── */
+let SC = null, ST = null, C = null, MODE = 'read', PAGE = 'front', Z = 1, TOOL = 'pen';
+let ENT = {}, STROKES = [], UNDO = [], HL = [], GHOST = null, RQ = null, RS = null, PK = null;
+const P = () => (PROG[SC.id] = PROG[SC.id] || { stage: 0, rounds: {}, read: {} });
+const round = () => SC.rounds[P().stage];
+const rctx = R => ({ ...R, you: meInit() || 'ST', name: (ME.name || 'Student Nurse').trim() });
+function stageScenario(k) { let S = SC; for (let i = 0; i < k; i++) S = CE.applyRound(S, rctx(SC.rounds[i])); return S; }
+function load(stage) { ST = stageScenario(stage); C = CE.compile(ST); }
+const dayLabel = d => `${CE.WEEKDAY(C.S, d)} ${CE.dayDate(C.S, d)}`;
+const nowLabel = () => `${dayLabel(C.now.day)} · ${C.now.t} · day ${C.now.day} of the chart`;
+
+/* ── home ── */
+function home() {
+  document.body.classList.remove('simon'); $('#sim').hidden = true; $('#view').hidden = false; SC = null;
+  const card = s => {
+    const p = PROG[s.id] || {}, k = p.stage || 0, n = s.rounds.length;
+    const rd = Object.values(p.read || {}).reduce((a, st) => { for (const v of Object.values(st)) { a.n++; a.r += v ? 1 : 0; } return a; }, { r: 0, n: 0 });
+    const line = k >= n ? `All ${n} rounds charted ✓` : k ? `Round ${k + 1} of ${n} next` : `${n} med rounds to chart`;
+    return `<button class="pcard" data-open="${s.id}"><b>${esc(s.t)}</b><small>${esc(s.sub)}</small><span class="pp">${line}${rd.n ? ` · ${rd.r}/${rd.n} read right` : ''}</span></button>`;
+  };
+  $('#view').innerHTML = `<div class="card intro">
+    <p class="kick">Read a med chart</p><h2>Chart Sim</h2>
+    <p>The <b>NZ 8-Day National Medication Chart</b>, redrawn box for box. Each patient’s chart is already part-filled, like one you pick up on the ward.</p>
+    <p><b>Read</b> — questions about what the chart says; some you answer by tapping the right box. <b>Chart it</b> — the med round happens, and you write it in: your initials, your RN’s check, the time, a code when a dose isn’t given. Then the chart moves on, and there is more to read.</p>
+    <details class="how"><summary>How your charting is marked</summary>
+      <p>Every box on this chart has an address — which medicine, which day, which time line. Each round has an answer key: which boxes should get something, and what.</p>
+      <p><b>👆 Tap to fill</b> (marked for you): tap a box and choose what goes in it — initials, a code, a time, a dose, a route. It checks the right box, the right thing in it, your initials <i>and</i> your RN’s check, a time within 30 minutes, a PRN dose the order allows — and anything written where nothing should be.</p>
+      <p><b>✍️ Handwrite</b> (pen or drawing tablet): where you wrote is marked for you — each stroke counts toward the box it mostly sits in. What you wrote you mark yourself: the right entry appears beside your ink, and you tick whether yours says it, as a preceptor would. Nothing here reads handwriting.</p>
+    </details>
+  </div>
+  <div class="card">
+    <h3 style="margin:.1rem 0 .2rem">You</h3>
+    <div class="fld"><label><span>Name &amp; designation (for the chart’s register)</span><input class="tx" id="meName" autocomplete="name" placeholder="e.g. PARKER, Sam · Student Nurse" value="${esc(ME.name)}"></label></div>
+    <div class="fld"><label><span>Your initials</span><input class="tx time" id="meInit" maxlength="3" autocapitalize="characters" placeholder="SP" value="${esc(ME.init)}"></label></div>
+    <div class="fld"><span>How you chart</span><div class="seg" id="inSeg"><button data-in="tap">👆 Tap to fill</button><button data-in="pen">✍️ Handwrite</button></div>
+      <small>Handwriting: a pen or stylus writes; one finger moves the chart; two fingers zoom.</small></div>
+    <label class="chk"><input type="checkbox" id="meFinger" ${ME.finger ? 'checked' : ''}> No stylus — let my finger write too (then two fingers move the chart)</label>
+    <p class="warnln" id="meWarn"></p>
+  </div>
+  <div class="lsec">Patients</div>
+  ${SCN.map(card).join('')}
+  <p class="foot">Invented patients · typical adult doses — <b>not a dosing guide</b> · the chart is NMC8D (2012 edition) · everything stays in this browser</p>`;
+  const warn = () => { $('#meWarn').textContent = ME.name || ME.init ? meProblem() : ''; };
+  $('#meName').oninput = e => { ME.name = e.target.value; saveMe(); warn(); };
+  $('#meInit').oninput = e => { ME.init = e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3); e.target.value = ME.init; saveMe(); warn(); };
+  $('#meFinger').onchange = e => { ME.finger = e.target.checked; saveMe(); };
+  const seg = () => document.querySelectorAll('#inSeg button').forEach(b => b.classList.toggle('on', b.dataset.in === ME.input));
+  document.querySelectorAll('#inSeg button').forEach(b => b.onclick = () => { ME.input = b.dataset.in; saveMe(); seg(); });
+  seg(); warn();
+  document.querySelectorAll('[data-open]').forEach(b => b.onclick = () => openPatient(b.dataset.open));
+  saveProg();
+}
+
+/* ── the patient ── */
+function openPatient(id, mode) {
+  SC = BYID.get(id); load(P().stage);
+  document.body.classList.add('simon'); $('#view').hidden = true; $('#sim').hidden = false;
+  MODE = mode || 'read'; PAGE = 'front'; HL = []; GHOST = null; PK = null;
+  const saved = LS('chart.w.' + SC.id);
+  ENT = saved && saved.stage === P().stage ? saved.ent || {} : {}; STROKES = saved && saved.stage === P().stage ? saved.ink || [] : []; UNDO = [];
+  RQ = null; RS = null;
+  $('#sWho').textContent = `${SC.t} — ${SC.sub}`;
+  tabs(); drawPage(); fitZoom();
+  setMode(MODE);
+  try { history.replaceState(null, '', '#' + SC.id); } catch (e) {}
+}
+function saveWork() { SV('chart.w.' + SC.id, { stage: P().stage, ent: ENT, ink: STROKES }); }
+function setMode(m) {
+  MODE = m; PK = null; HL = []; GHOST = null;
+  document.querySelectorAll('#modeSeg button').forEach(b => b.classList.toggle('on', b.dataset.mode === m));
+  $('#sNow').textContent = nowLabel();
+  if (m === 'read') { if (!RQ || RQ.stage !== P().stage) newRead(); showRead(); }
+  else { if (!RS || RS.stage !== P().stage) RS = { stage: P().stage, phase: 'brief', askI: 0 }; showRound(); }
+  $('#vp').classList.toggle('pen', penOn());
+  drawOverlays();
+}
+const penOn = () => MODE === 'chart' && ME.input === 'pen' && RS && RS.phase === 'chart';
+
+/* ── pages, zoom ── */
+const svg = $('#svg'), vp = $('#vp');
+function tabs() {
+  $('#tabs').innerHTML = CR.PAGES.map(p => `<button class="tab" data-pg="${p.id}">${p.n}</button>`).join('') +
+    `<span class="zm"><button class="btn sm" data-z="-" title="zoom out">−</button><button class="btn sm" data-z="fit" title="fit the page">⤢</button><button class="btn sm" data-z="+" title="zoom in">+</button></span>`;
+  document.querySelectorAll('[data-pg]').forEach(b => b.onclick = () => { PAGE = b.dataset.pg; drawPage(); fitZoom(); });
+  document.querySelectorAll('[data-z]').forEach(b => b.onclick = () => {
+    const r = vp.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    if (b.dataset.z === 'fit') fitZoom(); else zoomAt(Z * (b.dataset.z === '+' ? 1.35 : 1 / 1.35), cx, cy);
+  });
+}
+function markTabs() {
+  const pages = new Set();
+  for (const h of HL) for (const id of h.ids) { const pg = pageOf(id); if (pg) pages.add(pg); }
+  document.querySelectorAll('[data-pg]').forEach(b => { b.classList.toggle('on', b.dataset.pg === PAGE); b.classList.toggle('dot', pages.has(b.dataset.pg) && b.dataset.pg !== PAGE); });
+}
+const L = () => CR.layout(PAGE);
+const fitZ = () => (vp.clientWidth - 20) / L().w;
+const minZ = () => Math.min(fitZ(), 0.35);
+function sizeSvg() { svg.setAttribute('width', r1(L().w * Z)); svg.setAttribute('height', r1(L().h * Z)); }
+function fitZoom() { Z = fitZ(); sizeSvg(); vp.scrollTop = 0; vp.scrollLeft = 0; }
+const toPage = (cx, cy) => { const r = svg.getBoundingClientRect(); return { x: (cx - r.left) / Z, y: (cy - r.top) / Z }; };
+function zoomAt(z, cx, cy) {
+  const p = toPage(cx, cy); Z = clamp(z, minZ(), 5); sizeSvg();
+  const r = svg.getBoundingClientRect(); vp.scrollLeft += r.left + p.x * Z - cx; vp.scrollTop += r.top + p.y * Z - cy;
+}
+/* bring cells into view, zoomed to read */
+function focusCells(ids) {
+  const cs = ids.flatMap(id => cellsFor(id)).filter(c => c.page === PAGE);
+  if (!cs.length) return;
+  const x0 = Math.min(...cs.map(c => c.x)), y0 = Math.min(...cs.map(c => c.y)), x1 = Math.max(...cs.map(c => c.x + c.w)), y1 = Math.max(...cs.map(c => c.y + c.h));
+  const want = Math.min(vp.clientWidth / (x1 - x0 + 140), vp.clientHeight / (y1 - y0 + 110), 2.4);
+  Z = clamp(Math.max(want, fitZ()), minZ(), 5); sizeSvg();
+  const r = svg.getBoundingClientRect(), v = vp.getBoundingClientRect();      // an SVG has no offsetLeft
+  vp.scrollLeft += r.left - v.left + ((x0 + x1) / 2) * Z - vp.clientWidth / 2;
+  vp.scrollTop += r.top - v.top + ((y0 + y1) / 2) * Z - vp.clientHeight / 2;
+}
+/* a cell id, or 'prefix.*' — every matching cell, with its page */
+function cellsFor(id) {
+  if (id.endsWith('*')) { const pre = id.slice(0, -1); const out = []; for (const [k, v] of IDX) if (k.startsWith(pre)) out.push({ ...v.cell, page: v.page }); return out; }
+  const v = IDX.get(id); return v ? [{ ...v.cell, page: v.page }] : [];
+}
+const pageOf = id => (cellsFor(id)[0] || {}).page;
+function goTo(ids) {
+  const pg = ids.map(pageOf).find(Boolean); if (!pg) return;
+  if (pg !== PAGE) { PAGE = pg; drawPage(); }
+  focusCells(ids);
+}
+
+/* ── drawing the chart ── */
+function drawPage() {
+  const l = L();
+  svg.setAttribute('viewBox', `0 0 ${l.w} ${l.h}`); sizeSvg();
+  svg.innerHTML = `<g>${l.form}</g><g>${CR.entries(l, C.V, 'en')}</g><g id="gMe"></g><g id="gGh"></g><g id="gInk"></g><path id="live" class="inkp"/><g id="gHl"></g>`;
+  drawOverlays(); markTabs();
+}
+function drawOverlays() {
+  if (!svg.querySelector('#gMe')) return;
+  const l = L();
+  svg.querySelector('#gMe').innerHTML = CR.entries(l, ENT, 'me');
+  svg.querySelector('#gGh').innerHTML = GHOST ? CR.entries(l, GHOST, 'gh') : '';
+  svg.querySelector('#gInk').innerHTML = STROKES.filter(s => s.page === PAGE).map(s => `<path class="inkp" d="${INK.sketchStrokePath(s)}"/>`).join('');
+  let h = '';
+  for (const it of HL) for (const id of it.ids) {
+    const cs = cellsFor(id).filter(c => c.page === PAGE); if (!cs.length) continue;
+    const box = id.endsWith('*') ? [{ x: Math.min(...cs.map(c => c.x)), y: Math.min(...cs.map(c => c.y)), w: Math.max(...cs.map(c => c.x + c.w)) - Math.min(...cs.map(c => c.x)), h: Math.max(...cs.map(c => c.y + c.h)) - Math.min(...cs.map(c => c.y)) }] : cs;
+    for (const c of box) h += `<rect class="hl ${it.cls}" x="${c.x - 1}" y="${c.y - 1}" width="${c.w + 2}" height="${c.h + 2}" rx="2"/>`;
+  }
+  svg.querySelector('#gHl').innerHTML = h;
+  markTabs();
+}
+let toastT = 0;
+function toast(html, ms = 3200) { const t = $('#toast'); t.innerHTML = html; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, ms); }
+
+/* ── the panel ── */
+function panel(html) { $('#pbody').innerHTML = html; $('#panel').classList.remove('min'); $('#grab').textContent = '▾ hide'; $('#panel').scrollTop = 0; }
+$('#grab').onclick = () => { const m = $('#panel').classList.toggle('min'); $('#grab').textContent = m ? '▴ show the ' + (MODE === 'read' ? 'question' : 'round') : '▾ hide'; };
+const on = (sel, fn) => { const el = $(sel); if (el) el.onclick = fn; };
+
+/* ── READ: questions made from the chart itself ── */
+function newRead(onlyWrong) {
+  const k = P().stage, seen = (P().read[k] = P().read[k] || {});
+  let qs = shuffle(CE.questions(C, Math.random));
+  if (onlyWrong) qs = qs.filter(q => seen[q.id] === 0);
+  else qs.sort((a, b) => (seen[a.id] === 1) - (seen[b.id] === 1));       // not yet right first
+  RQ = { stage: k, list: qs.slice(0, 12), i: 0, right: 0, done: false, total: CE.questions(C, Math.random).length };
+}
+function showRead() {
+  const k = P().stage, seen = P().read[k] || {}, nRight = Object.values(seen).filter(v => v === 1).length;
+  if (RQ.i >= RQ.list.length) {
+    const nxt = round();
+    panel(`<h3>${RQ.right} of ${RQ.list.length} right</h3>
+      <p class="sub">This moment (${esc(nowLabel())}): ${nRight} of ${RQ.total} questions answered right so far.</p>
+      <div class="acts"><button class="btn primary" id="rMore">Another ${Math.min(12, RQ.total)}</button>
+      ${Object.values(seen).some(v => v === 0) ? '<button class="btn" id="rWrong">Just the ones I missed</button>' : ''}</div>
+      ${nxt ? `<div class="fb">Next on the ward: <b>${esc(nxt.title)}</b> — ${esc(CE.parseAt(nxt.at).t)}. <button class="btn primary wide" id="rGo">Chart it ›</button></div>` : '<p class="small">Every round on this chart is done.</p>'}
+      ${resetLink()}`);
+    on('#rMore', () => { newRead(); showRead(); }); on('#rWrong', () => { newRead(true); showRead(); }); on('#rGo', () => setMode('chart')); wireReset();
+    return;
+  }
+  const q = RQ.list[RQ.i];
+  const head = `<div class="meta"><span>Read · ${esc(q.tag || '')}</span><span>${RQ.i + 1} / ${RQ.list.length}</span></div><p class="q">${esc(q.q)}</p>`;
+  if (q.kind === 'tap') {
+    panel(`${head}<div class="tapnote">👆 Tap the box on the chart. The tabs above change the page; pinch or ± to zoom.</div>
+      <div class="acts"><button class="btn ghost" id="qSkip">I can’t find it — show me</button></div>`);
+    on('#qSkip', () => answerTap(null));
+  } else {
+    panel(`${head}<div class="opts">${q.opts.map((o, i) => `<button class="opt" data-o="${i}">${esc(o)}</button>`).join('')}</div>`);
+    document.querySelectorAll('[data-o]').forEach(b => b.onclick = () => answerMcq(+b.dataset.o));
+  }
+  HL = []; drawOverlays();
+}
+function scoreQ(q, ok) { const k = P().stage; (P().read[k] = P().read[k] || {})[q.id] = ok ? 1 : 0; if (ok) RQ.right++; saveProg(); }
+function after(q, ok, extra = '') {
+  const box = document.createElement('div');
+  box.innerHTML = `<div class="fb ${ok ? 'ok' : 'bad'}">${ok ? '✓ Right.' : '✗ Not quite.'} ${esc(q.why || '')}</div>${extra}
+    <div class="acts">${(q.show || []).length ? '<button class="btn" id="qShow">📍 Show me on the chart</button>' : ''}<button class="btn primary" id="qNext">Next ›</button></div>`;
+  $('#pbody').appendChild(box);
+  on('#qShow', () => { HL = [{ ids: q.show, cls: 'show pulse' }]; goTo(q.show); drawOverlays(); });
+  on('#qNext', () => { RQ.i++; showRead(); });
+  $('#qNext').scrollIntoView({ block: 'nearest' });
+}
+function answerMcq(i) {
+  const q = RQ.list[RQ.i], ok = q.opts[i] === q.a;
+  document.querySelectorAll('[data-o]').forEach(b => { const o = q.opts[+b.dataset.o]; b.disabled = true; if (o === q.a) b.classList.add('ok'); else if (+b.dataset.o === i) b.classList.add('bad'); else b.classList.add('dim'); });
+  scoreQ(q, ok); after(q, ok);
+}
+const accepts = (q, id) => q.accept.some(a => a.endsWith('*') ? id.startsWith(a.slice(0, -1)) : a === id);
+function answerTap(cell) {
+  const q = RQ.list[RQ.i]; if (RQ.answered === RQ.i) return; RQ.answered = RQ.i;
+  const ok = !!cell && accepts(q, cell.id);
+  on('#qSkip', null); const sk = $('#qSkip'); if (sk) sk.remove();
+  HL = [...(cell ? [{ ids: [cell.id], cls: ok ? 'ok' : 'bad' }] : []), ...(ok ? [] : [{ ids: q.accept, cls: 'show pulse' }])];
+  if (!ok) goTo(q.accept);
+  drawOverlays(); scoreQ(q, ok);
+  after({ ...q, show: ok ? [] : q.accept }, ok, cell && !ok ? `<p class="small">You tapped: ${esc(describe(cell))}</p>` : '');
+}
+
+/* what a box is, in words — for a tap outside a question */
+function describe(cell) {
+  const id = cell.id; let m;
+  if ((m = /^(reg|prn)\.([A-Z]{1,2})\.([a-z]+)$/.exec(id)) || (m = /^(reg)\.([A-Z]{1,2})\.(s\d)$/.exec(id))) {
+    const o = (m[1] === 'reg' ? C.reg : C.prn).find(x => x.L === m[2]);
+    return `${m[1] === 'reg' ? 'Regular' : 'PRN'} ${m[2]}${o ? ' (' + o.med + ')' : ' — no order on this line'} · ${cell.n}`;
+  }
+  if (/^(reg\.[A-Z]+\.d|prn\.[A-Z]\.\d|once\.|fl\.|siga\.)/.test(id)) return `${CE.cellLabel(C, id)} · ${cell.n}`;
+  return cell.n;
+}
+function valueOf(v) {
+  if (v == null) return '';
+  if (v.code) return `${v.code} — ${CE.CODES[v.code]}`;
+  if (v.giv !== undefined) return `given by ${v.giv || '—'}${v.chk ? ' · checked by ' + v.chk : ''}`;
+  if (v.tick) return '✓ ticked'; if (v.circle) return 'circled';
+  return String(v);
+}
+
+/* ── CHART IT: one round ── */
+function showRound() {
+  const R = round();
+  if (!R) {
+    panel(`<h3>Every round is charted ✓</h3><p class="sub">${esc(SC.t)}: ${SC.rounds.length} of ${SC.rounds.length}. ${roundScores()}</p>
+      <div class="acts"><button class="btn primary" id="toRead">Read the chart as it is now</button></div>${resetLink()}`);
+    on('#toRead', () => setMode('read')); wireReset(); return;
+  }
+  const prob = meProblem();
+  if (prob) {
+    panel(`<h3>First, who are you on this chart?</h3><p class="sub">Everyone who signs a chart is in its Sample Initials register.</p>
+      <div class="fld"><label><span>Name &amp; designation</span><input class="tx" id="pName" placeholder="e.g. PARKER, Sam · Student Nurse" value="${esc(ME.name)}"></label></div>
+      <div class="fld"><label><span>Your initials</span><input class="tx time" id="pInit" maxlength="3" placeholder="SP" value="${esc(ME.init)}"></label></div>
+      <p class="warnln" id="pWarn">${ME.name || ME.init ? esc(prob) : ''}</p>
+      <div class="fld"><span>How you chart</span><div class="seg" id="pSeg"><button data-in="tap">👆 Tap to fill</button><button data-in="pen">✍️ Handwrite</button></div></div>
+      <button class="btn primary wide" id="pGo">Start the round</button>`);
+    const seg = () => document.querySelectorAll('#pSeg button').forEach(b => b.classList.toggle('on', b.dataset.in === ME.input));
+    document.querySelectorAll('#pSeg button').forEach(b => b.onclick = () => { ME.input = b.dataset.in; saveMe(); seg(); }); seg();
+    $('#pInit').oninput = e => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3); };
+    on('#pGo', () => { ME.name = $('#pName').value; ME.init = $('#pInit').value; saveMe(); const p2 = meProblem(); if (p2) { $('#pWarn').textContent = p2; return; } load(P().stage); drawPage(); showRound(); });
+    return;
+  }
+  const at = CE.parseAt(R.at), rn = (C.S.nurses || []).find(n => n.init === R.rn);
+  const top = `<div class="meta"><span>Round ${P().stage + 1} of ${SC.rounds.length}</span><span>${esc(dayLabel(at.day))} · ${at.t}</span></div>
+    <h3>${esc(R.title)}</h3>
+    <div class="youare">You: <b>${esc(ME.name)}</b> (${esc(meInit())}) · Your RN: <b>${esc(rn ? rn.name : R.rn)}</b> (${esc(R.rn)})</div>`;
+  const brief = `<ul class="brief">${R.brief.map(b => `<li>${esc(b)}</li>`).join('')}</ul>`;
+  if (RS.phase === 'brief') {
+    panel(`${top}${brief}<div class="acts"><button class="btn primary" id="rStart">${(R.ask || []).length ? 'First, a question ›' : 'Chart it ›'}</button></div>`);
+    on('#rStart', () => { RS.phase = (R.ask || []).length ? 'ask' : 'chart'; RS.askI = 0; setMode('chart'); });
+    return;
+  }
+  if (RS.phase === 'ask') {
+    const q = R.ask[RS.askI]; if (!RS.opts || RS.optsFor !== RS.askI) { RS.opts = shuffle([q.a, ...q.w]); RS.optsFor = RS.askI; }
+    panel(`${top}<details><summary class="small">The round</summary>${brief}</details><p class="q">${esc(q.q)}</p>
+      <div class="opts">${RS.opts.map((o, i) => `<button class="opt" data-a="${i}">${esc(o)}</button>`).join('')}</div>`);
+    document.querySelectorAll('[data-a]').forEach(b => b.onclick = () => {
+      const ok = RS.opts[+b.dataset.a] === q.a;
+      document.querySelectorAll('[data-a]').forEach(x => { const o = RS.opts[+x.dataset.a]; x.disabled = true; x.classList.add(o === q.a ? 'ok' : x === b ? 'bad' : 'dim'); });
+      const box = document.createElement('div');
+      box.innerHTML = `<div class="fb ${ok ? 'ok' : 'bad'}">${ok ? '✓ Right.' : '✗ Not quite.'} ${esc(q.why || '')}</div><div class="acts">${(q.show || []).length ? '<button class="btn" id="aShow">📍 Show me</button>' : ''}<button class="btn primary" id="aNext">${RS.askI + 1 < R.ask.length ? 'Next ›' : 'Now chart it ›'}</button></div>`;
+      $('#pbody').appendChild(box);
+      on('#aShow', () => { HL = [{ ids: q.show, cls: 'show pulse' }]; goTo(q.show); drawOverlays(); });
+      on('#aNext', () => { HL = []; if (++RS.askI >= R.ask.length) RS.phase = 'chart'; setMode('chart'); });
+      $('#aNext').scrollIntoView({ block: 'nearest' });
+    });
+    return;
+  }
+  if (RS.phase === 'chart') {
+    if (ME.input === 'pen') {
+      panel(`${top}<details open><summary class="small">The round</summary>${brief}</details>
+        <div class="tools"><button class="btn ${TOOL === 'pen' ? 'on' : ''}" id="tPen">✍️ Pen</button><button class="btn ${TOOL === 'erase' ? 'on' : ''}" id="tErase">🧽 Eraser</button><button class="btn" id="tUndo">↶ Undo</button><button class="btn" id="tClear">Clear all</button></div>
+        <p class="small">Write in the boxes with your pen${ME.finger ? ' or finger' : ''}. ${ME.finger ? 'Two fingers' : 'One finger'} move${ME.finger ? '' : 's'} the chart; two fingers zoom. The eraser takes out whole strokes. ${STROKES.length} stroke${STROKES.length === 1 ? '' : 's'} so far.</p>
+        <div class="acts"><button class="btn primary" id="rCheck">Check my charting</button></div>`);
+      on('#tPen', () => { TOOL = 'pen'; showRound(); }); on('#tErase', () => { TOOL = 'erase'; showRound(); });
+      on('#tUndo', () => { if (UNDO.length) { STROKES = UNDO.pop(); saveWork(); drawOverlays(); showRound(); } });
+      on('#tClear', () => { if (STROKES.length && confirm('Clear all your ink for this round?')) { UNDO.push(STROKES); STROKES = []; saveWork(); drawOverlays(); showRound(); } });
+    } else {
+      const groups = [...new Set(Object.keys(ENT).map(k => groupOf(k)?.b).filter(Boolean))];
+      panel(`${top}<details ${groups.length ? '' : 'open'}><summary class="small">The round</summary>${brief}</details>
+        <p class="small">👆 Tap a box on the chart to write in it — find the right page with the tabs.</p>
+        ${groups.length ? `<ul class="elist">${groups.map(b => `<li><span>${esc(groupText(b))}</span><button class="btn sm ghost" data-ed="${b}">edit</button><button class="btn sm ghost" data-rm="${b}">✕</button></li>`).join('')}</ul>` : '<p class="small">Nothing written yet.</p>'}
+        <div class="acts"><button class="btn primary" id="rCheck">Check my charting</button></div>`);
+      document.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { clearGroup(b.dataset.rm); showRound(); });
+      document.querySelectorAll('[data-ed]').forEach(b => b.onclick = () => { const id = Object.keys(ENT).find(k => k.startsWith(b.dataset.ed + '.')); goTo([id]); openPicker(IDX.get(id).cell); });
+    }
+    on('#rCheck', markRound);
+    return;
+  }
+  if (RS.phase === 'marked') showMarked();
+}
+function roundScores() {
+  const r = P().rounds; const xs = Object.keys(r).sort().map(i => `round ${+i + 1}: ${r[i].got}/${r[i].tot}${r[i].mode === 'pen' ? ' ✍️' : ''}`);
+  return xs.length ? 'Your marks — ' + xs.join(' · ') + '.' : '';
+}
+function resetLink() { return `<p class="small" style="margin-top:14px"><button class="btn ghost sm" id="rReset">↺ Start this patient again</button></p>`; }
+function wireReset() { on('#rReset', () => { if (!confirm(`Start ${SC.t}’s chart again from the beginning? Your marks for this patient are cleared.`)) return; PROG[SC.id] = { stage: 0, rounds: {}, read: {} }; saveProg(); SV('chart.w.' + SC.id, null); openPatient(SC.id); }); }
+
+/* marking */
+function inkedCells() {
+  const set = new Set(); let stray = 0;
+  for (const s of STROKES) { const id = INK.strokeCell(s, CR.layout(s.page).cells); if (id) set.add(id); else stray++; }
+  return { set, stray };
+}
+function markRound() {
+  const R = rctx(round());
+  if (ME.input === 'pen') {
+    const { set, stray } = inkedCells();
+    RS.res = CE.checkInk(C, R, set); RS.stray = stray; RS.key = CE.roundKey(C, R).filter(k => !k.none); RS.self = {}; RS.mode = 'pen';
+    GHOST = CE.modelEntries(C, R);
+  } else { RS.res = CE.checkRound(C, R, ENT); RS.mode = 'tap'; GHOST = null; }
+  RS.phase = 'marked';
+  HL = RS.res.map(r => ({ ids: r.cells || [], cls: r.ok ? 'ok' : 'bad' }));
+  const first = RS.res.find(r => !r.ok && (r.cells || []).length);
+  if (first) goTo(first.cells);
+  drawOverlays(); showRound();
+}
+function showMarked() {
+  const R = round(), res = RS.res, okN = res.filter(r => r.ok).length;
+  const list = `<ul class="res">${res.map((r, i) => `<li class="${r.ok ? 'ok' : ''}" data-r="${i}"><i>${r.ok ? '✓' : '✗'}</i><span>${esc(r.msg)}</span></li>`).join('')}</ul>`;
+  let body;
+  if (RS.mode === 'pen') {
+    const sm = RS.key.map((k, i) => `<div class="self"><b>${esc(k.label)}</b><div class="mdl">${esc(k.model)}</div>
+      <div class="chipset"><button class="chip ${RS.self[i] === 1 ? 'on' : ''}" data-s="${i}" data-v="1">✓ Mine says that</button><button class="chip ${RS.self[i] === 0 ? 'on no' : ''}" data-s="${i}" data-v="0">✗ It doesn’t</button></div></div>`).join('');
+    const selfDone = Object.keys(RS.self).length, selfOk = Object.values(RS.self).filter(v => v === 1).length;
+    body = `<p class="score">Where you wrote: ${okN}/${res.length}</p>
+      <p class="small">Marked for you: which boxes your ink landed in${RS.stray ? ` (${RS.stray} stroke${RS.stray > 1 ? 's' : ''} outside every box, not counted)` : ''}. Tap a line to see it on the chart.</p>${list}
+      <h3 style="margin-top:14px">What you wrote — you mark it</h3>
+      <p class="small">The right entry is drawn in <b style="color:#067a52">green</b> beside your ink. Does yours say the same?</p>${sm}
+      <p class="score">${selfDone < RS.key.length ? `${RS.key.length - selfDone} left to mark` : `What you wrote: ${selfOk}/${RS.key.length} (self-marked)`}</p>`;
+  } else body = `<p class="score">${okN}/${res.length}</p><p class="small">Tap a line to see it on the chart.</p>${list}`;
+  const selfLeft = RS.mode === 'pen' && Object.keys(RS.self).length < RS.key.length;
+  panel(`<div class="meta"><span>Round ${P().stage + 1} of ${SC.rounds.length} · marked</span><span>${esc(R.title)}</span></div>${body}
+    <div class="acts"><button class="btn" id="mGhost">${GHOST ? 'Hide' : 'Show'} the right answer</button><button class="btn" id="mRedo">↺ Redo this round</button></div>
+    <button class="btn primary wide" id="mNext" ${selfLeft ? 'disabled' : ''}>${selfLeft ? 'Mark what you wrote first' : 'Next ›'}</button>
+    <p class="small">Next writes the right answer into the chart, so the next round starts from a correct chart.</p>`);
+  document.querySelectorAll('[data-r]').forEach(li => li.onclick = () => { const r = res[+li.dataset.r]; if ((r.cells || []).length) { HL = [{ ids: r.cells, cls: (r.ok ? 'ok' : 'bad') + ' pulse' }]; goTo(r.cells); drawOverlays(); } });
+  document.querySelectorAll('[data-s]').forEach(b => b.onclick = () => { RS.self[+b.dataset.s] = +b.dataset.v; showMarked(); });
+  on('#mGhost', () => { GHOST = GHOST ? null : CE.modelEntries(C, rctx(round())); drawOverlays(); showMarked(); });
+  on('#mRedo', () => { RS.phase = 'chart'; HL = []; GHOST = null; drawOverlays(); showRound(); $('#vp').classList.toggle('pen', penOn()); });
+  on('#mNext', commitRound);
+}
+function commitRound() {
+  const okN = RS.res.filter(r => r.ok).length, selfOk = RS.mode === 'pen' ? Object.values(RS.self).filter(v => v === 1).length : 0;
+  const tot = RS.res.length + (RS.mode === 'pen' ? RS.key.length : 0);
+  const k = P().stage; P().rounds[k] = { got: okN + selfOk, tot, mode: RS.mode };
+  P().stage = k + 1; saveProg();
+  ENT = {}; STROKES = []; UNDO = []; GHOST = null; HL = []; SV('chart.w.' + SC.id, null);
+  load(P().stage); drawPage(); RQ = null; RS = null;
+  toast(`The chart has moved on to ${esc(C.now.t)}. The right entries are written in.`);
+  setMode('read');
+}
+
+/* ── tap-to-fill: the picker ── */
+function groupOf(id) {
+  let m;
+  if ((m = /^(reg\.[A-Z]{1,2}\.d\d\.s\d)\.(t|dose|gc)$/.exec(id))) return { k: 'adm', b: m[1], f: ['t', 'dose', 'gc'] };
+  if ((m = /^(prn\.[A-H]\.\d+)\.(date|time|dose|route|gc)$/.exec(id))) return { k: 'prn', b: m[1], f: ['date', 'time', 'dose', 'route', 'gc'] };
+  if ((m = /^(once\.\d)\.(dosedt|gc|tstart|tend)$/.exec(id))) return { k: 'once', b: m[1], f: ['dosedt', 'gc'] };
+  if ((m = /^(fl\.\d+)\.(astart|gc|tend|avol)$/.exec(id))) return { k: 'fl', b: m[1], f: ['astart', 'gc', 'tend', 'avol'] };
+  if ((m = /^(siga\.\d+)\.(name|init|reg)$/.exec(id))) return { k: 'reg', b: m[1], f: ['name', 'init', 'reg'] };
+  return null;
+}
+function groupText(b) {
+  const g = groupOf(Object.keys(ENT).find(k => k.startsWith(b + '.')) || '') || { f: [] };
+  const vals = g.f.map(f => ENT[b + '.' + f]).filter(v => v != null && v !== '').map(valueOf);
+  return `${CE.cellLabel(C, b + '.' + g.f[0])}: ${vals.join(' · ')}`;
+}
+function clearGroup(b) { for (const k of Object.keys(ENT)) if (k.startsWith(b + '.')) delete ENT[k]; saveWork(); HL = HL.filter(h => h.cls !== 'sel'); drawOverlays(); }
+const inits = () => [...new Set([meInit(), ...(C.S.nurses || []).map(n => n.init)])].filter(Boolean).sort();
+const chipRow = (name, vals, cur, cls = '') => `<div class="chipset" data-name="${name}">${vals.map(([v, t]) => `<button class="chip ${cls} ${v === cur ? 'on' : ''}" data-v="${esc(v)}" title="${esc(t || '')}">${esc(t || v)}</button>`).join('')}</div>`;
+function wireChips(onPick) {
+  document.querySelectorAll('.chipset[data-name]').forEach(set => set.querySelectorAll('button').forEach(b => b.onclick = () => {
+    set.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); PK[set.dataset.name] = b.dataset.v; if (onPick) onPick(set.dataset.name, b.dataset.v);
+  }));
+}
+function tapToFill(cell) {
+  const g = groupOf(cell.id);
+  if (!g) return toast(`<b>${esc(describe(cell))}</b><br>${cell.id.startsWith('reg.') || cell.id.startsWith('prn.') || cell.id.startsWith('once.') ? 'The prescriber writes here — you read it.' : 'Not a box you write in on this round.'}`);
+  openPicker(cell);
+}
+function openPicker(cell) {
+  const g = groupOf(cell.id), b = g.b;
+  const taken = g.f.filter(f => C.V[b + '.' + f] != null);
+  if (g.k !== 'fl' && taken.length) return toast(`<b>${esc(CE.cellLabel(C, cell.id))}</b> is already written: ${esc(valueOf(C.V[b + '.' + taken[taken.length - 1]]))}.<br>The chart is in indelible pen — you never write over an entry.`, 4200);
+  const cur = f => ENT[b + '.' + f];
+  const dates = [-1, 0, 1].map(o => C.now.day + o).filter(d => d >= 1 && d <= 8).map(d => [CE.dayDate(C.S, d), `${CE.WEEKDAY(C.S, d)} ${CE.dayDate(C.S, d)}`]);
+  const initChips = (name, cur, none) => chipRow(name, [...(none ? [['', '— nobody']] : []), ...inits().map(i => [i, i])], cur);
+  const timeIn = (id, v, label) => `<div class="fld"><label><span>${label}</span><input class="tx time" id="${id}" inputmode="numeric" maxlength="4" placeholder="HHMM" value="${esc(v || '')}"></label><small>24-hour clock, the time it actually happened.</small></div>`;
+  let title = CE.cellLabel(C, cell.id), html = '';
+  PK = { g };
+  if (g.k === 'adm') {
+    const m = /^reg\.([A-Z]+)\.d(\d)\.s(\d)$/.exec(b), o = C.reg.find(x => x.L === m[1]);
+    if (!o) return toast(`Row ${m[1]} has no order on it.`);
+    const gc = cur('gc') || {};
+    PK.what = gc.code || (gc.giv ? 'given' : ''); PK.giv = gc.giv || ''; PK.chk = gc.chk || '';
+    html = `<div class="fld"><span>What happened?</span>${chipRow('what', [['given', '✓ Given'], ...Object.keys(CE.CODES).map(c => [c, c])], PK.what, 'code')}<small id="whatMean">${PK.what && PK.what !== 'given' ? esc(CE.CODES[PK.what]) : 'Given — or a not-given code from the chart’s key.'}</small></div>
+      <div id="givF" ${PK.what === 'given' ? '' : 'hidden'}>${timeIn('pkT', cur('t'), 'Time given')}
+      <div class="fld"><span>Given by</span>${initChips('giv', PK.giv)}</div><div class="fld"><span>Checked by</span>${initChips('chk', PK.chk, 1)}</div>
+      <div class="fld"><label><span>Dose (only for a variable dose)</span><input class="tx" id="pkDose" value="${esc(cur('dose') || '')}" placeholder="leave blank for a fixed dose"></label></div></div>`;
+    title = `Row ${o.L} · ${o.med} · ${dayLabel(+m[2])} · ${o.slots[+m[3]] ? o.slots[+m[3]].t + ' line' : CE.PRINTED[+m[3]] + ' line (nothing is due on it)'}`;
+  } else if (g.k === 'prn') {
+    const m = /^prn\.([A-H])\.(\d+)$/.exec(b), o = C.prn.find(x => x.L === m[1]);
+    if (!o) return toast(`PRN ${m[1]} has no order on it.`);
+    const gc = cur('gc') || {}; Object.assign(PK, { date: cur('date') || '', dose: cur('dose') || '', route: cur('route') || '', giv: gc.giv || '', chk: gc.chk || '' });
+    const doses = [...new Set([o.dose, ...String(o.range || '').split(/[–-]/).map(s => s.trim())].filter(Boolean))].map(d => [`${d} ${o.units}`, `${d} ${o.units}`]);
+    const routes = [...new Set([...String(o.route).split('/'), 'PO', 'IV', 'SC', 'IM', 'NEB', 'SL', 'PR'])].map(r => [r, r]);
+    html = `<div class="fld"><span>Date</span>${chipRow('date', dates, PK.date)}</div>${timeIn('pkT', cur('time'), 'Time given')}
+      <div class="fld"><span>Dose</span>${chipRow('dose', doses, PK.dose)}</div><div class="fld"><span>Route</span>${chipRow('route', routes, PK.route, 'code')}</div>
+      <div class="fld"><span>Given by</span>${initChips('giv', PK.giv)}</div><div class="fld"><span>Checked by</span>${initChips('chk', PK.chk, 1)}</div>`;
+    title = `PRN ${o.L} · ${o.med} · record line ${+m[2] + 1}`;
+  } else if (g.k === 'once') {
+    const i = +b.split('.')[1], o = C.once[i];
+    if (!o || o.hidden) return toast('There is no once-only order here.');
+    const gc = cur('gc') || {}, dt = String(cur('dosedt') || '').split(' ');
+    Object.assign(PK, { date: dt[0] || '', giv: gc.giv || '', chk: gc.chk || '' });
+    html = `<div class="fld"><span>Date of dose</span>${chipRow('date', dates, PK.date)}</div>${timeIn('pkT', dt[1], 'Time of dose')}
+      <div class="fld"><span>Given by</span>${initChips('giv', PK.giv)}</div><div class="fld"><span>Checked by</span>${initChips('chk', PK.chk, 1)}</div>`;
+    title = `Once Only · ${o.med} ${o.dose} ${o.units} ${o.route}`;
+  } else if (g.k === 'fl') {
+    const i = +b.split('.')[1], f = C.fluids[i];
+    if (!f) return toast('No fluid is prescribed on this line.');
+    const started = C.V[b + '.astart'] != null, ended = C.V[b + '.tend'] != null;
+    if (started && ended) return toast(`IV fluids line ${i + 1} is finished and recorded. The chart is in indelible pen — you never write over an entry.`, 4200);
+    const gc = cur('gc') || {}; Object.assign(PK, { giv: gc.giv || '', chk: gc.chk || '' });
+    html = started ? `<p class="small">Started ${esc(C.V[b + '.astart'])} by ${esc(valueOf(C.V[b + '.gc']))}. Record its completion:</p>${timeIn('pkEnd', cur('tend'), 'Completion time')}
+        <div class="fld"><label><span>Actual volume in (mL)</span><input class="tx time" id="pkVol" inputmode="numeric" value="${esc(cur('avol') || '')}"></label></div>`
+      : `${timeIn('pkT', cur('astart'), 'Actual commencing time')}<div class="fld"><span>Commenced by</span>${initChips('giv', PK.giv)}</div><div class="fld"><span>Checked by</span>${initChips('chk', PK.chk, 1)}</div>`;
+    PK.started = started;
+    title = `IV fluids line ${i + 1} · ${f.vol} mL ${f.fluid} at ${f.rate} mL/hr`;
+  } else if (g.k === 'reg') {
+    html = `<div class="fld"><label><span>Name &amp; designation</span><input class="tx" id="pkName" value="${esc(cur('name') || '')}" placeholder="${esc(ME.name)}"></label></div>
+      <div class="fld"><label><span>Initial</span><input class="tx time" id="pkInit" maxlength="3" value="${esc(cur('init') || '')}" placeholder="${esc(meInit())}"></label></div>
+      <div class="fld"><label><span>Reg. No. (a student leaves it blank)</span><input class="tx" id="pkReg" value="${esc(cur('reg') || '')}"></label></div>`;
+    title = `Sample Initials register · line ${+b.split('.')[1] + 1}`;
+  }
+  HL = [...HL.filter(h => h.cls !== 'sel'), { ids: g.f.map(f => b + '.' + f).filter(id => IDX.has(id)), cls: 'sel' }]; drawOverlays();
+  panel(`<div class="meta"><span>Write in the chart</span><span>${esc(round().title)}</span></div><h3>${esc(title)}</h3>${html}
+    <div class="acts"><button class="btn primary" id="pkSave">Write it</button><button class="btn" id="pkClear">Clear</button><button class="btn ghost" id="pkCancel">Cancel</button></div>`);
+  wireChips((name, v) => { if (name === 'what') { $('#givF').hidden = v !== 'given'; $('#whatMean').textContent = v === 'given' ? 'Record the time, your initials and your checker’s.' : CE.CODES[v]; } });
+  on('#pkCancel', () => { PK = null; HL = HL.filter(h => h.cls !== 'sel'); drawOverlays(); showRound(); });
+  on('#pkClear', () => { clearGroup(b); PK = null; showRound(); });
+  on('#pkSave', () => { if (savePicker()) { PK = null; HL = HL.filter(h => h.cls !== 'sel'); saveWork(); drawOverlays(); showRound(); } });
+}
+function savePicker() {
+  const { g } = PK, b = g.b, v = id => ($('#' + id) || {}).value?.trim() || '';
+  const set = (f, val) => { if (val === '' || val == null) delete ENT[b + '.' + f]; else ENT[b + '.' + f] = val; };
+  const t4 = id => { const t = v(id).replace(/\D/g, ''); if (t && !/^\d{4}$/.test(t)) { toast('Write the time as four figures, 24-hour clock — e.g. 0805.'); return null; } return t; };
+  const gc = () => PK.giv || PK.chk ? { giv: PK.giv || '', chk: PK.chk || '' } : '';
+  if (g.k === 'adm') {
+    if (!PK.what) { toast('Choose what happened: given, or a code.'); return false; }
+    if (PK.what !== 'given') { set('gc', { code: PK.what }); set('t', ''); set('dose', ''); return true; }
+    const t = t4('pkT'); if (t === null) return false;
+    set('t', t); set('gc', gc()); set('dose', v('pkDose')); return true;
+  }
+  if (g.k === 'prn') { const t = t4('pkT'); if (t === null) return false; set('date', PK.date); set('time', t); set('dose', PK.dose); set('route', PK.route); set('gc', gc()); return true; }
+  if (g.k === 'once') { const t = t4('pkT'); if (t === null) return false; set('dosedt', [PK.date, t].filter(Boolean).join(' ')); set('gc', gc()); return true; }
+  if (g.k === 'fl') {
+    if (PK.started) { const t = t4('pkEnd'); if (t === null) return false; set('tend', t); set('avol', v('pkVol').replace(/\s*mL$/i, '')); return true; }
+    const t = t4('pkT'); if (t === null) return false; set('astart', t); set('gc', gc()); return true;
+  }
+  if (g.k === 'reg') { set('name', v('pkName')); set('init', v('pkInit').toUpperCase()); set('reg', v('pkReg')); return true; }
+  return false;
+}
+
+/* ── pointers: one finger pans, two pinch, a tap picks a box; in handwriting, the pen writes.
+   The drawing half is Giga's SketchNodeView onDown/onMove/onUp (pressure rule, coalesced samples, a dot for a
+   tap, the whole-stroke eraser), ported to page units; panning, pinching and palm rejection are the Sim's. ── */
+const PTR = new Map(); let G = null, lastPen = 0, mom = 0;
+const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+function cellAt(x, y) { let best = null; for (const c of L().cells) if (x >= c.x && x <= c.x + c.w && y >= c.y && y <= c.y + c.h && (!best || c.w * c.h < best.w * best.h)) best = c; return best; }
+function drawLive() { const p = svg.querySelector('#live'); if (p) p.setAttribute('d', G && G.mode === 'draw' ? INK.sketchStrokePath({ pts: G.pts, size: 2, simulate: G.simulate }) : ''); }
+let liveQ = 0; const liveSoon = () => { if (!liveQ) liveQ = requestAnimationFrame(() => { liveQ = 0; drawLive(); }); };
+function eraseAt(v) {
+  const here = STROKES.filter(s => s.page === PAGE), kept = INK.eraseStrokes(here, v.x, v.y, 5);
+  if (kept.length !== here.length) { STROKES = [...STROKES.filter(s => s.page !== PAGE), ...kept]; drawOverlays(); }
+}
+function stopMomentum() { cancelAnimationFrame(mom); mom = 0; }
+function momentum(vx, vy) {
+  stopMomentum();
+  const step = () => { vx *= 0.93; vy *= 0.93; if (Math.abs(vx) < 0.4 && Math.abs(vy) < 0.4) return; vp.scrollLeft -= vx; vp.scrollTop -= vy; mom = requestAnimationFrame(step); };
+  mom = requestAnimationFrame(step);
+}
+vp.addEventListener('pointerdown', e => {
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  stopMomentum();
+  const drawing = penOn(), isPen = e.pointerType === 'pen', isTouch = e.pointerType === 'touch';
+  if (drawing && isTouch && (performance.now() - lastPen < 900 || (G && G.mode === 'draw'))) return;     // a palm, while the pen is busy
+  if (drawing && (isPen || e.pointerType === 'mouse' || (isTouch && ME.finger && PTR.size === 0))) {
+    e.preventDefault(); try { vp.setPointerCapture(e.pointerId); } catch (er) {}
+    if (isPen) lastPen = performance.now();
+    const v = toPage(e.clientX, e.clientY);
+    if (TOOL === 'erase') { UNDO.push(STROKES); G = { mode: 'erase', id: e.pointerId }; eraseAt(v); return; }
+    G = { mode: 'draw', id: e.pointerId, simulate: !isPen, pts: [[r1(v.x), r1(v.y), INK.inkPressure(e)]] };
+    drawLive(); return;
+  }
+  try { vp.setPointerCapture(e.pointerId); } catch (er) {}
+  PTR.set(e.pointerId, { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY });
+  if (PTR.size === 1) G = { mode: 'pan', moved: false, vx: 0, vy: 0, t: 0 };
+  else if (PTR.size === 2) { const [a, b] = [...PTR.values()]; G = { mode: 'pinch', d0: dist(a, b), z0: Z, mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 }; }
+});
+vp.addEventListener('pointermove', e => {
+  if (G && (G.mode === 'draw' || G.mode === 'erase') && e.pointerId === G.id) {
+    const co = e.getCoalescedEvents ? e.getCoalescedEvents() : null, samples = co && co.length ? co : [e];
+    for (const ce of samples) { const v = toPage(ce.clientX, ce.clientY); if (G.mode === 'erase') eraseAt(v); else G.pts.push([r1(v.x), r1(v.y), INK.inkPressure(ce)]); }
+    if (e.pointerType === 'pen') lastPen = performance.now();
+    if (G.mode === 'draw') liveSoon();
+    return;
+  }
+  const p = PTR.get(e.pointerId); if (!p || !G) return;
+  const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY;
+  if (G.mode === 'pan') {
+    if (!G.moved && Math.hypot(p.x - p.x0, p.y - p.y0) > 7) G.moved = true;
+    if (G.moved) { vp.scrollLeft -= dx; vp.scrollTop -= dy; G.vx = dx; G.vy = dy; G.t = performance.now(); }
+  } else if (G.mode === 'pinch' && PTR.size >= 2) {
+    const [a, b] = [...PTR.values()], mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+    vp.scrollLeft -= mx - G.mx; vp.scrollTop -= my - G.my; G.mx = mx; G.my = my;
+    zoomAt(G.z0 * dist(a, b) / G.d0, mx, my);
+  }
+});
+function endPointer(e) {
+  if (G && (G.mode === 'draw' || G.mode === 'erase') && e.pointerId === G.id) {
+    const g = G; G = null;
+    if (g.mode === 'draw') {
+      let pts = g.pts;
+      if (pts.length === 1) { const [x, y, p] = pts[0]; pts = [[x, y, p], [x + 0.8, y + 0.8, p]]; }
+      if (pts.length >= 2) { UNDO.push(STROKES); if (UNDO.length > 40) UNDO.shift(); STROKES = [...STROKES, { page: PAGE, pts: pts.slice(0, 1500), size: 2, simulate: g.simulate }]; }
+      drawLive(); drawOverlays();
+      const n = $('#pbody .small'); if (n && RS && RS.phase === 'chart') showRound();
+    }
+    saveWork(); return;
+  }
+  const p = PTR.get(e.pointerId); if (!p) return;
+  PTR.delete(e.pointerId);
+  if (G && G.mode === 'pan' && PTR.size === 0) {
+    if (!G.moved && e.type === 'pointerup') { const v = toPage(e.clientX, e.clientY), c = cellAt(v.x, v.y); onTap(c); }
+    else if (performance.now() - G.t < 80) momentum(G.vx, G.vy);
+    G = null;
+  } else if (G && G.mode === 'pinch' && PTR.size < 2) G = PTR.size === 1 ? { mode: 'pan', moved: true, vx: 0, vy: 0, t: 0 } : null;
+}
+vp.addEventListener('pointerup', endPointer); vp.addEventListener('pointercancel', endPointer);
+vp.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); zoomAt(Z * Math.exp(-e.deltaY * 0.01), e.clientX, e.clientY); }, { passive: false });
+vp.addEventListener('contextmenu', e => e.preventDefault());
+function onTap(cell) {
+  if (!cell) return;
+  if (MODE === 'read' && RQ && RQ.list[RQ.i] && RQ.list[RQ.i].kind === 'tap' && RQ.answered !== RQ.i) return answerTap(cell);
+  if (MODE === 'chart' && RS && RS.phase === 'chart' && ME.input === 'tap') return tapToFill(cell);
+  const v = C.V[cell.src || cell.id] ?? ENT[cell.id];
+  toast(`<b>${esc(describe(cell))}</b>${v != null ? '<br>' + esc(valueOf(v)) : ''}`);
+}
+addEventListener('resize', () => { if (!$('#sim').hidden && Z < fitZ()) fitZoom(); });
+
+/* ── chrome ── */
+$('#simBack').onclick = () => { try { history.replaceState(null, '', location.pathname); } catch (e) {} home(); };
+document.querySelectorAll('#modeSeg button').forEach(b => b.onclick = () => setMode(b.dataset.mode));
+{ document.documentElement.style.setProperty('--tool', D.hue);
+  const ic = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="${D.hue}"/><text x="32" y="45" font-size="38" text-anchor="middle">📋</text></svg>`;
+  const l = document.createElement('link'); l.rel = 'icon'; l.href = 'data:image/svg+xml,' + encodeURIComponent(ic); document.head.appendChild(l);
+  $('#backLink').textContent = '‹ ' + D.back;
+  document.title = 'Chart Sim · ' + D.short; }
+if (LS('theme') === 'light') document.documentElement.dataset.theme = 'light';
+$('#themeBtn').onclick = () => { const r = document.documentElement, to = r.dataset.theme === 'light' ? '' : 'light';
+  to ? r.dataset.theme = 'light' : delete r.dataset.theme; SV('theme', to); };
+$('#helpBtn').onclick = () => {
+  $('#help').innerHTML = `<h2 style="margin-top:0">What is this?</h2>
+  <p><b>Chart Sim</b> is the <b>NZ 8-Day National Medication Chart</b> (NMC8D, 2012 edition) redrawn box for box — the front page with allergies and the registers, Once Only / Verbal Orders / Oxygen, PRN orders facing their record, Regular orders facing their 8 days, the IV fluid record, and the key printed inside the chart (instructions, recommended times, the not-given codes). Each of the ${SCN.length} patients comes part-charted, like a chart you pick up on the ward.</p>
+  <h3>Read</h3><p>Questions made from the chart itself, so they can never disagree with it: allergies, doses, times, who gave what, what a code means, what is due next, whether a PRN can be given now, what has been stopped — plus some each patient asks. Some you answer by tapping the right box. Tap any box, any time, to see what it is.</p>
+  <h3>Chart it</h3><p>The med round happens — what you gave, what was refused, what the prescriber said. You write it in. Then the chart moves on (with the right answer written in), and there is more to read.</p>
+  <h3>How it is marked</h3>
+  <p><b>👆 Tap to fill:</b> every box has an address, and each round has an answer key. It checks the right box (medicine, day, time line), the right thing in it (initials, or which code), your initials and your RN’s check, a time within 30 minutes, a PRN line with a dose and route the order allows — and flags anything written where nothing should be, by name.</p>
+  <p><b>✍️ Handwrite:</b> nothing here reads handwriting. <i>Where</i> you wrote is marked for you — each stroke belongs to the box it mostly sits in, so crossing a line a little is fine. <i>What</i> you wrote you mark yourself, against the right entry drawn beside your ink. The pen writes, one finger moves the chart, two fingers zoom; a mouse or drawing tablet writes too.</p>
+  <h3>Honest limits</h3>
+  <p>The patients are invented and the doses are typical adult doses so the chart looks real — <b>not a dosing guide</b>. Your hospital’s policies (who checks what, which codes, where a code is written) win where they differ. The chart is redrawn from the 2012 edition’s own pages; a later edition may differ in small ways.</p>
+  <h3>Your data</h3><p>Progress lives in this browser only; the Paper Sim’s home row shows a one-line summary. Nothing is sent anywhere.</p>
+  <h3>For whoever maintains this</h3><p>Built by <code>node build-chart.mjs</code> from <code>content/chart/*.js</code> (the scenario format is at the top of <code>content/chart/index.js</code>), <code>chart-engine.mjs</code>, <code>chart-render.mjs</code>, <code>ink.mjs</code> (Giga’s ink, checked against Giga’s source when it is checked out beside this repo) and the vendored perfect-freehand 1.2.3 (MIT), into <code>chart-template.html</code>. Built ${esc(D.built)}.</p>
+  <button class="btn primary wide" onclick="this.closest('dialog').close()">Close</button>`;
+  $('#help').showModal(); };
+{ const id = decodeURIComponent(location.hash.slice(1)); if (BYID.has(id)) openPatient(id); else home(); }
+saveProg();
+</script>
+</body>
+</html>

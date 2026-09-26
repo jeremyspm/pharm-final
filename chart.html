@@ -1,0 +1,2214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Chart Sim</title>
+<style>
+/* the Paper Sim's own stylesheet, copied in by build-chart.mjs from template.html (never retyped here) */
+
+/* ── estate tokens (house.css contract, dark default) ─────────────── */
+:root{
+  --bg:hsl(225 33% 5%); --fg:hsl(225 31% 95%); --card:hsl(224 44% 10%);
+  --primary:hsl(218 91% 64%); --onprimary:hsl(225 33% 5%);
+  --muted:hsl(220 38% 13%); --muted-fg:hsl(218 19% 67%);
+  --accent:hsl(219 40% 18%); --danger:hsl(0 84% 60%); --ok:hsl(158 64% 42%);
+  --warn:hsl(38 92% 55%); --border:hsl(222 27% 19%); --radius:.625rem;
+  --dur:200ms; --ease:cubic-bezier(.4,0,.2,1);
+}
+:root[data-theme=light]{
+  --bg:hsl(214 47% 97%); --fg:hsl(222 47% 11%); --card:hsl(0 0% 100%);
+  --onprimary:#fff; --muted:hsl(215 40% 93%); --muted-fg:hsl(220 12% 40%);
+  --accent:hsl(216 45% 91%); --border:hsl(215 33% 89%); --warn:hsl(38 92% 40%);
+}
+*{box-sizing:border-box;min-width:0}
+[hidden]{display:none!important}   /* .btn sets display, which would otherwise beat the attribute */
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  -webkit-text-size-adjust:100%}
+header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;padding:10px 14px}
+header h1{font-size:1rem;margin:0;flex:1;font-weight:700}
+header .d{color:var(--muted-fg);font-size:.8rem;white-space:nowrap}
+/* phone: title over countdown on the left, buttons full height on the right (was one flex row: the title got squeezed to a word per line) */
+@media(max-width:560px){
+  header{display:grid;grid-template-columns:minmax(0,1fr);grid-auto-columns:auto;gap:0 8px;padding:8px 12px}
+  header h1{grid-area:1/1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  header .d{grid-area:2/1;white-space:normal;font-size:.76rem;line-height:1.3}
+  header .btn{grid-row:1/span 2;padding:8px 10px;min-width:40px}
+}
+main{max-width:720px;margin:0 auto;padding:14px 14px 90px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:14px;margin:0 0 12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;
+  border:1px solid var(--border);background:var(--muted);color:var(--fg);
+  border-radius:var(--radius);padding:10px 14px;font:inherit;font-weight:600;
+  transition:background var(--dur) var(--ease)}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:var(--onprimary)}
+.btn.ghost{background:transparent}
+.btn.wide{width:100%;margin-top:8px}
+a.btn{text-decoration:none}
+.btn:disabled{opacity:.45;cursor:default}
+.door h2{margin:.1rem 0 .3rem;font-size:1.02rem}
+.door p{margin:.2rem 0 .6rem;color:var(--muted-fg);font-size:.88rem}
+.qlist{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+/* a quiz row: tag + name, then count + Learn + Sit as one group that drops to a
+   second line at phone width instead of squeezing the name into four lines */
+.qrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;border:1px solid var(--border);
+  border-radius:var(--radius);padding:8px 10px;background:var(--muted)}
+.qrow b{flex:1 1 150px;font-size:.86rem;font-weight:600}
+.qrow .m{color:var(--muted-fg);font-size:.76rem;white-space:nowrap}
+.qrow .acts{margin-left:auto;display:flex;gap:6px;align-items:center}
+.sysrow{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 2px}
+/* quiz selection: tick any rows (or a whole system) and the bottom bar runs them as one */
+.qrow{cursor:pointer}
+.qrow.on{border-color:var(--primary);box-shadow:inset 0 0 0 1px var(--primary)}
+.qrow>input.pk{flex:0 0 auto;width:18px;height:18px;margin:0;accent-color:var(--primary);cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0 4px;font-size:.8rem;color:var(--muted-fg)}
+.chip{border:1px solid var(--border);border-radius:99px;padding:4px 11px;background:transparent;color:var(--fg);
+  cursor:pointer;font:inherit;font-size:.8rem;font-weight:600;line-height:1.3}
+.chip.on{background:var(--primary);border-color:var(--primary);color:var(--onprimary)}
+.footbar .btn.x{flex:0 0 auto}
+/* ── focus checklist ─────────────────────────────────────────────────── */
+.fhead{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px;margin:2px 0 8px}
+.fbar{height:6px;border-radius:99px;background:var(--accent);overflow:hidden;flex:1 1 140px;min-width:120px}
+.fbar i{display:block;height:100%;background:var(--ok);transition:width .25s}
+.ftier{font-weight:700;font-size:.82rem;margin:14px 0 6px;display:flex;align-items:center;gap:8px}
+.ftier b{font-weight:700}
+.ftier .fnum{font-weight:400;color:var(--muted-fg)}
+.frow{display:flex;gap:9px;align-items:flex-start;padding:8px 10px;margin-bottom:6px;
+  border:1px solid var(--border);border-radius:var(--radius);background:var(--muted);
+  border-left:3px solid var(--tc,var(--border))}
+.frow.on{opacity:.62}
+.frow.on .ft{text-decoration:line-through}
+.frow>input.fchk{flex:0 0 auto;width:18px;height:18px;margin-top:2px;accent-color:var(--ok);cursor:pointer}
+.fbody{flex:1 1 auto;min-width:0}
+.fbody>summary{cursor:pointer;list-style:none;display:block}
+.fbody>summary::-webkit-details-marker{display:none}
+.ft{font-weight:650;font-size:.92rem;display:block}
+.fmeta{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.fchip{font-size:.68rem;padding:1px 7px;border-radius:99px;background:var(--accent);color:var(--muted-fg);white-space:nowrap}
+.fchip.her{background:hsl(38 92% 55% / .18);color:var(--warn)}
+.fchip.tape{background:hsl(0 84% 60% / .16);color:var(--danger)}
+.fchip.saq{background:hsl(218 91% 64% / .16);color:var(--primary)}
+.fchip.sys{background:transparent;border:1px solid var(--border)}
+.fchip.hl{background:hsl(158 64% 42% / .2);color:var(--ok);font-weight:650}
+.fchip.rev{background:hsl(158 64% 42% / .12);color:var(--ok)}
+.fchip.kh{background:hsl(280 60% 60% / .16);color:hsl(280 70% 72%)}
+.hlans{margin-top:8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);overflow:hidden}
+.hlans>summary{cursor:pointer;padding:7px 10px;font-weight:650;font-size:.84rem;color:var(--ok);list-style:none}
+.hlans>summary::-webkit-details-marker{display:none}
+.hlans .hlbody{padding:0 10px 10px;font-size:.83rem;line-height:1.55;white-space:pre-wrap}
+.hlans .hlh{font-weight:700;margin:8px 0 4px;font-size:.8rem;letter-spacing:.02em}
+.fdet{font-size:.85rem;line-height:1.5;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+.fdet p{margin:0 0 7px}
+.fdet .fcap{color:var(--muted-fg)}
+.fwhy{font-size:.8rem;line-height:1.5;color:var(--muted-fg);margin:0 0 4px}
+@media(max-width:400px){ .ft{font-size:.88rem} .fdet{font-size:.82rem} }
+.tag{font-size:.72rem;padding:2px 8px;border-radius:99px;background:var(--accent);color:var(--muted-fg)}
+.tag.mixed,.tag.authored{color:var(--muted-fg)}
+/* one colour per group: written at load from META.hue (see "chrome") */
+/* sitting */
+.qhead{display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px;margin-bottom:8px}
+.qhead .n{font-weight:700}
+.qhead .timer{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--muted-fg)}
+.qhead .timer.low{color:var(--danger);font-weight:700}
+.stem{white-space:pre-wrap;margin-bottom:10px}
+.stem img,.qimg{max-width:100%;border-radius:8px;background:#fff;display:block;margin:8px 0}
+/* structured stem: her paragraphs, lists and table rows survive; a Canvas layout
+   table becomes stacked cells at phone width and side-by-side from 560px */
+.stem.rich{white-space:normal;line-height:1.5}
+.stem.rich p{margin:.4em 0}
+.stem.rich ul,.stem.rich ol{margin:.3em 0;padding-left:1.35em}
+.stem.rich li{margin:.15em 0}
+.stem.rich li>p{margin:.1em 0}
+.stem.rich div{margin:.15em 0}
+.stem.rich .tbl{display:flex;flex-direction:column;gap:8px;margin:10px 0}
+.stem.rich .tr{display:flex;flex-wrap:wrap;gap:8px 14px;border:1px solid var(--border);border-radius:8px;padding:8px 10px;background:var(--muted)}
+.stem.rich .td{flex:1 1 220px;min-width:0}
+.stem.rich .td>p:first-child{margin-top:0}
+.stem.rich .td img{margin:0 0 4px;max-height:280px;width:auto}
+.stem.rich img{max-height:520px;width:auto}
+.inl{display:inline-block;width:auto;max-width:100%;padding:5px 8px;margin:2px 0;vertical-align:baseline;
+  font-size:.95em;border:1px solid var(--primary);background:var(--card);color:var(--fg);border-radius:6px}
+input.inl{min-width:7ch}
+.inl:focus{outline:2px solid var(--primary);outline-offset:1px}
+.opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--border);
+  border-radius:var(--radius);padding:10px;margin:6px 0;cursor:pointer;background:var(--muted)}
+.opt input{margin-top:3px;flex:none}
+.opt.sel{border-color:var(--primary);background:var(--accent)}
+/* learn mode: a checked question locks and colours itself in place */
+.opt.k{border-color:var(--ok);box-shadow:inset 0 0 0 1px var(--ok)}
+.opt.x{border-color:var(--danger);box-shadow:inset 0 0 0 1px var(--danger)}
+.opt.lock{cursor:default}
+.lres{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0 0}
+.lres .hint{font-size:.76rem;color:var(--muted-fg)}
+.lres .qr-pane{flex-basis:100%;padding:6px 0 0}
+.mk .verdict{font-weight:700;margin:0 0 4px}
+.mk.right .verdict{color:var(--ok)} .mk.wrong .verdict{color:var(--danger)} .mk.saq{border-color:var(--primary)}
+.pip.ok{background:var(--ok);border-color:var(--ok)} .pip.bad{background:var(--danger);border-color:var(--danger)}
+.qrow .btn{padding:6px 10px;font-size:.8rem}
+.qrow .btn.learn{border-color:var(--primary);color:var(--primary)}
+.blankrow{display:flex;flex-direction:column;gap:4px;margin:8px 0}
+.blankrow label{font-size:.82rem;color:var(--muted-fg)}
+select,input[type=text],textarea{font:inherit;color:var(--fg);background:var(--muted);
+  border:1px solid var(--border);border-radius:8px;padding:9px;width:100%}
+textarea{min-height:120px}
+.pips{display:flex;gap:3px;flex-wrap:wrap;margin:10px 0 2px}
+.pip{width:14px;height:6px;border-radius:3px;background:var(--muted);border:1px solid var(--border)}
+.pip.done{background:var(--primary);border-color:var(--primary)}
+.pip.cur{outline:2px solid var(--primary);outline-offset:1px}
+/* marking */
+.mk{border-left:4px solid var(--border);padding-left:10px;margin:14px 0}
+.mk.right{border-color:var(--ok)}.mk.wrong{border-color:var(--danger)}
+.mk .you{color:var(--muted-fg);font-size:.9rem}
+.mk .keyline{color:var(--ok);font-weight:600}
+.mk .marks{font-size:.8rem;color:var(--muted-fg)}
+.steps label{display:flex;gap:8px;align-items:flex-start;margin:6px 0;cursor:pointer}
+.refq{font-size:.85rem;color:var(--muted-fg);margin:8px 0 2px;padding:8px 10px;background:var(--muted);border-radius:8px}
+.refq.slide{padding:6px}
+.refq.patton{border-left:3px solid var(--primary)}
+.refq i{color:var(--fg)}
+.slideimg{max-width:100%;background:#fff;border-radius:6px;display:block;margin:0 0 4px}
+.keyrows{margin:6px 0}
+.krow{font-size:.85rem;padding:3px 0;border-bottom:1px dashed var(--border)}
+.krow b{color:var(--ok);font-weight:600}
+.krow.kok{opacity:.55}
+.kyou{color:var(--danger);font-size:.78rem}
+.kref{font-size:.84rem;color:var(--muted-fg);margin:4px 0 6px 14px;padding:6px 10px;background:var(--muted);border-radius:8px;line-height:1.45}
+.kref i{color:var(--fg)}
+.kref .refsrc{display:inline}
+.refsrc{font-size:.74rem;color:var(--muted-fg);opacity:.8}
+.vidrow{font-size:.86rem;margin:6px 0}
+.vidrow a{font-weight:600}
+.askai{padding:3px 10px;font-size:.76rem;margin-top:6px}
+.aiwrap{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;margin:8px 0 4px}
+.aitext{flex-basis:100%;width:100%;min-height:150px;font-size:.78rem;margin-top:6px}
+.aisplit{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;margin-top:6px}
+.aisplit .askai{margin-top:0}
+.vclip{margin:.5rem 0}
+.vframe{position:relative;aspect-ratio:16/9;width:100%;max-width:460px;background:#000;border-radius:8px;overflow:hidden;cursor:pointer}
+.vframe img,.vframe iframe{width:100%;height:100%;display:block;border:0;object-fit:cover}
+.vplay{position:absolute;inset:0;margin:auto;width:54px;height:54px;border-radius:50%;background:rgba(20,20,28,.72);color:#fff;border:2px solid #fff;font-size:1.3rem;cursor:pointer;line-height:1}
+.vbadge{position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.8);color:#fff;font-size:.72rem;padding:2px 6px;border-radius:4px;pointer-events:none}
+.vmeta{font-size:.82rem;margin-top:5px;display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center}
+.vch{font-weight:600}
+.vfull{padding:2px 8px;font-size:.74rem}
+.rev-ctl{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:6px 0 10px;font-size:.85rem}
+.rev-ctl .wo{display:flex;gap:6px;align-items:center;cursor:pointer;user-select:none}
+.systally{display:flex;flex-wrap:wrap}
+.systally .tag{display:inline-block;background:var(--muted);padding:2px 9px;border-radius:11px;margin:2px 5px 2px 0;font-size:.74rem}
+.systally .tag.ok{color:var(--ok)}
+.qr{border:1px solid var(--muted);border-left-width:4px;border-radius:9px;margin:6px 0;background:var(--card)}
+.qr.right{border-left-color:var(--ok)} .qr.partial{border-left-color:var(--warn)} .qr.wrong{border-left-color:var(--danger)} .qr.saq{border-left-color:var(--primary)}
+.qr-head{display:flex;gap:10px;align-items:flex-start;padding:9px 11px 7px}
+.qr-mk{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;padding:2px 8px;border-radius:6px;font-size:.82rem;background:var(--muted)}
+.qr.right .qr-mk{background:var(--ok);color:var(--onprimary)} .qr.partial .qr-mk{background:var(--warn);color:var(--onprimary)} .qr.wrong .qr-mk{background:var(--danger);color:#fff}
+.qr-stem{font-size:.9rem;line-height:1.35;flex:1}
+.qr-acts{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:0 11px 9px}
+.qa{padding:3px 11px;font-size:.77rem;border:1px solid var(--muted);border-radius:14px;background:transparent;color:inherit;cursor:pointer}
+.qa:hover{border-color:var(--primary)} .qa.on{background:var(--primary);color:var(--onprimary);border-color:var(--primary)}
+.qr-pane{padding:2px 11px 11px}
+.qr .src{font-size:.72rem;color:var(--primary);margin-right:auto;opacity:.85}
+.qr .you{font-size:.8rem;padding:2px 11px 4px;opacity:.85}
+.qr .steps{padding:2px 11px 6px}
+.score-hero{font-size:2.2rem;font-weight:800;text-align:center;margin:.3rem 0 0}
+.score-sub{text-align:center;color:var(--muted-fg);margin:0 0 10px}
+/* chart */
+.spark{width:100%;height:84px;display:block}
+.hist{font-size:.82rem;color:var(--muted-fg)}
+.hist td{padding:2px 8px 2px 0}
+/* chain warmup */
+.chain{display:flex;flex-direction:column;gap:2px;margin:8px 0}
+.bead{background:var(--accent);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:.9rem}
+.bead.blank{border-style:dashed;color:var(--warn);text-align:center}
+.verb{color:var(--muted-fg);font-size:.78rem;padding:0 12px}
+.note{border:1px solid var(--border);border-left:4px solid var(--warn);border-radius:8px;
+  padding:8px 10px;font-size:.84rem;color:var(--muted-fg);margin:10px 0}
+.src{font-size:.75rem;color:var(--muted-fg);margin-top:6px}
+dialog{background:var(--card);color:var(--fg);border:1px solid var(--border);
+  border-radius:var(--radius);max-width:640px;width:calc(100% - 32px);padding:18px}
+dialog::backdrop{background:rgb(0 0 0 / .6)}
+h3{margin:14px 0 4px;font-size:.95rem}
+.footbar{position:fixed;bottom:0;left:0;right:0;background:var(--bg);
+  border-top:1px solid var(--border);padding:10px 14px;display:none;gap:8px;z-index:5}
+.footbar.on{display:flex}
+.footbar .btn{flex:1}
+a{color:var(--primary)}
+/* ── home: one screen of row cards, each opening its own screen (was one 5-6 screen scroll) ── */
+.hero{display:flex;align-items:center;gap:12px;width:100%;text-align:left;font:inherit;color:var(--fg);cursor:pointer;
+  background:color-mix(in srgb,var(--primary) 14%,var(--card));border:1px solid color-mix(in srgb,var(--primary) 45%,transparent);
+  border-radius:12px;padding:12px 14px;margin:2px 0 4px}
+.hero small{display:block;font-size:.76rem;color:var(--primary);font-weight:650}
+.hero b{display:block;font-size:1rem;line-height:1.35;margin-top:2px}
+.hero .go{flex:0 0 auto;margin-left:auto;width:42px;height:42px;border-radius:50%;background:var(--primary);color:var(--onprimary);
+  display:flex;align-items:center;justify-content:center;font-size:1rem}
+.lsec{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-fg);margin:12px 4px 5px}
+.lrow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;font:inherit;color:var(--fg);cursor:pointer;
+  background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px 12px;margin:0 0 7px;
+  transition:border-color var(--dur) var(--ease)}
+.lrow:hover{border-color:color-mix(in srgb,var(--primary) 55%,var(--border))}
+.lic{flex:0 0 40px;height:40px;border-radius:10px;background:var(--muted);display:flex;align-items:center;justify-content:center;font-size:1.15rem}
+.ltx{flex:1 1 auto;min-width:0}
+.ltx b{display:block;font-size:.97rem;font-weight:650}
+.ltx small{display:block;font-size:.8rem;color:var(--muted-fg);line-height:1.35;margin-top:1px}
+.lch{flex:0 0 auto;color:var(--muted-fg);font-size:1.3rem;line-height:1}
+a.lrow{text-decoration:none}   /* a row that opens another page of this tool (META.more) */
+/* the paper's banner on home: its bold first sentence always shows, the rest is one tap away */
+.bnote{margin:0 0 10px}
+.bnote>summary{cursor:pointer;list-style:none}
+.bnote>summary::-webkit-details-marker{display:none}
+.bnote>summary::after{content:' · more';color:var(--primary);font-size:.8rem;font-weight:650}
+.bnote[open]>summary::after{content:''}
+.shead{display:flex;align-items:center;gap:10px;margin:0 0 12px}
+.shead h2{margin:0;font-size:1.1rem;flex:1}
+/* the tool's own name and colour (26 Sep 2026): four Paper Sims share one layout, so the title card on home, the stripe
+   along the header and the tab icon are what tell them apart. --tool is set from TOOL at load. */
+header{border-top:4px solid var(--tool)}
+.idcard{display:flex;align-items:center;gap:12px;margin:0 0 12px;padding:12px 14px;border-radius:var(--radius);
+  background:color-mix(in srgb,var(--tool) 15%,var(--card));border:1px solid color-mix(in srgb,var(--tool) 45%,var(--border))}
+.idic{flex:0 0 48px;height:48px;border-radius:12px;background:var(--tool);display:flex;align-items:center;justify-content:center;font-size:1.55rem}
+.idtx{min-width:0}
+.idtx small{display:block;font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:color-mix(in srgb,var(--tool) 62%,var(--fg))}
+.idtx b{display:block;font-size:1.45rem;line-height:1.15;margin:2px 0 3px;font-weight:800}
+.idtx>span{display:block;font-size:.8rem;color:var(--muted-fg);line-height:1.3}
+/* phone: the title card and the rows tighten so home still fits one 375x812 screen */
+@media(max-width:560px){
+  .idcard{padding:9px 12px;gap:10px;margin-bottom:8px}
+  .idic{flex-basis:40px;height:40px;border-radius:10px;font-size:1.3rem}
+  .idtx b{font-size:1.25rem;margin:1px 0 2px}
+  .idtx small,.idtx>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lrow{padding:6px 12px;margin-bottom:5px}
+  .lic{flex-basis:36px;height:36px}
+  .lsec{margin:8px 4px 4px}
+  .hero{padding-top:9px;padding-bottom:9px}
+  .bnote{padding:6px 10px;margin-bottom:8px;line-height:1.35}
+}
+.shead .btn{padding:6px 12px;flex:0 0 auto}
+.card .lead{margin:0 0 4px;color:var(--muted-fg);font-size:.9rem;line-height:1.5}
+/* each screen's full explanation, folded under its one-line lead (self-explaining, but out of the way) */
+.how{margin:0 0 6px}
+.how>summary{cursor:pointer;font-size:.82rem;font-weight:650;color:var(--primary);list-style:none;display:inline-block;padding:2px 0}
+.how>summary::-webkit-details-marker{display:none}
+.how>summary::before{content:'ⓘ '}
+.how[open]{border-left:2px solid var(--border);padding-left:10px;margin:4px 0 10px}
+.how p,.how .note{font-size:.86rem;color:var(--muted-fg);margin:.4rem 0}
+/* ── written answers, learned from a short version (ported from hs2-final, itself hs2-test3's SAQ Trainer) ── */
+.sdoor{border-left:4px solid var(--danger)}
+.slist{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.srow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;border:1px solid var(--border);border-radius:var(--radius);
+  padding:8px 10px;background:var(--muted);cursor:pointer}
+.srow b{flex:1 1 160px;font-size:.86rem;font-weight:600}
+.srow .m{color:var(--muted-fg);font-size:.74rem;white-space:nowrap}
+.sbadge{font-size:.7rem;padding:1px 8px;border-radius:99px;background:var(--accent);color:var(--muted-fg);white-space:nowrap}
+.sbadge.lock{background:hsl(158 64% 42% / .2);color:var(--ok);font-weight:650}
+.sbadge.go{background:hsl(38 92% 55% / .18);color:var(--warn)}
+#sqBack,.qhead .tag{white-space:nowrap;flex:0 0 auto}
+.sstages{display:flex;gap:4px;margin:0 0 12px}
+.sstage{flex:1;font:inherit;font-size:.74rem;font-weight:600;padding:5px 2px;border-radius:6px;background:var(--muted);
+  color:var(--muted-fg);border:1px solid var(--border);cursor:pointer}
+.sstage.on{background:var(--primary);color:var(--onprimary);border-color:var(--primary)}
+.sask{font-weight:650;margin:0 0 10px;line-height:1.45}
+.shook{border:1px dashed var(--primary);border-radius:8px;padding:8px 10px;font-size:.88rem;margin:10px 0;line-height:1.45}
+.ssteps{margin:0 0 6px;padding-left:1.5em}
+.ssteps li{margin:7px 0;line-height:1.5}
+.ssteps b,.scheck b{color:var(--warn);font-weight:700}
+.sprog{display:flex;align-items:center;gap:10px;margin:0 0 6px}
+.scheck label{display:flex;gap:9px;align-items:flex-start;margin:9px 0;cursor:pointer;line-height:1.45;font-size:.92rem}
+.scheck input{margin-top:3px;width:18px;height:18px;flex:0 0 auto;accent-color:var(--ok)}
+.sres{font-size:1.7rem;font-weight:800;text-align:center;margin:.2rem 0}
+.syou{white-space:pre-wrap;font-size:.86rem;background:var(--muted);border-radius:8px;padding:8px 10px;margin:6px 0 10px}
+.sheet .sheeti{border-top:1px solid var(--border);padding-top:10px;margin-top:12px}
+.sheet h3{margin:0 0 4px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.sgrp{margin:12px 0 0}
+.sgq{font-size:.8rem;font-weight:700;color:var(--muted-fg);margin:0 0 2px}
+.ssteps.sfacts{margin:0}
+.ssteps.sfacts li{margin:4px 0;line-height:1.4}
+.sgap{display:block;width:100%;text-align:left;font:inherit;font-size:.9rem;color:var(--muted-fg);background:transparent;
+  border:1px dashed var(--primary);border-radius:8px;padding:7px 10px;cursor:pointer;line-height:1.4}
+.sgap.open{border-style:solid;color:var(--fg);cursor:default}
+.sgap.ok{border:1px solid var(--ok);color:var(--fg);cursor:default}
+.sgap.miss{border:1px solid var(--danger);color:var(--fg);cursor:default}
+.sgmk{display:flex;gap:6px;margin:5px 0 2px}
+.sgmk .btn{flex:1;padding:7px 10px;font-size:.84rem}
+.how.sfull{margin-top:14px}
+/* a correction line's reason, and the list's sections (her cases, then each module folded) */
+.sfix{font-size:.78rem;color:var(--warn);line-height:1.4;margin:2px 0 4px}
+.ssec{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-fg);margin:16px 0 4px}
+.smod{margin:8px 0 0;border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px}
+.smod>summary{cursor:pointer;font-weight:650;font-size:.88rem}
+/* the last-look sheet's quiz-row headings */
+.qmod{margin:14px 0 4px;font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted-fg)}
+
+/* ── Chart Sim's own ─────────────────────────────────────────────── */
+:root{--hand:"Bradley Hand","Segoe Print","Chalkboard SE","Comic Sans MS","Comic Neue",system-ui,sans-serif;--ink:#0b3ea8;--pen:#1d2433}
+header a.d{color:var(--primary);text-decoration:none;font-weight:600}
+.kick{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-fg);margin:0}
+.intro h2{margin:.1rem 0 .4rem;font-size:1.3rem}
+.intro p{margin:.3rem 0 .5rem;font-size:.93rem}
+details.how{border:1px solid var(--border);border-radius:var(--radius);background:var(--muted);padding:0 10px;margin-top:8px}
+details.how>summary{cursor:pointer;padding:9px 0;font-weight:650;font-size:.9rem}
+details.how p{font-size:.88rem;margin:.2rem 0 .6rem}
+.fld{margin:10px 0}
+.fld>span,.fld>label>span{display:block;font-size:.74rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted-fg);margin-bottom:4px}
+.fld small{display:block;color:var(--muted-fg);font-size:.8rem;margin-top:4px}
+input.tx{font:inherit;font-size:16px;color:var(--fg);background:var(--muted);border:1px solid var(--border);border-radius:8px;padding:9px 10px;width:100%}
+input.tx.time{width:7.5em;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.08em}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:99px;overflow:hidden;flex:0 0 auto}
+.seg button{font:inherit;font-size:.84rem;font-weight:650;border:0;background:transparent;color:var(--fg);padding:8px 13px;cursor:pointer;white-space:nowrap}
+.seg button.on{background:var(--primary);color:var(--onprimary)}
+label.chk{display:flex;gap:8px;align-items:center;font-size:.9rem;margin:10px 0 2px;cursor:pointer}
+label.chk input{width:18px;height:18px;accent-color:var(--primary)}
+.warnln{color:var(--danger);font-size:.86rem;margin:6px 0 0}
+.pcard{display:block;width:100%;text-align:left;font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--border);border-left:4px solid var(--tool,var(--primary));border-radius:var(--radius);padding:12px 14px;margin:0 0 10px;cursor:pointer}
+.pcard b{display:block;font-size:1.02rem}
+.pcard small{display:block;color:var(--muted-fg);font-size:.86rem;margin:2px 0 6px}
+.pcard .pp{font-size:.8rem;font-weight:650;color:var(--primary)}
+.foot{color:var(--muted-fg);font-size:.8rem;text-align:center;margin:16px 0 0}
+/* the simulator: header, a bar, the page tabs, then the chart beside (wide) or above (narrow) the panel */
+body.simon{overflow:hidden;height:100vh;height:100dvh;display:flex;flex-direction:column}
+body.simon header{position:static;flex:0 0 auto}
+body.simon main{display:none}
+#sim{flex:1 1 auto;min-height:0;display:grid;grid-template-rows:auto auto minmax(0,1fr)}
+.sbar{display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid var(--border)}
+.sbar .who{flex:1 1 auto;min-width:0;line-height:1.25}
+.sbar .who b{display:block;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sbar .who small{display:block;color:var(--muted-fg);font-size:.74rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btn.sm{padding:6px 9px;font-size:.84rem}
+.tabs{display:flex;gap:5px;align-items:center;padding:6px 8px;overflow-x:auto;border-bottom:1px solid var(--border);scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;border:1px solid var(--border);border-radius:8px;padding:6px 10px;background:transparent;color:var(--fg);font:inherit;font-size:.82rem;font-weight:650;cursor:pointer;white-space:nowrap;position:relative}
+.tab.on{background:var(--accent);border-color:var(--primary)}
+.tab.dot::after{content:'';position:absolute;top:3px;right:3px;width:7px;height:7px;border-radius:50%;background:var(--warn)}
+.zm{margin-left:auto;display:flex;gap:4px;flex:0 0 auto;padding-left:6px}
+.zm button{min-width:36px;padding:6px 8px}
+.stage{min-height:0;display:grid;grid-template-rows:minmax(0,1fr) auto;position:relative}
+.vp{overflow:auto;touch-action:none;background:#5b616c;overscroll-behavior:contain;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;position:relative}
+.vp.pen{cursor:crosshair}
+.vp svg{display:block;margin:10px auto;background:#fff;box-shadow:0 2px 14px rgb(0 0 0/.4)}
+.vp svg text{font-family:Arial,Helvetica,sans-serif}
+.vp svg .en{fill:var(--pen);font-family:var(--hand)}
+.vp svg .me{fill:var(--ink);font-family:var(--hand)}
+.vp svg .gh{fill:#067a52;font-family:var(--hand);opacity:.9}
+.vp svg .ty{fill:#111;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.vp svg path.en,.vp svg ellipse.en{fill:none;stroke:var(--pen)}
+.vp svg path.me,.vp svg ellipse.me{fill:none;stroke:var(--ink)}
+.vp svg path.gh,.vp svg ellipse.gh{fill:none;stroke:#067a52}
+.vp svg .inkp{fill:var(--ink)}
+.vp svg .hl{fill:rgb(245 158 11/.16);stroke:#f59e0b;stroke-width:1.8}
+.vp svg .hl.ok{fill:rgb(16 185 129/.16);stroke:#10b981}
+.vp svg .hl.bad{fill:rgb(239 68 68/.14);stroke:#ef4444}
+.vp svg .hl.sel{fill:rgb(59 130 246/.14);stroke:#3b82f6}
+.vp svg .hl.pulse{animation:pulse 1.2s ease-in-out 3}
+@keyframes pulse{50%{stroke-width:4}}
+.panel{border-top:1px solid var(--border);background:var(--card);max-height:46vh;max-height:46dvh;overflow:auto;overscroll-behavior:contain;position:relative}
+.panel .grab{position:sticky;top:0;z-index:2;display:flex;width:100%;justify-content:center;align-items:center;gap:6px;border:0;border-bottom:1px solid var(--border);background:var(--card);color:var(--muted-fg);font:inherit;font-size:.78rem;padding:4px 0;cursor:pointer}
+.panel.min #pbody{display:none}
+#pbody{padding:10px 14px 16px}
+#pbody h3{margin:.2rem 0 .3rem;font-size:1.02rem}
+#pbody .sub{color:var(--muted-fg);font-size:.84rem;margin:0 0 6px}
+#pbody .q{font-weight:700;font-size:1.02rem;margin:.3rem 0 .6rem;line-height:1.35}
+.meta{display:flex;justify-content:space-between;gap:8px;font-size:.76rem;color:var(--muted-fg);font-weight:650}
+.opts{display:flex;flex-direction:column;gap:6px}
+button.opt{width:100%;margin:0;text-align:left;font:inherit;font-size:.93rem;color:var(--fg);line-height:1.35;min-height:44px;background:var(--muted);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;cursor:pointer}
+button.opt.ok{border-color:var(--ok);box-shadow:inset 0 0 0 1px var(--ok)}
+button.opt.bad{border-color:var(--danger);box-shadow:inset 0 0 0 1px var(--danger)}
+button.opt:disabled{cursor:default}
+button.opt.dim{opacity:.55}
+.fb{margin:.6rem 0;padding:8px 10px;border-radius:8px;background:var(--muted);font-size:.9rem}
+.fb.ok{border-left:3px solid var(--ok)} .fb.bad{border-left:3px solid var(--danger)}
+.acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.acts .btn{flex:1 1 auto}
+.tapnote{border:1px dashed var(--primary);border-radius:8px;padding:8px 10px;font-size:.88rem;margin:.4rem 0}
+ul.brief{margin:.4rem 0;padding-left:1.1rem;font-size:.9rem}
+ul.brief li{margin:.25rem 0}
+.youare{font-size:.82rem;background:var(--muted);border-radius:8px;padding:6px 9px;margin:6px 0}
+.chipset{display:flex;flex-wrap:wrap;gap:6px}
+.chipset .chip{font-size:.86rem;padding:6px 11px}
+.chip.code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.elist{list-style:none;margin:6px 0;padding:0}
+.elist li{display:flex;gap:6px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:6px 8px;margin:0 0 5px;font-size:.85rem;background:var(--muted)}
+.elist li span{flex:1 1 auto;min-width:0}
+.elist li button{flex:0 0 auto}
+.res{list-style:none;margin:6px 0;padding:0}
+.res li{display:flex;gap:8px;align-items:flex-start;font-size:.88rem;padding:7px 8px;border-radius:8px;margin:0 0 5px;background:var(--muted);cursor:pointer;border-left:3px solid var(--danger)}
+.res li.ok{border-left-color:var(--ok)}
+.res li i{font-style:normal;flex:0 0 auto}
+.score{font-size:1.25rem;font-weight:800;margin:.2rem 0}
+.self{border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin:0 0 6px;font-size:.88rem}
+.self .mdl{font-family:var(--hand);color:#067a52;font-size:1rem;margin:3px 0 6px}
+.self .chipset .chip.on.no{background:var(--danger);border-color:var(--danger)}
+.tools{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.tools .btn{padding:8px 11px}
+.tools .btn.on{border-color:var(--primary);box-shadow:inset 0 0 0 1px var(--primary)}
+.small{font-size:.82rem;color:var(--muted-fg)}
+.toast{position:absolute;left:0;right:0;top:8px;margin:0 auto;width:max-content;max-width:calc(100% - 20px);background:rgb(15 18 25/.92);color:#fff;border-radius:10px;padding:8px 12px;font-size:.86rem;line-height:1.35;z-index:4;pointer-events:none;box-shadow:0 4px 16px rgb(0 0 0/.35)}
+@media (min-width:900px){
+  .stage{grid-template-columns:minmax(0,1fr) 390px;grid-template-rows:minmax(0,1fr)}
+  .panel{max-height:none;border-top:0;border-left:1px solid var(--border)}
+  .panel .grab{display:none}
+  .panel.min #pbody{display:block}
+  .toast{right:390px}
+}
+@media (max-width:560px){ .sbar .seg button{padding:7px 10px} }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="h1">Chart Sim</h1>
+  <a class="d" id="backLink" href="./">‹ Back to the Paper Sim</a>
+  <button class="btn ghost" id="themeBtn" title="theme">◐</button>
+  <button class="btn ghost" id="helpBtn" title="what is this?">?</button>
+</header>
+<main id="view"></main>
+<section id="sim" hidden>
+  <div class="sbar">
+    <button class="btn ghost sm" id="simBack" title="all patients">‹</button>
+    <div class="who"><b id="sWho"></b><small id="sNow"></small></div>
+    <div class="seg" id="modeSeg"><button data-mode="read">Read</button><button data-mode="chart">Chart it</button></div>
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div class="stage">
+    <div class="vp" id="vp"><svg id="svg" xmlns="http://www.w3.org/2000/svg"></svg></div>
+    <aside class="panel" id="panel"><button class="grab" id="grab">▾ hide</button><div id="pbody"></div></aside>
+    <div class="toast" id="toast" hidden></div>
+  </div>
+</section>
+<dialog id="help"></dialog>
+<script>
+const D = {"built":"2026-09-26","prefix":"phf.","hue":"#ea580c","short":"Pharm Paper Sim","back":"Pharm Final exam · Paper Sim","scenarios":[{"id":"hip","t":"Margaret Wilson, 82","sub":"Broken hip (#NOF) — day 2 after surgery","story":"Margaret fell at home on Monday and broke her left hip; it was pinned that afternoon. She has chronic kidney disease, high blood pressure and reflux. Overnight she was comfortable on oxycodone and had ondansetron for nausea at 0700. Yesterday her creatinine rose, so the house officer stopped her cilazapril and gave a dose of furosemide for crackles in her chest. It is Wednesday, 0730 — your first morning with her.","start":[28,9,2026],"now":"3@0730","patient":{"family":"WILSON","given":"Margaret","gender":"F","dob":"14/03/1944","nhi":"ZKM4827","weight":58,"height":160},"prescribers":[{"id":"hr","name":"RURU, Hana · Ortho Registrar","sig":"HRuru","reg":"48812"},{"id":"sp","name":"PATEL, Sam · House Officer","sig":"SPatel","reg":"51234"}],"nurses":[{"name":"WALSH, Ben · RN","init":"BW","reg":"240116"},{"name":"HALL, Jess · RN","init":"JH","reg":"233870"},{"name":"KEREAMA, Aroha · RN","init":"AK","reg":"231907"},{"name":"MOANA, Pita · RN","init":"PM","reg":"226341"},{"name":"TANE, Lisa · RN","init":"LT","reg":"198443"}],"allergies":[{"med":"PENICILLIN","rx":"Hives, lip swelling","by":"hr"}],"adverse":[{"med":"CODEINE","rx":"Vomiting, confusion","by":"hr"}],"special":["renal"],"supplementary":[],"vte":{"by":"hr","day":1,"anticoag":true,"stockings":true,"ipc":false},"o2":{"target":"92–96","rows":[{"start":1,"device":"Nasal prongs","flow":"2 L/min","by":"hr"}]},"regular":[{"L":"I","day":1,"startT":"1800","med":"PARACETAMOL","dose":"1","units":"g","route":"PO","freq":"QID","times":"0600 1200 1800 2200","by":"hr","inst":"Max 4 g in 24 h from all sources","given":{"1@1800":"BW","1@2200":"BW","2@0600":"AK","2@1200":"1215 LT","2@1800":"BW","2@2200":"R","3@0600":"AK"}},{"L":"J","day":2,"startT":"0800","med":"ENOXAPARIN","dose":"40","units":"mg","route":"SC","freq":"daily","times":"1800","by":"hr","inst":"Check platelets and eGFR","given":{"2@1800":"BW"}},{"L":"K","day":1,"startT":"1400","med":"METOPROLOL SUCCINATE CR","dose":"23.75","units":"mg","route":"PO","freq":"mane","times":"0800","by":"hr","inst":"Withhold if HR < 55 or SBP < 100 — tell dr","given":{"2@0800":"0815 LT"}},{"L":"L","day":1,"startT":"1400","med":"CILAZAPRIL","dose":"2.5","units":"mg","route":"PO","freq":"mane","times":"0800","by":"hr","given":{"2@0800":"0815 LT"},"cease":{"at":"2@1030","by":"sp"}},{"L":"M","day":1,"startT":"1400","med":"DOCUSATE + SENNOSIDES","dose":"2","units":"tab","route":"PO","freq":"nocte","times":"2000","by":"hr","given":{"1@2000":"N","2@2000":"BW"}},{"L":"N","day":1,"startT":"1400","med":"OMEPRAZOLE","dose":"20","units":"mg","route":"PO","freq":"mane","times":"0800","by":"hr","given":{"2@0800":"0815 LT"}}],"prn":[{"L":"A","day":1,"med":"OXYCODONE","dose":"2.5","range":"2.5 – 5","units":"mg","route":"PO","freq":"q4h","max":"20 mg","gapH":4,"maxAmount":20,"ind":"Pain","by":"hr","inst":"Controlled drug. Hold if drowsy or RR < 10","given":["1@2130 5mg PO BW/JH","2@0300 2.5mg PO AK/PM","2@0930 5mg PO LT/JH","2@1600 5mg PO BW/JH","2@2230 2.5mg PO BW/JH","3@0630 5mg PO AK/PM"]},{"L":"B","day":1,"med":"ONDANSETRON","dose":"4","units":"mg","route":"PO/IV","freq":"q8h","max":"12 mg","gapH":8,"maxAmount":12,"ind":"Nausea","by":"hr","given":["2@1400 4mg PO LT","3@0700 4mg IV AK/PM"]},{"L":"C","day":1,"med":"LACTULOSE","dose":"10","units":"mL","route":"PO","freq":"BD","max":"20 mL","gapH":8,"maxAmount":20,"ind":"Constipation","by":"hr","given":[]}],"once":[{"day":2,"med":"FUROSEMIDE","dose":"20","units":"mg","route":"IV","by":"sp","inst":"Crackles both bases","given":{"at":"2@1620","giv":"BW","chk":"JH"}}],"fluids":[{"day":1,"time":"1800","vol":1000,"fluid":"SODIUM CHLORIDE 0.9%","route":"IV","rate":83,"by":"hr","started":{"at":"1@1810","by":"BW","chk":"JH"},"done":{"at":"2@0610","vol":1000}},{"day":2,"time":"0600","vol":1000,"fluid":"PLASMA-LYTE 148","route":"IV","rate":83,"by":"sp","started":{"at":"2@0615","by":"AK","chk":"PM"},"done":{"at":"2@1815","vol":1000}},{"day":2,"time":"2000","vol":500,"fluid":"PLASMA-LYTE 148","route":"IV","rate":42,"by":"sp","started":{"at":"2@2010","by":"BW","chk":"JH"}},{"day":3,"time":"0800","vol":500,"fluid":"SODIUM CHLORIDE 0.9%","route":"IV","rate":42,"by":"sp"}],"questions":[{"id":"amox","tag":"Front page","q":"A new order for Margaret says amoxicillin. What do you do?","a":"Hold it — amoxicillin is a penicillin. Tell the prescriber","w":["Give it: the allergy says penicillin, not amoxicillin","Give it with an antihistamine, then watch for swelling","Give half the dose and check her lips every 15 minutes"],"show":["alg.0.med","alg.0.rx"],"why":"The Allergies box: PENICILLIN — hives and lip swelling. Amoxicillin (and flucloxacillin) are penicillins; a new order for one goes back to the prescriber."},{"id":"codeine","tag":"Front page","q":"The house officer asks whether Margaret can have codeine. What does her chart say?","a":"Codeine is an adverse reaction (vomiting, confusion), not an allergy","w":["Codeine is an allergy (hives, lip swelling) — never give it","Nothing: codeine is not written anywhere on her front page","Codeine must be charted on a supplementary chart instead"],"show":["adr.0.med","adr.0.rx"],"why":"The Adverse Reactions box, beside Allergies. Not an immune reaction — but it made her vomit and confused, so the prescriber weighs it."},{"id":"ncode","tag":"Regular","q":"Day 1’s 2000 laxative shows “N”. Where do you find out why it wasn’t given?","a":"In the clinical notes — “N” says the reason is written there","w":["In the PRN record — “N” says it was given as a PRN instead","On the fluid chart — “N” means she was nil by mouth all day","Nowhere — “N” simply means she refused it, so no reason is needed"],"show":["reg.M.d1.s3.gc"],"why":"N on the chart’s key: “Not administered — document reason in notes”. (R is the code for refused.)"},{"id":"tapcancel","kind":"tap","tag":"Regular","q":"Tap the box that says who stopped the cilazapril, and when.","accept":["reg.L.cancel"],"why":"“Sign, date and time to cancel” on row L — and the order and the days after it are crossed through."},{"id":"fluidnow","stage":1,"tag":"Fluids","q":"Which IV fluid is running now, and at what rate?","a":"Sodium chloride 0.9%, 500 mL at 42 mL/hr (line 4)","w":["Plasma-Lyte 148, 500 mL at 42 mL/hr (line 3)","Sodium chloride 0.9%, 1000 mL at 83 mL/hr (line 1)","Plasma-Lyte 148, 1000 mL at 83 mL/hr (line 2)"],"show":["fl.3.fluid","fl.3.rate","fl.3.astart"],"why":"The IV fluid record: the line with an actual commencing time and no completion time is the bag running now."}],"rounds":[{"at":"3@0805","rn":"LT","title":"0800 med round","brief":["Your first morning with Lisa Tane (RN, initials LT). You have not signed Margaret’s chart before.","0805 — with Lisa checking, you give Margaret all of her 0800 tablets except the metoprolol: her heart rate is 52, and Dr Patel says on the phone to withhold this morning’s dose.","0810 — the Plasma-Lyte bag (IV fluids line 3) has finished: all 500 mL in.","0815 — you and Lisa hang the next bag on her fluid chart."],"ask":[{"id":"r1hr","tag":"Judgement","q":"Margaret’s heart rate is 52 before her metoprolol (a beta-blocker). What is the safe move?","a":"Hold it and tell your RN, who calls the prescriber","w":["Give it: it is charted for 0800, so it is due now","Give half the dose and recheck her pulse in an hour","Skip it and write R (refused) in the dose box"],"show":["reg.K.inst"],"why":"Pharmacy & special instructions on row K: withhold if HR < 55. Withholding is the prescriber’s call — then the box gets D."}],"expect":[{"do":"reg"},{"do":"sign","c":"reg.N.d3.s1","t":"0805"},{"do":"code","c":"reg.K.d3.s1","code":"D","why":"Withheld on the prescriber’s instruction — Lisa writes up the phone call in the notes."},{"do":"none","c":"reg.L.d3","what":"Cilazapril (row L)","why":"it was stopped yesterday at 1030 — crossed through, cancel box signed — so it is not one of her 0800 tablets any more."},{"do":"fluidend","i":2,"t":"0810","vol":500},{"do":"fluid","i":3,"t":"0815"}]},{"at":"3@1045","rn":"LT","title":"Pain before physio","brief":["1040 — Margaret’s hip pain is 7/10 and the physio is coming at 1100. She asks for something for the pain.","1045 — after checking her chart, you and Lisa give her 5 mg of oxycodone PO. It is a controlled drug, so Lisa checks it with you."],"ask":[{"id":"r2can","tag":"PRN","q":"It is 1040. Can Margaret have PRN oxycodone now?","a":"Yes — last dose 0630 (4-hourly); 12.5 mg of 20 mg in 24 h","w":["No — the last dose was 0630, so not until 1230","No — she has already had the 20 mg 24-hour maximum","Only if the prescriber writes a new once-only order"],"show":["prn.A.freq","prn.A.max","prn.A.5.time"],"why":"Frequency q4h and Max dose/24hrs 20 mg on the order; the record’s last line is 0630 today. Since 1040 yesterday: 5 + 2.5 + 5 = 12.5 mg."}],"expect":[{"do":"prn","L":"A","dose":["5mg","5 mg","5"],"route":"PO","t":"1045"}]},{"at":"3@1210","rn":"LT","title":"Midday","brief":["1205 — with Lisa checking, you give Margaret the paracetamol due at 1200.","1210 — Margaret says she feels sick again and asks for something for it. You check her chart with Lisa."],"ask":[{"id":"r3ond","tag":"PRN","q":"Can Margaret have PRN ondansetron at 1210?","a":"Not yet — given at 0700 and 8-hourly: not before 1500","w":["Yes — 4 mg PO now, because the last dose was IV","Yes — PRN means whenever she asks for it","No — she has had the 12 mg 24-hour maximum"],"show":["prn.B.freq","prn.B.1.time"],"why":"Frequency q8h on the order; the last record line is 0700 today, IV. The route does not reset the clock."}],"expect":[{"do":"sign","c":"reg.I.d3.s2","t":"1205"},{"do":"none","c":"prn.B","what":"Ondansetron (PRN B)","why":"the last dose was 0700 and it is 8-hourly — not before 1500. Lisa asks the house officer to review Margaret’s nausea."}]}]},{"id":"copd","t":"Hemi Parata, 67","sub":"COPD flare — day 3 on the medical ward","story":"Hemi came in on Monday short of breath with a chest infection on top of his COPD. He has type 2 diabetes (his insulin is on its own chart) and high cholesterol. He is on prednisone and doxycycline, regular salbutamol nebs and 1 L/min of oxygen. Overnight on Monday he was wheezy, and the night nurse gave an extra neb on a phone order. It is Wednesday, 0730.","start":[5,10,2026],"now":"3@0730","patient":{"family":"PARATA","given":"Hemi","gender":"M","dob":"02/07/1959","nhi":"ZHT5291","weight":71,"height":174},"prescribers":[{"id":"dm","name":"MAHE, Daniel · Med Registrar","sig":"DMahe","reg":"39120"},{"id":"kw","name":"WONG, Kelly · House Officer","sig":"KWong","reg":"52287"}],"nurses":[{"name":"FALE, Losa · RN","init":"LF","reg":"229845"},{"name":"TUHI, Mere · RN","init":"MT","reg":"187650"},{"name":"KEREOPA, Tui · RN","init":"TK","reg":"238802"},{"name":"SINGH, Priya · RN","init":"PS","reg":"212334"},{"name":"BARNES, Jack · RN","init":"JB","reg":"236021"}],"allergies":[],"allergyBy":"dm","adverse":[],"adverseBy":"dm","special":[],"supplementary":["insulin"],"vte":{"by":"dm","day":1,"anticoag":true,"stockings":false,"ipc":false},"o2":{"target":"88–92","rows":[{"start":1,"device":"Nasal prongs","flow":"1 L/min","by":"dm"}]},"regular":[{"L":"I","day":1,"startT":"1400","med":"PREDNISONE","dose":"40","units":"mg","route":"PO","freq":"mane","times":"0800","by":"dm","inst":"5 days — last dose 9/10/26. With food","given":{"2@0800":"0810 PS"}},{"L":"J","day":1,"startT":"1400","med":"DOXYCYCLINE","dose":"100","units":"mg","route":"PO","freq":"daily","times":"0800","by":"dm","inst":"After 200 mg load (Once Only). Sit up, full glass of water","given":{"2@0800":"0810 PS"}},{"L":"K","day":1,"startT":"1400","med":"TIOTROPIUM","dose":"18","units":"mcg","route":"INH","freq":"mane","times":"0800","by":"dm","inst":"Own inhaler — assessed to self-administer","given":{"2@0800":"SM"}},{"L":"L","day":1,"startT":"1400","med":"SALBUTAMOL","dose":"5","units":"mg","route":"NEB","freq":"QID","times":"0600 1200 1800 2200","by":"dm","inst":"Nebulise with medical AIR, not oxygen","given":{"1@1800":"LF","1@2200":"LF","2@0600":"MT","2@1200":"1210 PS","2@1800":"LF","2@2200":"LF","3@0600":"MT"}},{"L":"M","day":1,"startT":"1400","med":"METFORMIN","dose":"500","units":"mg","route":"PO","freq":"BD","times":"0800 1800","by":"dm","inst":"With food","given":{"1@1800":"LF","2@0800":"0810 PS","2@1800":"LF"}},{"L":"N","day":1,"startT":"1400","med":"ATORVASTATIN","dose":"40","units":"mg","route":"PO","freq":"nocte","times":"2000","by":"dm","given":{"1@2000":"LF","2@2000":"R"}},{"L":"O","day":1,"startT":"1400","med":"ENOXAPARIN","dose":"40","units":"mg","route":"SC","freq":"daily","times":"1800","by":"dm","given":{"1@1800":"LF","2@1800":"LF"}}],"prn":[{"L":"A","day":1,"med":"PARACETAMOL","dose":"1","units":"g","route":"PO","freq":"q4h","max":"4 g","gapH":4,"maxAmount":4,"ind":"Pain / fever","by":"kw","given":["2@0900 1g PO PS","2@1500 1g PO PS","2@2200 1g PO LF","3@0400 1g PO MT"]},{"L":"B","day":1,"med":"ZOPICLONE","dose":"3.75","units":"mg","route":"PO","freq":"nocte","max":"3.75 mg","gapH":20,"maxAmount":3.75,"ind":"Sleep","by":"kw","given":["2@2215 3.75mg PO LF"]}],"once":[{"day":1,"med":"DOXYCYCLINE","dose":"200","units":"mg","route":"PO","by":"dm","inst":"Loading dose","given":{"at":"1@1430","giv":"LF","chk":""}},{"day":3,"from":1,"med":"IPRATROPIUM BROMIDE","dose":"500","units":"mcg","route":"NEB","by":"dm","inst":"Stat. Nebulise with medical AIR"}],"verbal":[{"at":"2@0310","med":"SALBUTAMOL","dose":"5","units":"mg","route":"NEB","pname":"Dr Kelly Wong","given":{"at":"2@0315","nurse":"MT","witness":"TK"}}],"questions":[{"id":"air","kind":"tap","tag":"Regular","q":"Tap where the chart says how Hemi’s salbutamol nebs must be run.","accept":["reg.L.inst"],"why":"Pharmacy & special instructions on row L: nebulise with medical air. Driving a neb with oxygen can push up the CO₂ of someone with COPD."},{"id":"sat97","tag":"Oxygen","q":"Hemi’s SpO₂ is 97% on 1 L/min. What does his chart tell you?","a":"He is above his 88–92% target — tell the RN, who may turn it down","w":["Nothing — 97% is a normal saturation, so leave the oxygen running","Turn the oxygen up — the higher his saturation, the better for COPD","Take the prongs off now — his target is to be off oxygen by day 3"],"show":["o2.target"],"why":"Target Oxygen Saturation on the oxygen section: 88–92%. Above target is a finding too, for someone who retains CO₂."},{"id":"ipra","stage":1,"kind":"tap","tag":"Once Only","q":"Dr Mahe has just charted a stat nebuliser. Tap its order.","accept":["once.1.*"],"why":"The Once Only page, second order: IPRATROPIUM BROMIDE 500 mcg NEB, stat."}],"rounds":[{"at":"3@0810","rn":"JB","title":"0800 med round","brief":["Your morning with Jack Barnes (RN, initials JB). You have not signed Hemi’s chart before.","0800 — Hemi takes his own tiotropium inhaler. He has been assessed as safe to self-medicate, and keeps it at the bedside.","0810 — with Jack checking, you give Hemi every other medicine due at 0800, with his breakfast."],"ask":[{"id":"r1sm","tag":"Codes","q":"Hemi used his own inhaler. What goes in his 0800 tiotropium box?","a":"SM — self-medicating","w":["Your initials — you saw him take it","R — he refused the ward’s inhaler","Nothing — it is his own medicine"],"show":["reg.K.inst","reg.K.d2.s1.gc"],"why":"The chart’s key: SM, self-medicating. Yesterday’s box on row K shows the same."}],"expect":[{"do":"reg"},{"do":"code","c":"reg.K.d3.s1","code":"SM","why":"He took it himself — self-medicating — so the box gets SM, not your initials."},{"do":"sign","c":"reg.I.d3.s1","t":"0810"},{"do":"sign","c":"reg.J.d3.s1","t":"0810"},{"do":"sign","c":"reg.M.d3.s1","t":"0810"}]},{"at":"3@0920","rn":"JB","title":"A stat neb","brief":["On the 0900 ward round Dr Mahe charts a stat ipratropium nebuliser on the Once Only page.","0920 — you and Jack give it, run with medical air."],"expect":[{"do":"once","i":1,"t":"0920"}]},{"at":"3@1405","rn":"JB","title":"Back from X-ray","brief":["1150 to 1340 — Hemi is away at X-ray, so his 1200 salbutamol neb is not given. Jack lets the team know; the next is due at 1800.","1405 — back on the ward, Hemi has a headache and asks for paracetamol. You check his chart with Jack, then give 1 g PO."],"ask":[{"id":"r3para","tag":"PRN","q":"Can Hemi have 1 g of paracetamol at 1405?","a":"Yes — 3 g in 24 h so far; 1 g more is the 4 g max","w":["No — he has already had 4 g in the last 24 hours","No — the last dose was at 0400, so not until 1600","Yes — PRN paracetamol has no daily maximum"],"show":["prn.A.max","prn.A.1.time","prn.A.2.time","prn.A.3.time"],"why":"Since 1405 yesterday: 1500, 2200 and 0400 — three doses, 3 g. Max dose/24hrs is 4 g, so one more is the limit."}],"expect":[{"do":"code","c":"reg.L.d3.s2","code":"U","why":"He was off the ward at X-ray — patient unavailable."},{"do":"prn","L":"A","dose":["1g","1 g","1000mg","1000 mg"],"route":"PO","t":"1405"}]}]},{"id":"cell","t":"Grace Liu, 58","sub":"Leg cellulitis — IV to oral antibiotics today","story":"Grace came in through ED on Monday with cellulitis of her left lower leg. She has type 2 diabetes, atrial fibrillation (her warfarin is on its own chart) and glaucoma. She has had IV flucloxacillin 6-hourly; the 0600 dose was missed because her cannula had tissued. On this morning’s ward round the leg looked much better, so the house officer switched her to oral flucloxacillin. It is Wednesday, 1030; her 0800 tablets are done.","start":[12,10,2026],"now":"3@1030","patient":{"family":"LIU","given":"Grace","gender":"F","dob":"19/11/1967","nhi":"ZRB7730","weight":92,"height":163},"prescribers":[{"id":"ed","name":"HURA, Tom · ED Registrar","sig":"THura","reg":"40455"},{"id":"ao","name":"OSEI, Ama · Med Registrar","sig":"AOsei","reg":"41876"},{"id":"kj","name":"JAMES, Kiri · House Officer","sig":"KJames","reg":"53301"}],"nurses":[{"name":"PETERS, Ana · RN (ED)","init":"AP","reg":"219934"},{"name":"BELL, Nina · RN","init":"NB","reg":"241187"},{"name":"LEE, Tanya · RN","init":"TL","reg":"235560"},{"name":"SMITH, Kate · RN","init":"KS","reg":"205512"},{"name":"FONG, Mei · RN","init":"MF","reg":"228406"},{"name":"ANARU, Rawiri · RN","init":"RA","reg":"209973"}],"allergies":[{"med":"CO-TRIMOXAZOLE","rx":"Widespread rash, blisters","by":"ao"}],"adverse":[{"med":"MORPHINE","rx":"Itch, nausea","by":"ao"}],"special":[],"supplementary":["warfarin"],"vte":{"by":"ao","day":1,"anticoag":true,"stockings":false,"ipc":false},"regular":[{"L":"I","day":1,"startT":"1800","med":"FLUCLOXACILLIN","dose":"2","units":"g","route":"IV","freq":"q6h","times":"0600 1200 1800 2400","by":"ao","inst":"In 100 mL NaCl 0.9% over 30 min","given":{"1@1800":"NB/TL","1@2400":"KS/MF","2@0600":"KS/MF","2@1200":"1215 RA/NB","2@1800":"NB/TL","2@2400":"KS/MF","3@0600":"N"},"cease":{"at":"3@1000","by":"kj"}},{"L":"J","day":3,"startT":"1000","med":"FLUCLOXACILLIN","dose":"1","units":"g","route":"PO","freq":"QID","times":"0600 1200 1800 2200","by":"kj","inst":"Empty stomach, 1 h before food. Oral switch from row I"},{"L":"K","day":1,"startT":"1400","med":"METFORMIN","dose":"1","units":"g","route":"PO","freq":"BD","times":"0800 1800","by":"ao","inst":"With food","given":{"1@1800":"NB","2@0800":"0810 RA","2@1800":"NB","3@0800":"0805 RA"}},{"L":"L","day":1,"startT":"1400","med":"LATANOPROST 0.005%","dose":"1","units":"drop","route":"EYE","freq":"nocte","times":"2000","by":"ao","inst":"BOTH eyes. Husband puts them in, as at home","given":{"1@2000":"CP","2@2000":"CP"}},{"L":"M","day":1,"startT":"1400","med":"LOSARTAN","dose":"50","units":"mg","route":"PO","freq":"mane","times":"0800","by":"ao","given":{"2@0800":"0810 RA","3@0800":"0805 RA"}}],"prn":[{"L":"A","day":1,"med":"PARACETAMOL","dose":"1","units":"g","route":"PO","freq":"q6h","max":"4 g","gapH":6,"maxAmount":4,"ind":"Pain / fever","by":"ao","given":["2@1000 1g PO RA","2@2100 1g PO NB","3@0500 1g PO KS"]},{"L":"B","day":1,"med":"TRAMADOL","dose":"50","range":"50 – 100","units":"mg","route":"PO","freq":"q6h","max":"400 mg","gapH":6,"maxAmount":400,"ind":"Pain","by":"ao","given":["2@1400 50mg PO RA","3@0200 100mg PO KS"]}],"once":[{"day":1,"med":"FLUCLOXACILLIN","dose":"2","units":"g","route":"IV","by":"ed","inst":"Stat in ED","given":{"at":"1@1310","giv":"AP","chk":"NB"}}],"fluids":[{"day":1,"time":"1330","vol":1000,"fluid":"SODIUM CHLORIDE 0.9%","route":"IV","rate":125,"by":"ed","started":{"at":"1@1335","by":"AP","chk":"NB"},"done":{"at":"1@2135","vol":1000}}],"questions":[{"id":"ncode","tag":"Regular","q":"Today’s 0600 IV flucloxacillin shows “N”. What does that tell you?","a":"Not given — the reason is written in the clinical notes","w":["Given — N is the night nurse’s initial in the register","Not given, because Grace refused it","Given late, at the next dose time"],"show":["reg.I.d3.s0.gc"],"why":"N on the chart’s key: not administered — document reason in notes. Here, the cannula had tissued. (R would mean refused.)"},{"id":"cp","tag":"Regular","q":"Row L (latanoprost) shows CP each night. Who put the drops in?","a":"Her husband — CP is carer/parent","w":["The charge nurse — CP is charge person","Nobody — CP means cancelled by prescriber","Grace herself — CP means “can do personally”"],"show":["reg.L.d2.s3.gc","reg.L.inst"],"why":"CP, carer/parent, on the chart’s key — and the order’s instructions say her husband gives them, as at home."},{"id":"ivpo","kind":"tap","tag":"Regular","q":"The house officer switched flucloxacillin from IV to oral this morning. Tap the NEW order.","accept":["reg.J.*"],"why":"Row J, dated today. The chart’s rule: to alter therapy, stop the original order and prescribe on a new line — never change the old one."},{"id":"coTri","tag":"Front page","q":"Grace’s allergy is co-trimoxazole. What did it do to her?","a":"A widespread rash with blisters","w":["Itch and nausea after each dose","Hives and swelling of her lips","Nothing — only the drug is written"],"show":["alg.0.rx"],"why":"The Reaction column of the Allergies box. Itch and nausea is morphine — and that is in Adverse Reactions, not Allergies."}],"rounds":[{"at":"3@1205","rn":"RA","title":"Midday","brief":["Your day with Rawiri Anaru (RN, initials RA). You have not signed Grace’s chart before.","1205 — with Rawiri checking, you give Grace her first dose of oral flucloxacillin, an hour before lunch."],"ask":[{"id":"r1line","tag":"Regular","q":"Which line do you sign for the 1200 flucloxacillin?","a":"Row J — the new oral order","w":["Row I — the IV order, in its 1200 box","Both rows — it is the same medicine","Neither — write it in the notes"],"show":["reg.J.med","reg.I.cancel"],"why":"Row I was stopped at 1000 and crossed through; row J is the order you are giving from."}],"expect":[{"do":"reg"},{"do":"sign","c":"reg.J.d3.s2","t":"1205"},{"do":"none","c":"reg.I.d3","what":"IV flucloxacillin (row I)","why":"it was stopped at 1000 and re-charted as oral on row J — the 1200 dose belongs to the new line."}]},{"at":"3@1400","rn":"RA","title":"Pain","brief":["1400 — Grace’s leg pain is 6/10. After checking her chart with Rawiri, you give her paracetamol 1 g and tramadol 50 mg, both PO."],"ask":[{"id":"r2both","tag":"PRN","q":"Can Grace have both at 1400?","a":"Yes — paracetamol last at 0500, tramadol at 0200; both 6-hourly","w":["Only the paracetamol — tramadol was given too recently","Only the tramadol — paracetamol has hit its maximum","Neither — two PRN painkillers can’t be given together"],"show":["prn.A.2.time","prn.B.1.time","prn.A.freq","prn.B.freq"],"why":"The last line of each PRN record, and q6h on both orders: 0500 + 6 h = 1100, 0200 + 6 h = 0800."}],"expect":[{"do":"prn","L":"A","dose":["1g","1 g","1000mg","1000 mg"],"route":"PO","t":"1400"},{"do":"prn","L":"B","dose":["50mg","50 mg","50"],"route":"PO","t":"1400"}]}]}]};
+/* perfect-freehand 1.2.3 (MIT, Steve Ruiz) — vendor/perfect-freehand-1.2.3.mjs, pinned by sha256 */
+const PF = (() => {
+const{PI:e}=Math,t=e+1e-4,n=.5,r=[1,1];function i(e,t,n,r=e=>e){return e*r(.5-t*(.5-n))}const{min:a}=Math;function o(e,t,n){let r=a(1,t/n);return a(1,e+(a(1,1-r)-e)*(r*.275))}function s(e){return[-e[0],-e[1]]}function c(e,t){return[e[0]+t[0],e[1]+t[1]]}function l(e,t,n){return e[0]=t[0]+n[0],e[1]=t[1]+n[1],e}function u(e,t){return[e[0]-t[0],e[1]-t[1]]}function d(e,t,n){return e[0]=t[0]-n[0],e[1]=t[1]-n[1],e}function f(e,t){return[e[0]*t,e[1]*t]}function p(e,t,n){return e[0]=t[0]*n,e[1]=t[1]*n,e}function m(e,t){return[e[0]/t,e[1]/t]}function h(e){return[e[1],-e[0]]}function g(e,t){let n=t[0];return e[0]=t[1],e[1]=-n,e}function ee(e,t){return e[0]*t[0]+e[1]*t[1]}function _(e,t){return e[0]===t[0]&&e[1]===t[1]}function v(e){return Math.hypot(e[0],e[1])}function y(e,t){let n=e[0]-t[0],r=e[1]-t[1];return n*n+r*r}function b(e){return m(e,v(e))}function x(e,t){return Math.hypot(e[1]-t[1],e[0]-t[0])}function S(e,t,n){let r=Math.sin(n),i=Math.cos(n),a=e[0]-t[0],o=e[1]-t[1],s=a*i-o*r,c=a*r+o*i;return[s+t[0],c+t[1]]}function C(e,t,n,r){let i=Math.sin(r),a=Math.cos(r),o=t[0]-n[0],s=t[1]-n[1],c=o*a-s*i,l=o*i+s*a;return e[0]=c+n[0],e[1]=l+n[1],e}function w(e,t,n){return c(e,f(u(t,e),n))}function te(e,t,n,r){let i=n[0]-t[0],a=n[1]-t[1];return e[0]=t[0]+i*r,e[1]=t[1]+a*r,e}function T(e,t,n){return c(e,f(t,n))}const E=[0,0],D=[0,0],O=[0,0];function k(e,n){let r=T(e,b(h(u(e,c(e,[1,1])))),-n),i=[],a=1/13;for(let n=a;n<=1;n+=a)i.push(S(r,e,t*2*n));return i}function A(e,n,r){let i=[],a=1/r;for(let r=a;r<=1;r+=a)i.push(S(n,e,t*r));return i}function j(e,t,n){let r=u(t,n),i=f(r,.5),a=f(r,.51);return[u(e,i),u(e,a),c(e,a),c(e,i)]}function M(e,n,r,i){let a=[],o=T(e,n,r),s=1/i;for(let n=s;n<1;n+=s)a.push(S(o,e,t*3*n));return a}function ne(e,t,n){return[c(e,f(t,n)),c(e,f(t,n*.99)),u(e,f(t,n*.99)),u(e,f(t,n))]}function N(e,t,n){return e===!1||e===void 0?0:e===!0?Math.max(t,n):e}function re(e,t,n){return e.slice(0,10).reduce((e,r)=>{let i=r.pressure;return t&&(i=o(e,r.distance,n)),(e+i)/2},e[0].pressure)}function P(e,n={}){let{size:r=16,smoothing:a=.5,thinning:f=.5,simulatePressure:m=!0,easing:_=e=>e,start:v={},end:b={},last:x=!1}=n,{cap:S=!0,easing:w=e=>e*(2-e)}=v,{cap:T=!0,easing:P=e=>--e*e*e+1}=b;if(e.length===0||r<=0)return[];let F=e[e.length-1].runningLength,I=N(v.taper,r,F),L=N(b.taper,r,F),R=(r*a)**2,z=[],B=[],V=re(e,m,r),H=i(r,f,e[e.length-1].pressure,_),U,W=e[0].vector,G=e[0].point,K=G,q=G,J=K,Y=!1;for(let n=0;n<e.length;n++){let{pressure:a}=e[n],{point:s,vector:h,distance:v,runningLength:b}=e[n],x=n===e.length-1;if(!x&&F-b<3)continue;f?(m&&(a=o(V,v,r)),H=i(r,f,a,_)):H=r/2,U===void 0&&(U=H);let S=b<I?w(b/I):1,T=F-b<L?P((F-b)/L):1;H=Math.max(.01,H*Math.min(S,T));let k=(x?e[n]:e[n+1]).vector,A=x?1:ee(h,k),j=ee(h,W)<0&&!Y,M=A!==null&&A<0;if(j||M){g(E,W),p(E,E,H);for(let e=0;e<=1;e+=.07692307692307693)d(D,s,E),C(D,D,s,t*e),q=[D[0],D[1]],z.push(q),l(O,s,E),C(O,O,s,t*-e),J=[O[0],O[1]],B.push(J);G=q,K=J,M&&(Y=!0);continue}if(Y=!1,x){g(E,h),p(E,E,H),z.push(u(s,E)),B.push(c(s,E));continue}te(E,k,h,A),g(E,E),p(E,E,H),d(D,s,E),q=[D[0],D[1]],(n<=1||y(G,q)>R)&&(z.push(q),G=q),l(O,s,E),J=[O[0],O[1]],(n<=1||y(K,J)>R)&&(B.push(J),K=J),V=a,W=h}let X=[e[0].point[0],e[0].point[1]],Z=e.length>1?[e[e.length-1].point[0],e[e.length-1].point[1]]:c(e[0].point,[1,1]),Q=[],$=[];if(e.length===1){if(!(I||L)||x)return k(X,U||H)}else{I||L&&e.length===1||(S?Q.push(...A(X,B[0],13)):Q.push(...j(X,z[0],B[0])));let t=h(s(e[e.length-1].vector));L||I&&e.length===1?$.push(Z):T?$.push(...M(Z,t,H,29)):$.push(...ne(Z,t,H))}return z.concat($,B.reverse(),Q)}const F=[0,0];function I(e){return e!=null&&e>=0}function L(e,t={}){let{streamline:i=.5,size:a=16,last:o=!1}=t;if(e.length===0)return[];let s=.15+(1-i)*.85,l=Array.isArray(e[0])?e:e.map(({x:e,y:t,pressure:r=n})=>[e,t,r]);if(l.length===2){let e=l[1];l=l.slice(0,-1);for(let t=1;t<5;t++)l.push(w(l[0],e,t/4))}l.length===1&&(l=[...l,[...c(l[0],r),...l[0].slice(2)]]);let u=[{point:[l[0][0],l[0][1]],pressure:I(l[0][2])?l[0][2]:.25,vector:[...r],distance:0,runningLength:0}],f=!1,p=0,m=u[0],h=l.length-1;for(let e=1;e<l.length;e++){let t=o&&e===h?[l[e][0],l[e][1]]:w(m.point,l[e],s);if(_(m.point,t))continue;let r=x(t,m.point);if(p+=r,e<h&&!f){if(p<a)continue;f=!0}d(F,m.point,t),m={point:t,pressure:I(l[e][2])?l[e][2]:n,vector:b(F),distance:r,runningLength:p},u.push(m)}return u[0].vector=u[1]?.vector||[0,0],u}function R(e,t={}){return P(L(e,t),t)}var z=R;
+
+return R;
+})();
+const CE = (() => {
+/* Chart Sim's engine: pure functions, no DOM, no imports. build-chart.mjs inlines this file into chart.html (with
+   `export ` stripped) AND imports it to audit every scenario — so the questions and checks the build proves are the
+   ones the page runs.
+
+   A scenario (content/chart/*.js) describes one patient's 8-Day National Medication Chart in a few lines per order;
+   compile() turns it into V, a map from every cell on the chart (see the cell ids in chart-render.mjs) to what is
+   written there, plus the structured facts the questions are generated from. */
+
+/* The regular-medicine time boxes printed on the NZ chart (NMC8D) beside every order */
+const PRINTED = ['0600', '0800', '1400', '1800', '2200'];
+/* The chart's own non-administration key (NMC8D, 2012 ed., p. 11) */
+const CODES = { U: 'Patient unavailable', SM: 'Self-medicating', CP: 'Carer/Parent', R: 'Patient refused', D: 'Prescriber’s instructions', N: 'Not administered — reason in notes' };
+const PRN_LINES = 20;      // record lines per PRN order: 4 groups × 5 (NMC8D p. 5)
+
+const toMin = hhmm => { const t = String(hhmm).padStart(4, '0'); return +t.slice(0, 2) * 60 + +t.slice(2); };
+const abs = (day, hhmm) => (day - 1) * 1440 + toMin(hhmm);                 // minutes since 0000 on day 1
+const hhmm = m => { m = ((m % 1440) + 1440) % 1440; return String(Math.floor(m / 60)).padStart(2, '0') + String(m % 60).padStart(2, '0'); };
+const parseAt = at => { const m = /^(\d)@(\d{4})$/.exec(at); if (!m) throw new Error('bad time "' + at + '" — want day@HHMM'); return { day: +m[1], t: m[2], m: abs(+m[1], m[2]) }; };
+
+/* the chart's dates: day 1 = start, written d/m/yy as a nurse would */
+function dayDate(S, day) {
+  const [d, mo, y] = S.start, dt = new Date(Date.UTC(y, mo - 1, d + day - 1));
+  return `${dt.getUTCDate()}/${dt.getUTCMonth() + 1}/${String(dt.getUTCFullYear()).slice(2)}`;
+}
+const WEEKDAY = (S, day) => { const [d, mo, y] = S.start; return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Date(Date.UTC(y, mo - 1, d + day - 1)).getUTCDay()]; };
+
+/* Where each prescribed time sits in the five printed rows: a printed time is circled; any other time is written
+   in the box beside the nearest free printed row (e.g. 2000 beside 1800). */
+function slotsFor(times) {
+  const out = [null, null, null, null, null];
+  const list = String(times || '').split(/\s+/).filter(Boolean);
+  for (const t of list) { const i = PRINTED.indexOf(t); if (i >= 0) out[i] = { t, circled: true }; }
+  for (const t of list) {
+    if (PRINTED.includes(t)) continue;
+    let best = -1, bd = 1e9;
+    PRINTED.forEach((p, i) => { const d = Math.abs(toMin(p) - toMin(t)); if (!out[i] && d < bd) { bd = d; best = i; } });
+    if (best < 0) throw new Error('no free time row for ' + t);
+    out[best] = { t, circled: false };
+  }
+  return out;
+}
+
+/* "0810 AK/LT" → {t:'0810', giv:'AK', chk:'LT'} · "AK" → given at the slot time · "R" / "D" … → a code */
+function parseAdmin(v, slotT) {
+  const s = String(v).trim();
+  if (CODES[s]) return { code: s };
+  const m = /^(?:(\d{4})\s+)?([A-Z]{2,3})(?:\/([A-Z]{2,3}))?(?:\s+dose=(\S+))?$/.exec(s);
+  if (!m) throw new Error('bad administration entry "' + v + '"');
+  return { t: m[1] || slotT, giv: m[2], chk: m[3] || '', dose: m[4] || '' };
+}
+/* "2@0610 1g PO AK/LT" → a PRN record line */
+function parsePrn(v) {
+  const m = /^(\d@\d{4})\s+(\S+)\s+(\S+)\s+([A-Z]{2,3})(?:\/([A-Z]{2,3}))?$/.exec(String(v).trim());
+  if (!m) throw new Error('bad PRN record "' + v + '"');
+  const a = parseAt(m[1]);
+  return { day: a.day, t: a.t, m: a.m, dose: m[2], route: m[3], giv: m[4], chk: m[5] || '' };
+}
+/* a dose written in the record ("1g", "500mg", "2.5mg") as an amount in the order's own units, for the 24-hour sum */
+function doseAmount(txt, units) {
+  const m = /^([\d.]+)\s*(mcg|microgram|mg|g|mL|units)?$/i.exec(String(txt).trim());
+  if (!m) return NaN;
+  const n = +m[1], u = (m[2] || units).toLowerCase(), want = String(units).toLowerCase();
+  const f = { mcg: 1e-3, microgram: 1e-3, mg: 1, g: 1000, ml: 1, units: 1 };
+  if (u === want) return n;
+  if (f[u] != null && f[want] != null && u !== 'ml' && want !== 'ml' && u !== 'units' && want !== 'units') return n * f[u] / f[want];
+  return NaN;
+}
+
+const who = (S, id) => (S.prescribers || []).find(p => p.id === id);
+const nurse = (S, init) => (S.nurses || []).find(n => n.init === init);
+
+/* ── compile: a scenario → every written cell (V) + facts ── */
+function compile(S) {
+  const V = {}, put = (id, v) => { if (v !== undefined && v !== null && v !== '') V[id] = v; };
+  const date = d => dayDate(S, d), sig = id => (who(S, id) || {}).sig || id;
+  const P = S.patient;
+  for (const [k, v] of Object.entries({ family: P.family, given: P.given, gender: P.gender, dob: P.dob, nhi: P.nhi })) put('pt.' + k, v);
+  put('chart.no', '1'); put('chart.of', '1');
+  if (P.weight) { put('wt.0', P.weight); put('wt.0d', date(P.wday || 1)); }
+  if (P.height) { put('ht', P.height); put('htd', date(P.wday || 1)); }
+  /* front: allergies and adverse reactions — "No" ticked only when the list is empty */
+  for (const [k, list] of [['alg', S.allergies || []], ['adr', S.adverse || []]]) {
+    if (!list.length) { put(k + '.none', { tick: 1 }); if (S[k === 'alg' ? 'allergyBy' : 'adverseBy']) { put(k + '.sig', sig(S[k === 'alg' ? 'allergyBy' : 'adverseBy'])); put(k + '.date', date(1)); } }
+    list.forEach((a, i) => { put(`${k}.${i}.med`, a.med); put(`${k}.${i}.rx`, a.rx); });
+    if (list.length) { put(k + '.sig', sig(list[0].by)); put(k + '.date', date(list[0].day || 1)); }
+    /* the summary box the Once Only page carries */
+    put(k + '2.' + (list.length ? 'yes' : 'no'), { tick: 1 });
+    if (list.length) put(k + '2.list', list.map(a => a.med).join(', '));
+  }
+  const SC = { renal: 'sc.renal', preg: 'sc.preg', hep: 'sc.hep', bf: 'sc.bf' }, SU = { insulin: 'sup.insulin', analgesia: 'sup.analg', heparin: 'sup.heparin', warfarin: 'sup.warfarin' };
+  if (!(S.special || []).length) put('sc.none', { tick: 1 });
+  for (const s of S.special || []) put(SC[s] || 'sc.other', SC[s] ? { tick: 1 } : s);
+  if (!(S.supplementary || []).length) put('sup.none', { tick: 1 });
+  for (const s of S.supplementary || []) put(SU[s] || 'sup.other', SU[s] ? { tick: 1 } : s);
+  (S.prescribers || []).forEach((p, i) => { put(`sigp.${i}.name`, p.name); put(`sigp.${i}.sig`, p.sig); put(`sigp.${i}.reg`, p.reg); });
+  (S.nurses || []).forEach((n, i) => { put(`siga.${i}.name`, n.name); put(`siga.${i}.init`, n.init); put(`siga.${i}.reg`, n.reg); });
+  /* VTE box */
+  if (S.vte) {
+    const v = S.vte;
+    put('vte.assessed', { tick: 1 }); put('vte.date', date(v.day || 1)); put('vte.psig', sig(v.by));
+    if (v.anticoag != null) put(v.anticoag ? 'vte.anticoag.y' : 'vte.anticoag.n', { tick: 1 });
+    if (v.stockings != null) put(v.stockings ? 'vte.stock.y' : 'vte.stock.n', { tick: 1 });
+    if (v.ipc != null) put(v.ipc ? 'vte.ipc.y' : 'vte.ipc.n', { tick: 1 });
+    if (v.none) put('vte.' + v.none, { tick: 1 });
+  }
+  /* once only */
+  const once = (S.once || []).map((o, i) => {
+    if ((o.from || 0) > (S.stage || 0)) return { ...o, i, hidden: 1 };   // charted later in the scenario (after round `from`)
+    const g = o.given ? parseAt(o.given.at) : null;
+    put(`once.${i}.date`, date(o.day)); put(`once.${i}.med`, o.med); put(`once.${i}.dose`, o.dose); put(`once.${i}.units`, o.units);
+    put(`once.${i}.route`, o.route); put(`once.${i}.calc`, o.calc); put(`once.${i}.psig`, sig(o.by)); put(`once.${i}.range`, o.range); put(`once.${i}.inst`, o.inst);
+    if (g) { put(`once.${i}.dosedt`, date(g.day) + ' ' + g.t); put(`once.${i}.gc`, { giv: o.given.giv, chk: o.given.chk || '' }); if (o.given.tstart) put(`once.${i}.tstart`, o.given.tstart); if (o.given.tend) put(`once.${i}.tend`, o.given.tend); }
+    return { ...o, i, givenAt: g };
+  });
+  const verbal = (S.verbal || []).map((o, i) => {
+    const a = parseAt(o.at), g = o.given ? parseAt(o.given.at) : null;
+    put(`verb.${i}.dt`, date(a.day) + ' ' + a.t); put(`verb.${i}.med`, o.med); put(`verb.${i}.dose`, o.dose); put(`verb.${i}.units`, o.units); put(`verb.${i}.route`, o.route);
+    put(`verb.${i}.pname`, o.pname); if (o.signed) put(`verb.${i}.psig`, sig(o.signed));
+    if (g) { put(`verb.${i}.dosedt`, date(g.day) + ' ' + g.t); put(`verb.${i}.nurse`, o.given.nurse); put(`verb.${i}.witness`, o.given.witness); put(`verb.${i}.gc`, { giv: o.given.nurse, chk: o.given.witness }); }
+    return { ...o, i, atM: a, givenAt: g };
+  });
+  if (S.o2) {
+    put('o2.target', S.o2.target);
+    S.o2.rows.forEach((r, i) => { put(`o2.${i}.start`, date(r.start)); put(`o2.${i}.device`, r.device); put(`o2.${i}.flow`, r.flow); put(`o2.${i}.sig`, sig(r.by)); if (r.stop) put(`o2.${i}.stop`, date(r.stop)); });
+  }
+  /* PRN */
+  const prn = (S.prn || []).map(o => {
+    const L = o.L, rec = (o.given || []).map(parsePrn).sort((a, b) => a.m - b.m);
+    for (const f of ['med', 'dose', 'units', 'route', 'freq', 'calc', 'range', 'ind', 'inst']) put(`prn.${L}.${f}`, o[f]);
+    put(`prn.${L}.date`, date(o.day)); put(`prn.${L}.max`, o.max); put(`prn.${L}.psig`, sig(o.by));
+    let cease = null;
+    if (o.cease) { cease = parseAt(o.cease.at); put(`prn.${L}.cancel`, `${sig(o.cease.by)} ${date(cease.day)} ${cease.t}`); put(`prn.${L}.x`, { day: cease.day }); }
+    rec.forEach((r, j) => { r.line = j; put(`prn.${L}.${j}.date`, date(r.day)); put(`prn.${L}.${j}.time`, r.t); put(`prn.${L}.${j}.dose`, r.dose); put(`prn.${L}.${j}.route`, r.route); put(`prn.${L}.${j}.gc`, { giv: r.giv, chk: r.chk }); });
+    return { ...o, rec, ceaseAt: cease };
+  });
+  /* regular: the order, its time rows, its 8 days of boxes */
+  for (let d = 1; d <= 8; d++) put(`reg.day${d}`, date(d));
+  const reg = (S.regular || []).map(o => {
+    const L = o.L, slots = slotsFor(o.times);
+    for (const f of ['med', 'dose', 'units', 'route', 'freq', 'calc', 'range', 'inst']) put(`reg.${L}.${f}`, o[f]);
+    put(`reg.${L}.date`, date(o.day)); put(`reg.${L}.psig`, sig(o.by));
+    slots.forEach((s, k) => { if (s) put(`reg.${L}.s${k}`, s.circled ? { circle: 1 } : s.t); });
+    let cease = null;
+    if (o.cease) {
+      cease = parseAt(o.cease.at); put(`reg.${L}.cancel`, `${sig(o.cease.by)} ${date(cease.day)} ${cease.t}`);
+      /* "cross through order and administration": the rest of the cease day's rows, then every day after */
+      put(`reg.${L}.x`, { day: cease.day, rows: slots.map((q, k) => q && toMin(q.t) > toMin(cease.t) ? k : -1).filter(k => k >= 0) });
+    }
+    const adm = [];
+    for (const [key, v] of Object.entries(o.given || {})) {
+      const a = parseAt(key), k = slots.findIndex(s => s && s.t === a.t);
+      if (k < 0) throw new Error(`regular ${L} ${o.med}: nothing is due at ${a.t} (times: ${o.times})`);
+      const e = { ...parseAdmin(v, a.t), day: a.day, slot: k, due: a.t, m: a.m };
+      adm.push(e);
+      const base = `reg.${L}.d${a.day}.s${k}`;
+      if (e.code) put(base + '.gc', { code: e.code });
+      else { put(base + '.t', e.t); put(base + '.gc', { giv: e.giv, chk: e.chk }); if (e.dose) put(base + '.dose', e.dose); }
+    }
+    adm.sort((a, b) => a.m - b.m);
+    return { ...o, slots, adm, ceaseAt: cease, start: abs(o.day, o.startT || '0000') };
+  });
+  const fluids = (S.fluids || []).map((f, i) => {
+    put(`fl.${i}.date`, date(f.day)); put(`fl.${i}.time`, f.time); put(`fl.${i}.vol`, f.vol); put(`fl.${i}.fluid`, f.fluid); put(`fl.${i}.route`, f.route);
+    put(`fl.${i}.rate`, f.rate); put(`fl.${i}.psig`, sig(f.by));
+    if (f.started) { const a = parseAt(f.started.at); put(`fl.${i}.astart`, a.t); put(`fl.${i}.gc`, { giv: f.started.by, chk: f.started.chk || '' }); }
+    if (f.done) { const a = parseAt(f.done.at); put(`fl.${i}.tend`, a.t); put(`fl.${i}.avol`, f.done.vol); }
+    return { ...f, i };
+  });
+  const now = parseAt(S.now);
+  return { S, V, now, once, verbal, prn, reg, fluids, dates: [1, 2, 3, 4, 5, 6, 7, 8].map(date) };
+}
+
+/* ── timing facts ── */
+/* a regular order's next due dose after a moment: {day, t, slot} — null when ceased first or past day 8 */
+function nextDue(o, m) {
+  for (let d = 1; d <= 8; d++) for (let k = 0; k < 5; k++) {
+    const s = o.slots[k]; if (!s) continue;
+    const at = abs(d, s.t);
+    if (at <= m || at < o.start) continue;
+    if (o.ceaseAt && at >= o.ceaseAt.m) return null;
+    return { day: d, t: s.t, slot: k, m: at };
+  }
+  return null;
+}
+/* a PRN order at a moment: what has been given in the last 24 h, and whether it can be given now */
+function prnStatus(o, m) {
+  const past = o.rec.filter(r => r.m <= m), last = past[past.length - 1] || null;
+  const day24 = past.filter(r => r.m > m - 1440);
+  const amount = day24.reduce((a, r) => a + doseAmount(r.dose, o.units), 0);
+  const nextOk = last ? last.m + o.gapH * 60 : m;
+  const maxHit = o.maxAmount != null && amount >= o.maxAmount - 1e-9;
+  return { last, n24: day24.length, amount, nextOk, maxHit, can: !o.ceaseAt && m >= nextOk && !maxHit };
+}
+const when = (C, m) => {
+  const d = Math.floor(m / 1440) + 1, day = d === C.now.day ? 'today' : d === C.now.day - 1 ? 'yesterday' : d === C.now.day + 1 ? 'tomorrow' : 'day ' + d;
+  return `${day} at ${hhmm(m)}`;
+};
+
+/* ── the reading questions, generated from the chart itself (so they can never disagree with it) ──
+   {id, kind:'mcq'|'tap', q, opts?, a?, accept?:[cell ids or 'prefix*'], show:[cell ids], why, tag} */
+function questions(C, rnd) {
+  const S = C.S, out = [], first = S.patient.given, nowTxt = `${WEEKDAY(S, C.now.day)} ${dayDate(S, C.now.day)}, ${C.now.t}`;
+  const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const pick = (a, n) => shuffle(a).slice(0, n);
+  const mcq = (id, tag, q, a, wrong, show, why) => {
+    const w = [...new Set(wrong.filter(x => x && x !== a))];
+    if (w.length < 2) return;
+    out.push({ id, kind: 'mcq', tag, q, a, opts: shuffle([a, ...pick(w, 3)]), show, why });
+  };
+  const tap = (id, tag, q, accept, why) => out.push({ id, kind: 'tap', tag, q, accept, show: accept.filter(x => !x.endsWith('*')), why });
+  /* two lines for one medicine (a therapy change is a new line) → name the row, or a question has two answers */
+  const nm = o => C.reg.filter(x => x.med === o.med).length > 1 ? `${o.med} (row ${o.L})` : o.med;
+  const list = a => a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
+  const nameOf = init => (nurse(S, init) || {}).name || init;
+  const regByL = L => C.reg.find(o => o.L === L);
+
+  /* allergies */
+  const alg = S.allergies || [], adr = S.adverse || [];
+  if (alg.length) {
+    const a = alg.map(x => `${x.med} — ${x.rx}`).join('; ');
+    const meds = [...new Set([...C.reg.map(o => o.med), ...C.prn.map(o => o.med), ...adr.map(x => x.med)])].filter(m => !alg.some(x => x.med === m));
+    mcq('alg', 'Front page', `What is ${first} allergic to?`, a,
+      [...meds.slice(0, 4).map(m => `${m} — ${alg[0].rx}`), ...adr.map(x => `${x.med} — ${x.rx}`), 'Nothing — no known allergies'],
+      alg.map((_, i) => `alg.${i}.med`), 'The Allergies box on the front page. Check it before every first dose — and ask the patient too.');
+    tap('alg-tap', 'Front page', `Tap where the chart records ${first}’s allergies.`, ['alg.*'], 'The Allergies box, top left of the front page.');
+  } else {
+    mcq('alg', 'Front page', `What does the chart say about ${first}’s allergies?`, 'No known allergies — the “No” box is ticked and signed',
+      ['The box is blank, so there are no allergies', 'PENICILLIN — rash', 'It says to check the notes', 'Allergies are not recorded on this chart'],
+      ['alg.none'], 'The Allergies box: a ticked, signed “No” is a recorded answer. A blank box would mean nobody has asked.');
+  }
+  if (adr.length) mcq('adr', 'Front page', `${adr[0].med} is on the front page. What is it recorded as?`, `An adverse reaction (${adr[0].rx}) — not an allergy`,
+    [`An allergy — never give it`, 'A medicine she takes at home', 'A supplementary chart', `A special-care warning`],
+    ['adr.0.med', 'adr.0.rx'], 'Adverse Reactions is the right-hand box, separate from Allergies: a known bad effect that is not an immune reaction. The prescriber weighs it; it still matters.');
+  /* special care + supplementary */
+  const SCN = { renal: 'Renal impairment', preg: 'Pregnancy', hep: 'Hepatic impairment', bf: 'Breastfeeding' };
+  if ((S.special || []).length) mcq('sc', 'Front page', 'Which “Special Care Required” box is ticked?', SCN[S.special[0]] || S.special[0],
+    Object.values(SCN).concat('None — the “No” box is ticked'), [`sc.${S.special[0] === 'renal' ? 'renal' : S.special[0] === 'hep' ? 'hep' : S.special[0] === 'bf' ? 'bf' : 'preg'}`],
+    'Special Care Required, front page. Renal impairment changes the dose of every medicine the kidneys clear.');
+  const SUN = { insulin: 'Diabetic/Insulin', analgesia: 'Specialised analgesia', heparin: 'Heparin', warfarin: 'Warfarin' };
+  if ((S.supplementary || []).length) {
+    const s = S.supplementary[0];
+    mcq('sup', 'Front page', `Where would you find ${first}’s ${s === 'analgesia' ? 'PCA or epidural' : s}?`, `On a separate ${SUN[s]} chart — the front page ticks it`,
+      ['In the PRN section', 'On the Regular Medicine page, row I', 'It is not prescribed', 'In the Once Only section'],
+      [`sup.${s === 'analgesia' ? 'analg' : s}`], 'Supplementary Charts, front page: those medicines live on their own chart, so the main chart will not show them.');
+  }
+  mcq('nhi', 'Front page', `What is ${first}’s NHI number?`, S.patient.nhi,
+    [S.patient.nhi.slice(0, 3) + S.patient.nhi.slice(4) + S.patient.nhi[3], S.patient.nhi.slice(0, 5) + String((+S.patient.nhi[5] + 3) % 10) + S.patient.nhi.slice(6), 'ZZZ0000', S.patient.nhi.split('').reverse().join('').toUpperCase()],
+    ['pt.nhi'], 'Every page carries the patient label; the NHI is one of the three identifiers you check against the ID band.');
+
+  /* regular orders: dose, times, who gave, codes, what is due next */
+  const active = C.reg.filter(o => !o.ceaseAt || o.ceaseAt.m > abs(C.now.day, C.now.t));
+  const timesTxt = o => list(o.slots.filter(Boolean).map(s => s.t).sort());
+  for (const o of C.reg) {
+    mcq(`dose-${o.L}`, 'Regular', `What dose and route is ${nm(o)} charted at?`, `${o.dose} ${o.units} ${o.route}`,
+      [...C.reg.filter(x => x !== o).map(x => `${x.dose} ${x.units} ${x.route}`), `${o.dose} ${o.units === 'mg' ? 'mcg' : 'mg'} ${o.route}`, `${o.dose} ${o.units} ${o.route === 'PO' ? 'IV' : 'PO'}`],
+      [`reg.${o.L}.dose`, `reg.${o.L}.units`, `reg.${o.L}.route`], 'The order line: Dose · Units · Route, written by the prescriber.');
+    mcq(`times-${o.L}`, 'Regular', `At what time(s) is ${nm(o)} due each day?`, timesTxt(o),
+      [...C.reg.filter(x => x !== o).map(timesTxt), '0800 and 1400', '0600 and 1800', '2200'],
+      o.slots.map((s, k) => s ? `reg.${o.L}.s${k}` : null).filter(Boolean), 'The “Circle or actual time” column beside the order: circled printed times, or a time written in the box.');
+  }
+  const signed = C.reg.flatMap(o => o.adm.filter(e => e.giv).map(e => ({ o, e })));
+  for (const { o, e } of pick(signed, 4)) {
+    const cell = `reg.${o.L}.d${e.day}.s${e.slot}.gc`, idx = (S.nurses || []).findIndex(n => n.init === e.giv);
+    mcq(`who-${o.L}-${e.day}-${e.slot}`, 'Regular', `Who gave the ${e.due} ${nm(o)} on ${dayDate(S, e.day)}?`, nameOf(e.giv),
+      (S.nurses || []).map(n => n.name).concat((S.prescribers || []).map(p => p.name)), [cell, `siga.${idx}.init`, `siga.${idx}.name`],
+      `Initials in the Giv/Chck box (${e.giv}${e.chk ? ' / ' + e.chk : ''}) — and the Sample Initials register on the front page says whose they are.`);
+    tap(`tap-${o.L}-${e.day}-${e.slot}`, 'Regular', `Tap the box that shows the ${e.due} ${nm(o)} was given on ${dayDate(S, e.day)}.`, [cell, `reg.${o.L}.d${e.day}.s${e.slot}.t`],
+      `Row ${o.L}, the ${dayDate(S, e.day)} column, the ${e.due} line.`);
+  }
+  for (const o of C.reg) for (const e of o.adm.filter(x => x.code)) {
+    const cell = `reg.${o.L}.d${e.day}.s${e.slot}.gc`;
+    mcq(`code-${o.L}-${e.day}-${e.slot}`, 'Regular', `The ${e.due} ${nm(o)} on ${dayDate(S, e.day)} has a code instead of initials. What does it mean?`, `${e.code} — ${CODES[e.code]}`,
+      Object.entries(CODES).map(([k, v]) => `${k} — ${v}`), [cell], `A code in the Giv/Chck box instead of initials: no nurse gave that dose. The key is printed on the chart (U, SM, CP, R, D, N)${e.code === 'N' ? ' — N means the reason is in the clinical notes' : ''}.`);
+    tap(`tapcode-${o.L}-${e.day}-${e.slot}`, 'Regular', `Tap the box that shows the ${e.due} ${nm(o)} on ${dayDate(S, e.day)} was NOT given by a nurse.`, [cell], `Row ${o.L}: the box with “${e.code}” in it.`);
+  }
+  const m = abs(C.now.day, C.now.t);
+  for (const o of pick(active, 3)) {
+    const n = nextDue(o, m); if (!n) continue;
+    const others = [...new Set(C.reg.flatMap(x => x.slots.filter(Boolean).map(s => s.t)))].filter(t => t !== n.t);
+    mcq(`next-${o.L}`, 'Regular', `It is ${nowTxt}. When is ${nm(o)} next due?`, when(C, n.m),
+      [...others.map(t => when(C, abs(C.now.day, t) > m ? abs(C.now.day, t) : abs(C.now.day + 1, t))), when(C, n.m + 1440), when(C, n.m - 1440 > m ? n.m - 1440 : n.m + 2880)],
+      [`reg.${o.L}.s${n.slot}`], 'The circled times, then the last signed box in its row.');
+  }
+  const ceased = C.reg.filter(o => o.ceaseAt && o.ceaseAt.m <= m);
+  if (ceased.length) {
+    const o = ceased[0];
+    mcq(`ceased-${o.L}`, 'Regular', 'Which regular order has been stopped?', `${o.med} ${o.dose} ${o.units} ${o.route} (row ${o.L})`, C.reg.filter(x => x !== o).map(x => `${x.med} ${x.dose} ${x.units} ${x.route} (row ${x.L})`), [`reg.${o.L}.cancel`],
+      '“Sign, date and time to cancel” is filled in and the order is crossed through. Never give it from that line again.');
+    tap(`tapceased-${o.L}`, 'Regular', 'Tap the regular order that has been stopped.', [`reg.${o.L}.*`], `Row ${o.L} — crossed through, with the cancel box signed.`);
+  }
+
+  /* PRN: last dose, can it be given now, 24-hour total */
+  for (const o of C.prn) {
+    const st = prnStatus(o, m);
+    if (st.last) {
+      const cells = [`prn.${o.L}.${st.last.line}.date`, `prn.${o.L}.${st.last.line}.time`];
+      mcq(`prnlast-${o.L}`, 'PRN', `When was ${o.med} (PRN) last given?`, when(C, st.last.m),
+        o.rec.filter(r => r !== st.last).map(r => when(C, r.m)).concat([when(C, st.last.m - 120), when(C, st.last.m + 240), when(C, st.last.m - 1440)]),
+        cells, 'The PRN record, beside the order on the facing page: the last line filled in.');
+      tap(`tapprn-${o.L}`, 'PRN', `Tap the most recent dose of ${o.med} in the PRN record.`, [`prn.${o.L}.${st.last.line}.*`], `Row ${o.L} of the PRN record — the last line written.`);
+    }
+    const gapTxt = `every ${o.gapH} hours at most`;
+    const yes = st.last ? `Yes — the last dose was ${when(C, st.last.m)}, and the 24-hour maximum is not reached` : 'Yes — none has been given yet, so the gap and the 24-hour maximum are fine';
+    const notYet = `Not yet — not until ${when(C, st.nextOk)} (${gapTxt})`;
+    const maxed = `No — ${first} has had the 24-hour maximum (${o.max})`;
+    const a = o.ceaseAt ? 'No — the order has been cancelled' : st.maxHit ? maxed : st.can ? yes : notYet;
+    mcq(`prncan-${o.L}`, 'PRN', `It is ${nowTxt}. ${first} asks for ${o.med} (${o.ind}). Can you give it?`, a,
+      [yes, notYet.replace(when(C, st.nextOk), when(C, st.nextOk + 120)), maxed, 'No — PRN medicines are only given twice a day', 'Yes — PRN means whenever the patient asks'],
+      [`prn.${o.L}.freq`, `prn.${o.L}.max`, ...(st.last ? [`prn.${o.L}.${st.last.line}.time`] : [])],
+      `Frequency (${o.freq}) and Max dose/24hrs (${o.max}) on the order, then the record: ${st.n24} dose${st.n24 === 1 ? '' : 's'} in the last 24 hours${st.last ? ', the last ' + when(C, st.last.m) : ''}.`);
+  }
+  /* once only, verbal, oxygen, fluids */
+  for (const o of C.once.filter(x => x.givenAt && !x.hidden)) {
+    const g = o.given, at = when(C, o.givenAt.m), others = (S.nurses || []).filter(n => n.init !== g.giv && n.init !== g.chk).map(n => n.name);
+    if (g.chk) mcq(`once-${o.i}`, 'Once Only', `${o.med} ${o.dose} ${o.units} ${o.route} was a once-only dose. When was it given, and who checked it?`, `${at} — checked by ${nameOf(g.chk)}`,
+      [`${at} — checked by ${nameOf(g.giv)}`, `${when(C, o.givenAt.m + 60)} — checked by ${nameOf(g.chk)}`, ...others.slice(0, 2).map(n => `${at} — checked by ${n}`), 'It has not been given yet'],
+      [`once.${o.i}.dosedt`, `once.${o.i}.gc`], '“Date & time of dose” and the Given by / Checked by box on the Once Only order.');
+    else mcq(`once-${o.i}`, 'Once Only', `${o.med} ${o.dose} ${o.units} ${o.route} was a once-only dose. When was it given, and by whom?`, `${at} — by ${nameOf(g.giv)}`,
+      [`${when(C, o.givenAt.m + 60)} — by ${nameOf(g.giv)}`, ...others.slice(0, 2).map(n => `${at} — by ${n}`), 'It has not been given yet'],
+      [`once.${o.i}.dosedt`, `once.${o.i}.gc`], '“Date & time of dose” and the Given by box on the Once Only order.');
+  }
+  for (const o of C.verbal) {
+    const ok = !!o.signed, due = o.atM.m + 1440;
+    mcq(`verbal-${o.i}`, 'Verbal Orders', `A verbal order for ${o.med} was taken at ${dayDate(S, o.atM.day)} ${o.atM.t}. Is it complete?`,
+      ok ? 'Yes — the prescriber has signed it' : m > due ? `No — still unsigned, and overdue: it was due by ${when(C, due)}` : `No — not signed yet (due within 24 hours, by ${when(C, due)})`,
+      ['Yes — the nurse’s and witness’s initials are enough', ok ? `No — the prescriber has not signed it yet` : 'Yes — the prescriber has signed it', 'Verbal orders never need a signature', 'No — a verbal order cannot be given at all'],
+      [`verb.${o.i}.psig`, `verb.${o.i}.pname`], 'The Verbal Orders heading on the chart: “must be signed as soon as possible or within 24 hours of order”.');
+  }
+  if (S.o2) {
+    const t = S.o2.target;
+    mcq('o2target', 'Oxygen', `What is ${first}’s target oxygen saturation?`, t + '%', ['88–92%', '92–96%', '94–98%', 'Above 90%', '100%'].filter(x => x !== t + '%'), ['o2.target'],
+      'Oxygen Therapy & Medical Gases: the target saturation sits at the top of the section.');
+    const cur = S.o2.rows.find(r => !r.stop || r.stop > C.now.day);
+    mcq('o2now', 'Oxygen', `Is ${first} still prescribed oxygen, as of ${nowTxt}?`, cur ? `Yes — ${cur.device}, ${cur.flow}` : 'No — a stop date has been written',
+      [cur ? 'No — a stop date has been written' : `Yes — ${S.o2.rows[0].device}, ${S.o2.rows[0].flow}`, 'Yes — via a non-rebreather at 15 L/min', 'Only at night'],
+      S.o2.rows.map((_, i) => `o2.${i}.stop`), 'START DATE and STOP DATE on each oxygen line.');
+  }
+  for (const f of C.fluids) mcq(`fl-${f.i}`, 'Fluids', `At what rate is the ${f.vol} mL of ${f.fluid} prescribed?`, `${f.rate} mL/hr`,
+    [`${Math.round(f.vol / 8)} mL/hr`, `${f.rate * 2} mL/hr`, `${Math.round(f.rate / 2)} mL/hr`, `${f.vol} mL/hr`].filter(x => x !== `${f.rate} mL/hr`),
+    [`fl.${f.i}.rate`], 'Rate (mL/hr) on the IV & subcut fluid record. Volume ÷ hours = rate.');
+  /* the scenario's own questions (judgement the chart alone cannot generate) */
+  for (const q of S.questions || []) if ((q.stage || 0) === (S.stage || 0)) out.push(ownQ(q, shuffle));
+  return out;
+}
+
+/* a question the scenario writes itself: {id, stage?, tag, q, a, w:[wrong…], show, why} or {kind:'tap', accept} */
+const ownQ = (q, shuffle) => q.kind === 'tap' ? { ...q, own: 1, show: q.show || q.accept.filter(x => !x.endsWith('*')) } : { ...q, kind: 'mcq', own: 1, opts: shuffle([q.a, ...q.w]) };
+
+/* ── checking the student's charting for one round ──
+   entries: { cellId: value } (tap mode) — gc cells hold {giv, chk} or {code}; plain cells hold text.
+   A round: { at:'3@1400', you: initials, rn: preceptor initials, expect: [...] }
+     {do:'sign', c:'reg.K.d3.s2'}               — given: your initials + the RN's check, a time within 30 min
+     {do:'code', c:'reg.J.d3.s1', code:'D'}     — not given: that code
+     {do:'prn', L:'A', dose:['1g'], route:'PO'} — a new PRN record line: date, time, dose, route, your initials + check
+     {do:'once', i:1}                            — once-only: date & time of dose, given by you, checked by the RN
+     {do:'fluid', i:1}                           — fluids: actual commencing time, commenced by, checked by
+     {do:'fluidend', i:1, vol:1000}              — a bag finished: completion time, actual volume
+     {do:'reg', name}                            — your line in the Sample Initials register
+     {do:'none', c:'prn.B', why}                 — must NOT be written (e.g. a PRN given too soon)
+   returns [{ok, part, msg, cells}] — every expectation, then every entry no expectation asked for. */
+function checkRound(C, R, entries) {
+  const out = [], used = new Set(), at = parseAt(R.at), date = dayDate(C.S, at.day);
+  const txt = v => (v == null ? '' : String(v)).trim();
+  const near = t => /^\d{4}$/.test(txt(t)) && Math.abs(toMin(txt(t)) - toMin(at.t)) <= 30;
+  const res = (ok, msg, cells) => out.push({ ok, msg, cells });
+  for (const x of R.expect) {
+    if (x.do === 'sign' || x.do === 'code') {
+      const [, L, d, s] = /^reg\.([A-Z]{1,2})\.d(\d)\.s(\d)$/.exec(x.c), o = C.reg.find(r => r.L === L), gc = entries[x.c + '.gc'], t = entries[x.c + '.t'];
+      const label = `${o.med} · ${dayDate(C.S, +d)} · ${o.slots[+s].t}`;
+      used.add(x.c + '.gc'); used.add(x.c + '.t'); used.add(x.c + '.dose');
+      if (x.do === 'sign') {
+        if (!gc || gc.code || !gc.giv) res(false, `${label}: should be signed as given${gc && gc.code ? ` — you wrote the code ${gc.code}` : ' — the box is empty'}.`, [x.c + '.gc']);
+        else if (gc.giv !== R.you) res(false, `${label}: the “given by” initials must be yours (${R.you}).`, [x.c + '.gc']);
+        else if (gc.chk !== R.rn) res(false, `${label}: given ✓, but ${gc.chk ? `the check initials (${gc.chk}) should be your RN’s` : 'the check initials are missing'} — a student’s dose carries the RN’s (${R.rn}).`, [x.c + '.gc']);
+        else if (!near(t)) res(false, `${label}: signed ✓, but record the actual time given (24-hour clock, within 30 minutes of ${at.t}).`, [x.c + '.t']);
+        else res(true, `${label}: given, signed ${R.you}/${R.rn} at ${txt(t)}.`, [x.c + '.gc']);
+      } else {
+        if (gc && gc.code === x.code) res(true, `${label}: not given — ${x.code} (${CODES[x.code]}).${x.why ? ' ' + x.why : ''}`, [x.c + '.gc']);
+        else res(false, `${label}: should be ${x.code} (${CODES[x.code]})${gc ? (gc.code ? ` — you wrote ${gc.code}` : ' — you signed it as given') : ' — the box is empty'}.${x.why ? ' ' + x.why : ''}`, [x.c + '.gc']);
+      }
+    } else if (x.do === 'prn') {
+      const o = C.prn.find(p => p.L === x.L), j = o.rec.length, base = `prn.${x.L}.${j}`;
+      ['date', 'time', 'dose', 'route', 'gc'].forEach(f => used.add(`${base}.${f}`));
+      const e = f => entries[`${base}.${f}`], gc = e('gc') || {};
+      const miss = [];
+      if (txt(e('date')) !== date) miss.push(`date ${date}`);
+      if (!near(e('time'))) miss.push(`time (~${at.t})`);
+      if (!x.dose.map(s => s.replace(/\s/g, '').toLowerCase()).includes(txt(e('dose')).replace(/\s/g, '').toLowerCase())) miss.push(`dose ${x.dose[0]}`);
+      if (txt(e('route')).toUpperCase() !== x.route) miss.push(`route ${x.route}`);
+      if (gc.giv !== R.you || gc.chk !== R.rn) miss.push(`initials ${R.you}/${R.rn}`);
+      res(!miss.length, miss.length ? `${o.med} PRN: the next record line (line ${j + 1}) needs ${miss.join(', ')}.` : `${o.med} PRN: recorded on line ${j + 1} — ${date} ${txt(e('time'))}, ${txt(e('dose'))} ${txt(e('route'))}, ${R.you}/${R.rn}.`, [`${base}.time`]);
+    } else if (x.do === 'once') {
+      const b = `once.${x.i}`, o = C.once[x.i], gc = entries[b + '.gc'] || {}, dt = txt(entries[b + '.dosedt']);
+      used.add(b + '.gc'); used.add(b + '.dosedt');
+      const okDt = dt.startsWith(date) && near(dt.slice(date.length).trim());
+      const miss = [...(okDt ? [] : [`date & time of dose (${date} ~${at.t})`]), ...(gc.giv === R.you && gc.chk === R.rn ? [] : [`given by ${R.you} / checked by ${R.rn}`])];
+      res(!miss.length, miss.length ? `${o.med} once only: needs ${miss.join(' and ')}.` : `${o.med} once only: given ${dt}, ${R.you}/${R.rn}.`, [b + '.dosedt']);
+    } else if (x.do === 'fluid') {
+      const b = `fl.${x.i}`, f = C.fluids[x.i], gc = entries[b + '.gc'] || {};
+      ['astart', 'gc'].forEach(k => used.add(`${b}.${k}`));
+      const miss = [...(near(entries[b + '.astart']) ? [] : [`actual commencing time (~${at.t})`]), ...(gc.giv === R.you ? [] : [`commenced by ${R.you}`]), ...(gc.chk === R.rn ? [] : [`checked by ${R.rn}`])];
+      res(!miss.length, miss.length ? `${f.fluid}: needs ${miss.join(', ')}.` : `${f.fluid}: started ${txt(entries[b + '.astart'])} by ${R.you}, checked ${R.rn}.`, [b + '.astart']);
+    } else if (x.do === 'fluidend') {
+      const b = `fl.${x.i}`, f = C.fluids[x.i];
+      ['tend', 'avol'].forEach(k => used.add(`${b}.${k}`));
+      const vol = txt(entries[b + '.avol']).replace(/\s*mL$/i, '');
+      const miss = [...(near(entries[b + '.tend']) ? [] : [`completion time (~${at.t})`]), ...(vol === String(x.vol) ? [] : [`actual volume (${x.vol} mL)`])];
+      res(!miss.length, miss.length ? `${f.fluid} (line ${x.i + 1}) has finished: record ${miss.join(' and ')}.` : `${f.fluid}: completed ${txt(entries[b + '.tend'])}, ${x.vol} mL in.`, [b + '.tend']);
+    } else if (x.do === 'reg') {
+      const i = (C.S.nurses || []).length, b = `siga.${i}`;
+      ['name', 'init', 'reg'].forEach(k => used.add(`${b}.${k}`));
+      const okI = txt(entries[b + '.init']) === R.you, okN = txt(entries[b + '.name']).length >= 3;
+      res(okI && okN, okI && okN ? `Sample Initials register: you are on it (${R.you}).` : `Sample Initials register: add your name & designation and your initials (${R.you}) on the next free line — everyone who signs the chart must.`, [b + '.init']);
+    } else if (x.do === 'none') {
+      const hits = Object.keys(entries).filter(k => k.startsWith(x.c + '.') && txt(JSON.stringify(entries[k])) !== '' && !used.has(k));
+      hits.forEach(k => used.add(k));
+      res(!hits.length, hits.length ? `Nothing should be written for ${x.what}: ${x.why}` : `${x.what}: correctly left alone — ${x.why}`, hits.length ? hits : []);
+    }
+  }
+  for (const k of Object.keys(entries)) if (!used.has(k)) res(false, `You wrote in a box this round did not need: ${cellLabel(C, k)}.`, [k]);
+  return out;
+}
+
+/* a cell described in words, for feedback */
+function cellLabel(C, id) {
+  let m;
+  if ((m = /^reg\.([A-Z]{1,2})\.d(\d)\.s(\d)\.(\w+)$/.exec(id))) { const o = C.reg.find(r => r.L === m[1]); return `Regular ${m[1]}${o ? ' (' + o.med + ')' : ''} · ${dayDate(C.S, +m[2])} · ${o && o.slots[+m[3]] ? o.slots[+m[3]].t : PRINTED[+m[3]]} line`; }
+  if ((m = /^prn\.([A-Z])\.(\d+)\.(\w+)$/.exec(id))) { const o = C.prn.find(r => r.L === m[1]); return `PRN ${m[1]}${o ? ' (' + o.med + ')' : ''} · record line ${+m[2] + 1}`; }
+  if ((m = /^once\.(\d)\./.exec(id))) return `Once Only order ${+m[1] + 1}`;
+  if ((m = /^fl\.(\d+)\./.exec(id))) return `IV fluids line ${+m[1] + 1}`;
+  if ((m = /^siga\.(\d+)\./.exec(id))) return `Sample Initials register line ${+m[1] + 1}`;
+  return id;
+}
+
+/* ── a round's right answer, three ways ── */
+const regCell = c => { const m = /^reg\.([A-Z]{1,2})\.d(\d)\.s(\d)$/.exec(c); return m && { L: m[1], d: +m[2], s: +m[3] }; };
+
+/* as tap-mode entries — what a perfect student would have written (the build proves checkRound passes it) */
+function modelEntries(C, R) {
+  const at = parseAt(R.at), date = dayDate(C.S, at.day), E = {}, gc = { giv: R.you, chk: R.rn };
+  for (const x of R.expect) {
+    const t = x.t || at.t;
+    if (x.do === 'sign') { E[x.c + '.t'] = t; E[x.c + '.gc'] = gc; }
+    else if (x.do === 'code') E[x.c + '.gc'] = { code: x.code };
+    else if (x.do === 'prn') { const b = `prn.${x.L}.${C.prn.find(p => p.L === x.L).rec.length}`; Object.assign(E, { [b + '.date']: date, [b + '.time']: t, [b + '.dose']: x.dose[0], [b + '.route']: x.route, [b + '.gc']: gc }); }
+    else if (x.do === 'once') { E[`once.${x.i}.dosedt`] = `${date} ${t}`; E[`once.${x.i}.gc`] = gc; }
+    else if (x.do === 'fluid') { E[`fl.${x.i}.astart`] = t; E[`fl.${x.i}.gc`] = gc; }
+    else if (x.do === 'fluidend') { E[`fl.${x.i}.tend`] = t; E[`fl.${x.i}.avol`] = String(x.vol); }
+    else if (x.do === 'reg') { const i = (C.S.nurses || []).length; E[`siga.${i}.name`] = R.name; E[`siga.${i}.init`] = R.you; }
+  }
+  return E;
+}
+
+/* as the scenario after the round — the next round, and the next set of questions, start from a correct chart */
+function applyRound(S, R) {
+  S = JSON.parse(JSON.stringify(S));
+  const at = parseAt(R.at);
+  for (const x of R.expect) {
+    const t = x.t || at.t;
+    if (x.do === 'sign' || x.do === 'code') {
+      const c = regCell(x.c), o = S.regular.find(r => r.L === c.L), slotT = slotsFor(o.times)[c.s].t;
+      o.given = { ...(o.given || {}), [`${c.d}@${slotT}`]: x.do === 'sign' ? `${t} ${R.you}/${R.rn}` : x.code };
+    } else if (x.do === 'prn') { const o = S.prn.find(p => p.L === x.L); o.given = [...(o.given || []), `${at.day}@${t} ${x.dose[0].replace(/\s/g, '')} ${x.route} ${R.you}/${R.rn}`]; }
+    else if (x.do === 'once') S.once[x.i].given = { at: `${at.day}@${t}`, giv: R.you, chk: R.rn };
+    else if (x.do === 'fluid') S.fluids[x.i].started = { at: `${at.day}@${t}`, by: R.you, chk: R.rn };
+    else if (x.do === 'fluidend') S.fluids[x.i].done = { at: `${at.day}@${t}`, vol: x.vol };
+    else if (x.do === 'reg') S.nurses = [...(S.nurses || []), { name: R.name, init: R.you, reg: '' }];
+  }
+  S.now = R.at; S.stage = (S.stage || 0) + 1;
+  return S;
+}
+
+/* as boxes, for handwriting: which boxes must get ink, which may, and the entry a marker would expect to read */
+const PART = { tend: 'Completion time', avol: 'Actual vol.', t: 'Time', dose: 'Dose', gc: 'Giv/Chck', date: 'Date', time: 'Time', route: 'Route', dosedt: 'Date & time of dose', astart: 'Actual commencing time', name: 'Name & designation', init: 'Initial' };
+function roundKey(C, R) {
+  const at = parseAt(R.at), date = dayDate(C.S, at.day), out = [], who = `${R.you}/${R.rn}`;
+  for (const x of R.expect) {
+    const t = x.t || at.t;
+    if (x.do === 'sign' || x.do === 'code') {
+      const c = regCell(x.c), o = C.reg.find(r => r.L === c.L), label = `${o.med} · ${dayDate(C.S, c.d)} · ${o.slots[c.s].t} line`;
+      out.push(x.do === 'sign' ? { label, need: [x.c + '.t', x.c + '.gc'], may: [x.c + '.dose'], model: `Time ${t} · Giv/Chck ${who}` }
+        : { label, need: [x.c + '.gc'], may: [x.c + '.t'], model: `${x.code} — ${CODES[x.code]}` });
+    } else if (x.do === 'prn') {
+      const o = C.prn.find(p => p.L === x.L), j = o.rec.length, b = `prn.${x.L}.${j}`;
+      out.push({ label: `${o.med} PRN — record line ${j + 1}`, need: ['date', 'time', 'dose', 'route', 'gc'].map(f => `${b}.${f}`), model: `${date} · ${t} · ${x.dose[0]} · ${x.route} · ${who}` });
+    } else if (x.do === 'once') out.push({ label: `${C.once[x.i].med} once only`, need: [`once.${x.i}.dosedt`, `once.${x.i}.gc`], may: [`once.${x.i}.tstart`, `once.${x.i}.tend`], model: `${date} ${t} · given ${R.you} / checked ${R.rn}` });
+    else if (x.do === 'fluid') out.push({ label: `${C.fluids[x.i].fluid} (IV fluids line ${x.i + 1})`, need: [`fl.${x.i}.astart`, `fl.${x.i}.gc`], model: `${t} · commenced ${R.you} / checked ${R.rn}` });
+    else if (x.do === 'fluidend') out.push({ label: `${C.fluids[x.i].fluid} (IV fluids line ${x.i + 1}) finished`, need: [`fl.${x.i}.tend`, `fl.${x.i}.avol`], model: `Completion: ${t} · ${x.vol} mL` });
+    else if (x.do === 'reg') { const i = (C.S.nurses || []).length; out.push({ label: 'Sample Initials register', need: [`siga.${i}.name`, `siga.${i}.init`], may: [`siga.${i}.reg`], model: `${R.name} · ${R.you}` }); }
+    else if (x.do === 'none') out.push({ label: x.what, none: x.c + '.', why: x.why, model: 'nothing' });
+  }
+  return out;
+}
+/* handwriting, marked for WHERE: inked = the cells the strokes landed in (ink.mjs strokeCell). What was written is
+   the student's to compare against the model entry — the page asks them. */
+function checkInk(C, R, inked) {
+  const key = roundKey(C, R), out = [], allowed = new Set();
+  const part = id => PART[id.split('.').pop()] || id.split('.').pop();
+  for (const k of key) {
+    if (k.none) {
+      const hits = [...inked].filter(id => id.startsWith(k.none));
+      out.push({ ok: !hits.length, msg: hits.length ? `Nothing should be written for ${k.label}: ${k.why}` : `${k.label}: correctly left alone — ${k.why}`, cells: hits, k });
+      continue;
+    }
+    k.need.forEach(id => allowed.add(id)); (k.may || []).forEach(id => allowed.add(id));
+    const miss = k.need.filter(id => !inked.has(id));
+    out.push({ ok: !miss.length, msg: miss.length ? `${k.label}: nothing written in ${miss.map(part).join(', ')}.` : `${k.label}: ink in the right boxes.`, cells: k.need, k });
+  }
+  for (const id of inked) if (!allowed.has(id) && !key.some(k => k.none && id.startsWith(k.none))) out.push({ ok: false, msg: `You wrote in a box this round did not need: ${cellLabel(C, id)}.`, cells: [id] });
+  return out;
+}
+
+return { PRINTED, CODES, PRN_LINES, toMin, abs, hhmm, parseAt, dayDate, WEEKDAY, slotsFor, parseAdmin, parsePrn, doseAmount, compile, nextDue, prnStatus, when, questions, ownQ, checkRound, cellLabel, modelEntries, applyRound, roundKey, checkInk };
+})();
+const CR = (() => {
+/* Chart Sim's renderer: the NZ 8-Day National Medication Chart (NMC8D, 2012 edition) redrawn as SVG, page by page,
+   from the chart itself (the booklet's pages 1–12). Pure functions, no DOM: build-chart.mjs inlines this file into
+   chart.html (with `export ` stripped) and imports it to prove every cell a scenario writes to exists.
+
+   layout(id) → { id, w, h, form, cells, blocks }
+     form    the printed chart (boxes, labels, tints) as an SVG string, in page units
+     cells   every box a hand could write in: {id, x, y, w, h, k, n} — k is how an entry is drawn ('t' handwriting,
+             'ty' typed label, 'm' medicine in block capitals, 'x' tick box, 'gc' Giv/Chck diagonal, 'sl' circle-or-time,
+             'dt' a date heading), n the name printed on it. Because every rectangle is known, a tap and a pen stroke are
+             both placed by arithmetic, never by guessing from the screen.
+     blocks  order outlines, for crossing a ceased order through
+   entries(pg, V, cls) → the written entries (V: cell id → value, as compile() makes it) as an SVG string */
+
+const PAGES = [
+  { id: 'front', n: 'Front' }, { id: 'once', n: 'Once only' }, { id: 'prn', n: 'PRN' },
+  { id: 'reg', n: 'Regular' }, { id: 'fl', n: 'IV fluids' }, { id: 'key', n: 'Key' },
+];
+const REG_LETTERS = ['I', 'J', 'K', 'L', 'M', 'N', 'O'];
+const PRN_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+const TIMES = ['0600', '0800', '1400', '1800', '2200'];
+
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const n1 = v => Math.round(v * 10) / 10;
+const RED = '#d9363e', PINK = '#e9a3ab', LINE = '#4a4a4a', GREY = '#9a9a9a';
+
+function page(id, w, h) {
+  const f = [], cells = [], blocks = {};
+  const p = {
+    id, w, h, f, cells, blocks,
+    rect(x, y, w, h, o = {}) { f.push(`<rect x="${n1(x)}" y="${n1(y)}" width="${n1(w)}" height="${n1(h)}" fill="${o.fill || 'none'}" stroke="${o.stroke || LINE}" stroke-width="${o.sw ?? 0.6}"${o.rx ? ` rx="${o.rx}"` : ''}/>`); },
+    fill(x, y, w, h, fill) { f.push(`<rect x="${n1(x)}" y="${n1(y)}" width="${n1(w)}" height="${n1(h)}" fill="${fill}"/>`); },
+    line(x1, y1, x2, y2, o = {}) { f.push(`<line x1="${n1(x1)}" y1="${n1(y1)}" x2="${n1(x2)}" y2="${n1(y2)}" stroke="${o.stroke || LINE}" stroke-width="${o.sw ?? 0.6}"${o.dash ? ` stroke-dasharray="${o.dash}"` : ''}/>`); },
+    /* printed text; '\n' splits lines */
+    text(x, y, s, o = {}) {
+      const size = o.size || 6.2, lines = String(s).split('\n'), lh = o.lh || size * 1.15;
+      const at = `x="${n1(x)}" y="${n1(y)}" font-size="${size}"${o.bold ? ' font-weight="700"' : ''}${o.italic ? ' font-style="italic"' : ''}${o.fill ? ` fill="${o.fill}"` : ''}${o.anchor ? ` text-anchor="${o.anchor}"` : ''}${o.rot ? ` transform="rotate(${o.rot} ${n1(x)} ${n1(y)})"` : ''}`;
+      if (lines.length === 1) f.push(`<text ${at}>${esc(s)}</text>`);
+      else f.push(`<text ${at}>${lines.map((l, i) => `<tspan x="${n1(x)}" dy="${i ? lh : 0}">${esc(l)}</tspan>`).join('')}</text>`);
+    },
+    cell(id, x, y, w, h, k = 't', n = '', o = {}) { cells.push({ id, x: n1(x), y: n1(y), w: n1(w), h: n1(h), k, n, ...o }); },
+    /* a labelled box: the printed name top-left, the whole box writable */
+    box(x, y, w, h, label, id, o = {}) {
+      p.rect(x, y, w, h, { fill: o.fill, stroke: o.stroke, sw: o.sw });
+      if (label) p.text(x + 2.5, y + 7.5, label, { size: o.ls || 6.2, bold: o.lb });
+      if (o.sub) p.text(x + 2.5, y + 13, o.sub, { size: 4.4, fill: '#666' });
+      if (id) p.cell(id, x, y, w, o.ch || h, o.k || 't', o.n || label, { lab: !!label, al: o.al });
+    },
+    tick(id, x, y, s, n) { p.rect(x, y, s, s, { fill: '#fff', stroke: '#333', sw: 0.7 }); p.cell(id, x - 1, y - 1, s + 2, s + 2, 'x', n); },
+    under(id, x, y, w, n, o = {}) { p.line(x, y, x + w, y, { stroke: '#555', sw: 0.5, dash: o.dash }); p.cell(id, x, y - 11, w, 12, o.k || 't', n); },
+  };
+  return p;
+}
+
+/* the ruler printed along every Medicine line, and the ⌐•¬ decimal guide in every Dose box */
+function ruler(p, x, y, w, h) {
+  const by = y + h - 4;
+  p.line(x + 6, by, x + w - 6, by, { sw: 0.7 });
+  for (let tx = x + 12, i = 0; tx < x + w - 8; tx += 21, i++) p.line(tx, by, tx, by - (i % 4 === 0 ? 5 : 3), { sw: 0.7 });
+}
+function decimal(p, x, y, w, h) {
+  const by = y + h - 4, mid = x + w / 2;
+  p.line(x + 4, by, mid - 4, by, { sw: 0.5 }); p.line(mid - 4, by, mid - 4, by - 3, { sw: 0.5 });
+  p.line(mid + 4, by, x + w - 4, by, { sw: 0.5 }); p.line(mid + 4, by, mid + 4, by - 3, { sw: 0.5 });
+  p.f.push(`<circle cx="${n1(mid)}" cy="${n1(by - 2)}" r="1.1" fill="#222"/>`);
+}
+function gcBox(p, id, x, y, w, h, o = {}) {
+  p.rect(x, y, w, h, { fill: o.fill });
+  p.line(x, y + h, x + w, y, { sw: 0.5 });
+  if (o.labels) { p.text(x + 2, y + 7, o.labels[0], { size: 5 }); p.text(x + 2, y + h - 2.5, o.labels[1], { size: 5 }); }
+  p.cell(id, x, y, w, h, 'gc', o.n || 'Giv/Chck');
+}
+function strip(p, x, fill, label, o = {}) {
+  p.fill(x, 0, 18, p.h, fill);
+  if (label) p.text(x + (o.right ? 6 : 12), 14, label, { size: 7, bold: true, rot: 90, fill: o.fg || '#222' });
+}
+function noWrite(p, x, cy) { p.text(x, cy, 'DO NOT WRITE IN THIS AREA', { size: 9, bold: true, fill: '#8a8a8a', rot: -90, anchor: 'middle' }); }
+function ptLabel(p, x, y, pre) {
+  const c = (k, cx, cy, w, n) => p.under(`${pre}pt.${k}`, cx, cy, w, n, { k: 'ty' });
+  p.text(x, y, 'Family Name:', { size: 7.5 }); c('family', x + 52, y + 1, 240, 'Family name');
+  p.text(x, y + 18, 'Given Name:', { size: 7.5 }); c('given', x + 48, y + 19, 150, 'Given name');
+  p.text(x + 206, y + 18, 'Gender:', { size: 7.5 }); c('gender', x + 236, y + 19, 56, 'Gender');
+  p.text(x + 66, y + 38, 'AFFIX PATIENT LABEL HERE', { size: 10, bold: true, italic: true, fill: '#777' });
+  p.text(x, y + 58, 'Date of Birth:', { size: 7.5 }); c('dob', x + 52, y + 59, 110, 'Date of birth');
+  p.text(x + 176, y + 58, 'NHI#:', { size: 7.5 }); c('nhi', x + 198, y + 59, 94, 'NHI number');
+  if (pre) for (const k of ['family', 'given', 'gender', 'dob', 'nhi']) p.cells.find(q => q.id === `${pre}pt.${k}`).src = 'pt.' + k;
+}
+
+/* ── page 1: the front ── */
+function front() {
+  const p = page('front', 640, 812);
+  p.fill(0, 0, 22, p.h, '#e6e6e6'); noWrite(p, 15, 380);
+  p.text(64, 34, '8 Day National Medication Chart', { size: 15, bold: true });
+  p.rect(64, 46, 190, 44, { stroke: RED, sw: 1 });
+  p.text(72, 73, 'Chart', { size: 11 }); p.box(108, 53, 50, 30, '', 'chart.no', { fill: '#fff', al: 'c', n: 'Chart number' });
+  p.text(164, 73, 'of', { size: 11 }); p.box(180, 53, 62, 30, '', 'chart.of', { fill: '#fff', al: 'c', n: 'Number of charts' });
+  p.rect(64, 98, 190, 40, { stroke: RED, sw: 1 });
+  p.text(72, 124, 'Date Recharted', { size: 11 }); p.under('recharted', 170, 126, 76, 'Date recharted');
+  p.text(176, 133, 'Day   Month   Year', { size: 4.6, fill: '#555' });
+  ptLabel(p, 276, 58, '');
+  p.text(276, 136, 'Prescriber to write Patient’s name and NHI:', { size: 7, bold: true });
+  p.line(276, 148, 620, 148, { sw: 0.5 });
+  /* allergies and adverse reactions */
+  for (const [k, x, title, border] of [['alg', 64, 'Allergies', RED], ['adr', 350, 'Adverse Reactions', '#666']]) {
+    const y = 158, w = 270;
+    p.fill(x, y, w, 196, '#fdf3a0'); p.fill(x, y, w, 17, '#f0b323');
+    p.text(x + 5, y + 12.5, title, { size: 10, bold: true });
+    p.text(x + w - 32, y + 12, 'No', { size: 7.5, bold: true }); p.tick(k + '.none', x + w - 17, y + 3, 11, `${title}: No`);
+    p.text(x + 3, y + 24, k === 'alg' ? 'Medication / Other' : 'Medication', { size: 5.8, bold: true }); p.text(x + 150, y + 24, 'Reaction', { size: 5.8, bold: true });
+    for (let i = 0; i < 4; i++) {
+      const ry = y + 27 + i * 20;
+      p.line(x, ry + 20, x + w, ry + 20, { sw: 0.5 });
+      p.cell(`${k}.${i}.med`, x, ry, 146, 20, 'm', `${title} — medicine ${i + 1}`); p.cell(`${k}.${i}.rx`, x + 146, ry, 124, 20, 't', `${title} — reaction ${i + 1}`);
+    }
+    p.line(x + 146, y + 20, x + 146, y + 107, { sw: 0.5, dash: '1.5 1.5' });
+    p.line(x, y + 127, x + w, y + 127, { sw: 0.6 });
+    p.text(x + 3, y + 114, 'Signature', { size: 5.8, bold: true }); p.text(x + 170, y + 114, 'Date', { size: 5.8, bold: true });
+    p.cell(`${k}.sig`, x, y + 107, 166, 20, 't', `${title} — signature`, { lab: true }); p.cell(`${k}.date`, x + 166, y + 107, 104, 20, 't', `${title} — date`, { lab: true });
+    p.text(x + 3, y + 134, 'New on this admission', { size: 5.8, bold: true });
+    p.cell(`${k}.new`, x, y + 127, w, 49, 't', `${title} — new on this admission`, { lab: true });
+    p.line(x, y + 152, x + w, y + 152, { sw: 0.5 }); p.line(x, y + 176, x + w, y + 176, { sw: 0.6 });
+    p.text(x + 3, y + 183, 'Signature', { size: 5.8, bold: true }); p.text(x + 170, y + 183, 'Date', { size: 5.8, bold: true });
+    p.cell(`${k}.newsig`, x, y + 176, 166, 20, 't', `${title} (new) — signature`, { lab: true }); p.cell(`${k}.newdate`, x + 166, y + 176, 104, 20, 't', `${title} (new) — date`, { lab: true });
+    p.rect(x, y, w, 196, { stroke: border, sw: 1.2 });
+  }
+  /* special care, supplementary charts */
+  const panel = (x, fill, stroke, title, k, items) => {
+    const y = 364, w = 270;
+    p.rect(x, y, w, 76, { fill, stroke, sw: 1 });
+    p.text(x + 5, y + 13, title, { size: 10, bold: true });
+    p.text(x + w - 32, y + 12, 'No', { size: 7.5, bold: true }); p.tick(k + '.none', x + w - 17, y + 3, 11, `${title}: No`);
+    items.forEach(([id, label], i) => {
+      const cx = x + 8 + (i % 2) * 150, cy = y + 24 + Math.floor(i / 2) * 17;
+      p.tick(`${k}.${id}`, cx, cy, 10, `${title}: ${label}`); p.text(cx + 16, cy + 8, label, { size: 7 });
+    });
+    p.tick(`${k}.otherx`, x + 8, y + 58, 10, `${title}: Other`); p.text(x + 24, y + 66, 'Other:', { size: 7 });
+    p.under(`${k}.other`, x + 50, y + 68, w - 58, `${title}: Other`);
+  };
+  panel(64, '#bad4ee', '#3f7cc0', 'Special Care Required', 'sc', [['renal', 'Renal impairment'], ['preg', 'Pregnancy'], ['hep', 'Hepatic impairment'], ['bf', 'Breastfeeding']]);
+  panel(350, '#e4e4e4', '#8a8a8a', 'Supplementary Charts', 'sup', [['insulin', 'Diabetic/Insulin'], ['analg', 'Specialised analgesia'], ['heparin', 'Heparin'], ['warfarin', 'Warfarin']]);
+  /* the two registers */
+  p.text(64, 464, 'Sample Signature', { size: 10 }); p.text(162, 464, 'Prescribers', { size: 10 });
+  p.text(350, 464, 'Sample Initials', { size: 10 }); p.text(436, 464, 'Administrators/Others', { size: 10 });
+  const reg = (x, cols, pre, who) => {
+    let cx = x; const y = 470;
+    for (const [lab, w] of cols) { p.rect(cx, y, w, 22); p.text(cx + 3, y + 9, lab, { size: 6.4 }); if (lab.startsWith('NAME')) p.text(cx + 3, y + 16, '(family & given)', { size: 4.2 }); cx += w; }
+    for (let i = 0; i < 16; i++) {
+      let rx = x; const ry = y + 22 + i * 18.5;
+      for (const [lab, w, k] of cols) { p.rect(rx, ry, w, 18.5); p.cell(`${pre}.${i}.${k}`, rx, ry, w, 18.5, 't', `${who} register, line ${i + 1} — ${lab.toLowerCase()}`); rx += w; }
+    }
+  };
+  reg(64, [['NAME & DESIGNATION', 132, 'name'], ['SIGNATURE', 88, 'sig'], ['REG. No.', 56, 'reg']], 'sigp', 'Prescribers’ signature');
+  reg(346, [['NAME & DESIGNATION', 150, 'name'], ['INITIAL', 54, 'init'], ['REG. No.', 70, 'reg']], 'siga', 'Sample initials');
+  p.text(64, 804, 'NMC8D September 2012', { size: 5.5 }); p.text(620, 804, '1', { size: 6, anchor: 'end' });
+  return p;
+}
+
+/* an order block's top two rows, shared by Once Only, PRN and Regular */
+function medRow(p, id, x, y, w, fill) {
+  p.rect(x, y, w, 30, { fill }); p.text(x + 3, y + 8, 'Medicine', { size: 6.2, bold: true });
+  ruler(p, x, y, w, 30); p.cell(id, x, y, w, 30, 'm', 'Medicine');
+}
+function doseBox(p, id, x, y, w, h, fill) { p.box(x, y, w, h, 'Dose', id, { fill, n: 'Dose', k: 'ds' }); decimal(p, x, y, w, h); }
+
+/* ── pages 2–3: once only, verbal orders, oxygen ── */
+function once() {
+  const p = page('once', 640, 912);
+  p.fill(0, 0, 20, p.h, '#161616'); p.text(8, 14, 'ONCE ONLY / VERBAL ORDERS / OXYGEN', { size: 7, bold: true, rot: 90, fill: '#fff' });
+  /* the allergy summary every page carries */
+  p.fill(40, 20, 250, 98, '#fdf3a0'); p.fill(40, 20, 250, 16, '#f0b323');
+  for (const [k, x, t] of [['alg2', 40, 'Allergies'], ['adr2', 165, 'Adverse Reactions']]) {
+    p.text(x + 4, 31, t, { size: 6.8, bold: true }); p.text(x + 100, 31, 'No', { size: 6.2 }); p.tick(k + '.no', x + 110, 23, 10, `${t} (page summary): No`);
+    p.text(x + 4, 50, 'Yes', { size: 6.2 }); p.tick(k + '.yes', x + 18, 42, 10, `${t} (page summary): Yes`); p.text(x + 34, 50, 'List medicine(s):', { size: 6.2 });
+    p.cell(k + '.list', x, 53, 125, 65, 't', `${t} (page summary): list`);
+  }
+  p.line(165, 20, 165, 138, { stroke: RED, sw: 1 });
+  p.rect(40, 118, 125, 20, { fill: '#fdf3a0' }); p.text(43, 130, 'Refer to front page for details', { size: 5.8 });
+  p.box(165, 118, 125, 20, 'Initials', 'alg2.init', { fill: '#fdf3a0', n: 'Initials (allergy summary)' });
+  p.rect(40, 20, 250, 118, { stroke: RED, sw: 1.2 });
+  ptLabel(p, 306, 32, 'once.');
+  const wbox = (x, y, w, parts) => { p.rect(x, y, w, 18, { stroke: '#333' }); for (const [lab, id, lx, cw, n] of parts) { p.text(x + lx, y + 11.5, lab, { size: 5.4 }); if (id) p.cell(id, x + lx + (lab.length * 2.6), y, cw, 18, 't', n); } };
+  wbox(306, 104, 158, [['Weight (kg)', 'wt.0', 3, 36, 'Weight (kg)'], ['Date', 'wt.0d', 78, 62, 'Weight — date']]);
+  wbox(467, 104, 158, [['Weight (kg)', 'wt.1', 3, 36, 'Weight (kg), re-weighed'], ['Date', 'wt.1d', 78, 62, 'Re-weighed — date']]);
+  wbox(306, 126, 124, [['Height (cm)', 'ht', 3, 30, 'Height (cm)'], ['Date', 'htd', 66, 44, 'Height — date']]);
+  wbox(433, 126, 58, [['B.S.A (m²)', 'bsa', 3, 26, 'Body surface area']]);
+  wbox(494, 126, 131, [['Gestational age at birth (wks)', 'ga', 3, 42, 'Gestational age at birth']]);
+  p.text(40, 168, 'Once Only', { size: 15, bold: true });
+  for (let i = 0; i < 4; i++) {
+    const y = 176 + i * 94, x = 40, g = '#eef1ee';
+    p.box(x, y, 36, 92, 'Date', `once.${i}.date`, { lb: true, ch: 42, n: 'Date' });
+    medRow(p, `once.${i}.med`, 76, y, 507, g);
+    doseBox(p, `once.${i}.dose`, 76, y + 30, 82, 30);
+    p.box(158, y + 30, 38, 62, 'Units', `once.${i}.units`, { fill: g });
+    p.box(196, y + 30, 44, 30, 'Route', `once.${i}.route`);
+    p.box(240, y + 30, 86, 30, 'Dose calculation', `once.${i}.calc`, { sub: '(eg. mg/kg per dose)' });
+    p.box(326, y + 30, 160, 30, 'Prescriber’s signature', `once.${i}.psig`);
+    p.box(486, y + 30, 97, 30, 'Time commenced', `once.${i}.tstart`);
+    p.box(76, y + 60, 82, 32, 'Dose range if needed', `once.${i}.range`);
+    p.box(196, y + 60, 130, 32, 'Date & time of dose', `once.${i}.dosedt`);
+    p.box(326, y + 60, 126, 32, 'Pharmacy & special instructions', `once.${i}.inst`);
+    p.box(452, y + 60, 34, 32, 'Pharm', `once.${i}.pharm`);
+    p.box(486, y + 60, 97, 32, 'Time completed', `once.${i}.tend`);
+    gcBox(p, `once.${i}.gc`, 583, y, 42, 92, { labels: ['Given by', 'Checked by'], n: 'Given by / Checked by' });
+    p.rect(x, y, 585, 92, { sw: 1 });
+    p.blocks[`once.${i}`] = { x, y, w: 585, h: 92 };
+  }
+  p.text(40, 572, 'Verbal Orders', { size: 15, bold: true }); p.text(150, 572, '(must be signed as soon as possible or within 24 hours of order)', { size: 8.5 });
+  for (let i = 0; i < 2; i++) {
+    const y = 580 + i * 94, x = 40, g = '#eef1ee';
+    p.box(x, y, 36, 92, 'Date\n& Time', `verb.${i}.dt`, { lb: true, ch: 42, n: 'Date & time of the order' });
+    medRow(p, `verb.${i}.med`, 76, y, 507, g);
+    doseBox(p, `verb.${i}.dose`, 76, y + 30, 82, 30);
+    p.box(158, y + 30, 38, 62, 'Units', `verb.${i}.units`, { fill: g });
+    p.box(196, y + 30, 40, 30, 'Route', `verb.${i}.route`);
+    p.box(236, y + 30, 76, 30, 'Dose calculation', `verb.${i}.calc`, { sub: '(eg. mg/kg per dose)' });
+    p.box(312, y + 30, 92, 30, 'Date & time of dose', `verb.${i}.dosedt`);
+    p.box(404, y + 30, 82, 15, 'Initials: Nurse', `verb.${i}.nurse`, { n: 'Initials: nurse who took the order' });
+    p.box(404, y + 45, 82, 15, 'Initials: Witness', `verb.${i}.witness`, { n: 'Initials: witness' });
+    p.box(486, y + 30, 97, 15, 'Time commenced', `verb.${i}.tstart`);
+    p.box(486, y + 45, 97, 15, 'Time completed', `verb.${i}.tend`);
+    p.box(76, y + 60, 82, 32, 'Dose range if needed', `verb.${i}.range`);
+    p.box(196, y + 60, 116, 32, 'Prescriber’s name', `verb.${i}.pname`);
+    p.box(312, y + 60, 92, 32, 'Prescriber’s signature', `verb.${i}.psig`);
+    p.box(404, y + 60, 146, 32, 'Pharmacy & Special Instructions', `verb.${i}.inst`);
+    p.box(550, y + 60, 33, 32, 'Pharm', `verb.${i}.pharm`);
+    gcBox(p, `verb.${i}.gc`, 583, y, 42, 92, { labels: ['Given by', 'Checked by'], n: 'Given by / Checked by' });
+    p.rect(x, y, 585, 92, { sw: 1 });
+  }
+  p.text(40, 792, 'Oxygen Therapy & Medical Gases', { size: 13, bold: true });
+  p.rect(352, 778, 273, 17, { fill: '#f4f7fb', stroke: '#8aa6c8' }); p.text(356, 789.5, 'Target Oxygen Saturation (%):', { size: 7 });
+  p.cell('o2.target', 460, 778, 165, 17, 't', 'Target oxygen saturation (%)');
+  const cols = [['START DATE', 'start', 100], ['DEVICE/DELIVERY', 'device', 160], ['FLOW RATE', 'flow', 100], ['SIGNATURE', 'sig', 120], ['STOP DATE', 'stop', 105]];
+  let cx = 40;
+  for (const [lab, , w] of cols) { p.rect(cx, 800, w, 14, { fill: '#bcd4ee' }); p.text(cx + 4, 810, lab, { size: 6.4 }); cx += w; }
+  for (let i = 0; i < 5; i++) { cx = 40; for (const [lab, k, w] of cols) { p.rect(cx, 814 + i * 17, w, 17); p.cell(`o2.${i}.${k}`, cx, 814 + i * 17, w, 17, 't', `Oxygen line ${i + 1} — ${lab.toLowerCase()}`); cx += w; } }
+  p.text(620, 906, '3', { size: 6, anchor: 'end' });
+  return p;
+}
+
+/* ── pages 4–5: PRN orders facing their record ── */
+function prn() {
+  const p = page('prn', 1280, 812);
+  strip(p, 0, '#e8812c', 'PRN'); strip(p, 1262, '#e8812c', 'PRN', { right: 1 });
+  p.line(640, 0, 640, p.h, { stroke: '#bbb', dash: '3 3' });
+  p.text(40, 34, 'As Required (PRN) Medicines', { size: 15, bold: true });
+  const gx = 654, cols = [['Date', 'date', 34], ['Time', 'time', 28], ['Dose', 'dose', 30], ['Route', 'route', 26], ['Giv/Chck', 'gc', 32]];
+  for (let g = 0; g < 4; g++) { let cx = gx + g * 150; for (const [lab, , w] of cols) { p.rect(cx, 30, w, 14, { fill: '#fbe6d4' }); p.text(cx + w / 2, 39.5, lab, { size: 5.4, anchor: 'middle', bold: lab === 'Date' }); cx += w; } }
+  PRN_LETTERS.forEach((L, i) => {
+    const y = 44 + i * 94, x = 40, fill = i % 2 ? '#fbe6d4' : '#fff';
+    p.fill(x, y, 590, 92, fill);
+    p.box(x, y, 36, 92, 'Date', `prn.${L}.date`, { lb: true, ch: 42, n: 'Date ordered' });
+    p.text(58, y + 86, L, { size: 20, bold: true, fill: GREY, anchor: 'middle' });
+    medRow(p, `prn.${L}.med`, 76, y, 554);
+    doseBox(p, `prn.${L}.dose`, 76, y + 30, 84, 30);
+    p.box(160, y + 30, 40, 62, 'Units', `prn.${L}.units`);
+    p.box(200, y + 30, 52, 30, 'Route', `prn.${L}.route`);
+    p.box(252, y + 30, 56, 30, 'Frequency', `prn.${L}.freq`);
+    p.box(308, y + 30, 102, 30, 'Dose calculation', `prn.${L}.calc`, { sub: '(eg. mg/kg per dose)' });
+    p.box(410, y + 30, 70, 30, 'Max dose/24hrs', `prn.${L}.max`, { stroke: PINK });
+    p.box(480, y + 30, 150, 30, 'Prescriber’s signature', `prn.${L}.psig`);
+    p.box(76, y + 60, 84, 32, 'Dose range if needed', `prn.${L}.range`);
+    p.box(200, y + 60, 66, 32, 'Indication', `prn.${L}.ind`);
+    p.box(266, y + 60, 144, 32, 'Pharmacy & special instructions', `prn.${L}.inst`);
+    p.box(410, y + 60, 30, 32, 'Pharm', `prn.${L}.pharm`);
+    p.box(440, y + 60, 190, 32, 'Sign, date and time to cancel', `prn.${L}.cancel`, { stroke: PINK });
+    p.rect(x, y, 590, 92, { sw: 1 });
+    p.blocks[`prn.${L}`] = { x: 76, y, w: 554, h: 92 };
+    /* the record: 4 groups of 5 lines, filled down the first group, then the next */
+    p.fill(gx, y, 600, 92, fill);
+    for (let j = 0; j < 20; j++) {
+      const g = Math.floor(j / 5), r = j % 5, ry = y + r * 18.4;
+      let cx = gx + g * 150;
+      for (const [lab, k, w] of cols) {
+        if (k === 'gc') gcBox(p, `prn.${L}.${j}.gc`, cx, ry, w, 18.4, { n: `PRN ${L} record line ${j + 1} — Giv/Chck` });
+        else { p.rect(cx, ry, w, 18.4); p.cell(`prn.${L}.${j}.${k}`, cx, ry, w, 18.4, 't', `PRN ${L} record line ${j + 1} — ${lab.toLowerCase()}`, { al: 'c' }); }
+        cx += w;
+      }
+    }
+    p.text(gx + 34 + 14, y + 62, L, { size: 16, bold: true, fill: GREY, anchor: 'middle' });
+    p.rect(gx, y, 600, 92, { sw: 1 });
+  });
+  p.text(44, 806, '4', { size: 6 }); p.text(1250, 806, '5', { size: 6, anchor: 'end' });
+  return p;
+}
+
+/* ── pages 6–7: VTE, regular orders facing their 8 days ── */
+function reg() {
+  const p = page('reg', 1280, 834);
+  strip(p, 0, '#b8cde6', 'REGULAR 1'); strip(p, 1262, '#b8cde6', 'REGULAR 1', { right: 1 });
+  p.line(640, 0, 640, p.h, { stroke: '#bbb', dash: '3 3' });
+  p.text(40, 19, 'IF CHART IS TO BE SCANNED PLEASE ENTER PATIENT NAME:', { size: 8, bold: true, italic: true, fill: '#555' });
+  p.under('scan.name', 312, 20, 200, 'Patient name (for scanning)'); p.text(518, 19, 'NHI:', { size: 8, bold: true, italic: true, fill: '#555' }); p.under('scan.nhi', 538, 20, 92, 'NHI (for scanning)');
+  /* VTE */
+  p.rect(40, 26, 590, 116, { stroke: RED, sw: 1 });
+  p.text(46, 36, 'VENOUS THROMBOEMBOLISM (VTE) PREVENTION', { size: 7.2, bold: true, fill: RED });
+  p.text(46, 45.5, 'Assess VTE risk on admission, again within 24 – 48 hours of admission, and periodically when/if the patient’s clinical condition changes significantly.', { size: 5.9 });
+  p.text(46, 58, 'VTE risk assessed on admission', { size: 6.8, bold: true, fill: RED }); p.tick('vte.assessed', 158, 50, 10, 'VTE risk assessed on admission');
+  p.text(186, 58, 'Date:', { size: 6.5 }); p.under('vte.date', 206, 59, 110, 'VTE assessment — date');
+  p.text(356, 58, 'Prescriber’s signature:', { size: 6.5 }); p.under('vte.psig', 432, 59, 194, 'VTE assessment — prescriber’s signature');
+  p.rect(46, 64, 578, 12); p.text(49, 72.5, 'VTE risk reassessed', { size: 5.8, bold: true, fill: RED });
+  for (let i = 0; i < 3; i++) {
+    const x = 122 + i * 167.3;
+    p.line(x, 64, x, 76);
+    p.text(x + 3, 72.5, 'Date:', { size: 5.8, bold: true }); p.cell(`vte.r${i}.date`, x + 22, 64, 52, 12, 't', `VTE reassessed (${i + 1}) — date`);
+    p.text(x + 76, 72.5, 'Signature:', { size: 5.8, bold: true }); p.cell(`vte.r${i}.sig`, x + 110, 64, 57, 12, 't', `VTE reassessed (${i + 1}) — signature`);
+  }
+  p.text(46, 88, 'If NO VTE prophylaxis prescribed', { size: 6.6, bold: true, fill: RED }); p.text(170, 88, 'state reason why:', { size: 6.6, bold: true, fill: RED });
+  p.text(46, 100, 'Low risk of VTE:', { size: 6.5 }); p.tick('vte.low', 102, 92, 9, 'No VTE prophylaxis: low risk');
+  p.text(238, 100, 'High bleeding risk:', { size: 6.5 }); p.tick('vte.bleed', 302, 92, 9, 'No VTE prophylaxis: high bleeding risk');
+  p.text(46, 112, 'Other:', { size: 6.5 }); p.line(68, 113, 318, 113, { dash: '1 1.5' }); p.line(46, 128, 318, 128, { dash: '1 1.5' });
+  p.cell('vte.other', 68, 103, 250, 26, 't', 'No VTE prophylaxis: other reason');
+  p.line(326, 80, 326, 138, { sw: 0.5 });
+  p.text(334, 88, 'VTE prophylaxis prescribed:', { size: 6.6, bold: true, fill: RED });
+  const yn = (y, lab, k) => { p.text(334, y, lab, { size: 6.5 }); p.text(560, y, 'Yes', { size: 6.5 }); p.tick(`vte.${k}.y`, 574, y - 8, 9, `${lab} Yes`); p.text(594, y, 'No', { size: 6.5 }); p.tick(`vte.${k}.n`, 606, y - 8, 9, `${lab} No`); };
+  yn(99, 'Anticoagulation prescribed:', 'anticoag');
+  p.text(334, 110, 'Mechanical VTE prophylaxis prescribed:', { size: 6.6, bold: true, fill: RED });
+  yn(121, 'Graduated compression stockings:', 'stock'); yn(133, 'Intermittent pneumatic compression devices:', 'ipc');
+  /* the orders */
+  p.text(44, 164, 'Regular Medicine', { size: 15, bold: true });
+  p.rect(556, 150, 74, 20); p.text(593, 162, 'Circle or actual time', { size: 5.6, anchor: 'middle' });
+  const gx = 654, dayW = 75;
+  for (let d = 1; d <= 8; d++) {
+    const x = gx + (d - 1) * dayW;
+    p.rect(x, 150, dayW, 11, { fill: '#e7edf6' }); p.text(x + 2, 158, 'Date', { size: 5.2 });
+    p.cell(`reg.day${d}`, x + 16, 150, dayW - 16, 11, 'dt', `Date — day ${d} of the chart`);
+    [['Time', 25], ['Dose', 21], ['Giv/Chck', 29]].reduce((cx, [lab, w]) => { p.rect(cx, 161, w, 11, { fill: '#e7edf6' }); p.text(cx + w / 2, 168.5, lab, { size: 4.8, anchor: 'middle' }); return cx + w; }, x);
+  }
+  REG_LETTERS.forEach((L, i) => {
+    const y = 172 + i * 92, x = 40, fill = i % 2 ? '#e7edf6' : '#fff';
+    p.fill(x, y, 590, 90, fill);
+    p.box(x, y, 36, 90, 'Date', `reg.${L}.date`, { lb: true, ch: 42, n: 'Date ordered' });
+    p.text(58, y + 84, L, { size: 20, bold: true, fill: GREY, anchor: 'middle' });
+    medRow(p, `reg.${L}.med`, 76, y, 480);
+    doseBox(p, `reg.${L}.dose`, 76, y + 30, 84, 28);
+    p.box(160, y + 30, 40, 60, 'Units', `reg.${L}.units`);
+    p.box(200, y + 30, 46, 28, 'Route', `reg.${L}.route`);
+    p.box(246, y + 30, 50, 28, 'Frequency', `reg.${L}.freq`);
+    p.box(296, y + 30, 84, 28, 'Dose calculation', `reg.${L}.calc`, { sub: '(eg. mg/kg per dose)' });
+    p.box(380, y + 30, 176, 28, 'Prescriber’s signature', `reg.${L}.psig`);
+    p.box(76, y + 58, 84, 32, 'Dose range if needed', `reg.${L}.range`);
+    p.box(200, y + 58, 156, 32, 'Pharmacy & special instructions', `reg.${L}.inst`);
+    p.box(356, y + 58, 30, 32, 'Pharm', `reg.${L}.pharm`);
+    p.box(386, y + 58, 170, 32, 'Sign, date and time to cancel', `reg.${L}.cancel`, { stroke: PINK });
+    for (let k = 0; k < 5; k++) {
+      const ty = y + k * 18;
+      p.rect(556, ty, 34, 18, { fill: '#fff' }); p.text(560, ty + 11.5, TIMES[k], { size: 6.2 }); p.rect(590, ty, 40, 18, { fill: '#fff' });
+      p.cell(`reg.${L}.s${k}`, 556, ty, 74, 18, 'sl', `Time row ${TIMES[k]} (circle it, or write the actual time beside it)`);
+    }
+    p.rect(x, y, 590, 90, { sw: 1 });
+    p.blocks[`reg.${L}`] = { x: 76, y, w: 480, h: 90 };
+    /* 8 days × 5 time rows × Time · Dose · Giv/Chck */
+    p.fill(gx, y, 8 * dayW, 90, fill);
+    for (let k = 0; k < 5; k++) for (let d = 1; d <= 8; d++) {
+      const cx = gx + (d - 1) * dayW, ty = y + k * 18, sh = d === 8 && k >= 3 ? '#c9d8ec' : null, id = `reg.${L}.d${d}.s${k}`;
+      p.rect(cx, ty, 25, 18, { fill: sh }); p.cell(id + '.t', cx, ty, 25, 18, 't', 'Time given', { al: 'c' });
+      p.rect(cx + 25, ty, 21, 18, { fill: sh }); p.cell(id + '.dose', cx + 25, ty, 21, 18, 't', 'Dose given (variable dose)', { al: 'c' });
+      gcBox(p, id + '.gc', cx + 46, ty, 29, 18, { fill: sh, n: 'Giv/Chck — given by / checked by' });
+    }
+    for (let d = 1; d < 8; d++) p.line(gx + d * dayW, y, gx + d * dayW, y + 90, { sw: 0.9 });
+    p.text(gx + 35.5, y + 62, L, { size: 16, bold: true, fill: GREY, anchor: 'middle' });
+    p.rect(gx, y, 8 * dayW, 90, { sw: 1 });
+    p.blocks[`reg.${L}.adm`] = { x: gx, y, w: 8 * dayW, h: 90, dayW };
+  });
+  p.text(gx + 7 * dayW + 64, 172 + 320, 'PRESCRIBER TO RE-WRITE MEDICATION CHART', { size: 15, bold: true, fill: '#c3cedd', rot: 90, anchor: 'middle' });
+  ptLabel(p, 940, 40, 'reg.');
+  p.text(44, 830, '6', { size: 6 }); p.text(1250, 830, '7', { size: 6, anchor: 'end' });
+  return p;
+}
+
+/* ── page 12: IV and subcut fluids (a landscape page, drawn upright) ── */
+function fluids() {
+  const p = page('fl', 940, 424);
+  p.rect(20, 14, 150, 92, { fill: '#fdf3a0', stroke: '#888' });
+  p.text(95, 36, 'Allergy/\nAdverse Reaction\nInformation', { size: 9.5, bold: true, anchor: 'middle', lh: 12 });
+  p.text(95, 92, 'Refer Front Page', { size: 7.5, bold: true, anchor: 'middle' });
+  p.text(430, 50, 'INTRAVENOUS AND SUBCUTANEOUS FLUID', { size: 12, bold: true, anchor: 'middle' });
+  p.text(430, 66, 'PRESCRIPTION AND INFUSION RECORD', { size: 12, bold: true, anchor: 'middle' });
+  ptLabel(p, 632, 24, 'fl.');
+  const cols = [['Date', 'date', 20, 58], ['Prescribed\nCommencing\nTime', 'time', 78, 54], ['Volume\n(mL)', 'vol', 132, 46], ['Intravenous and Subcutaneous Fluid and Additives', 'fluid', 178, 290],
+    ['Route', 'route', 468, 32], ['Rate\n(mL / hr)', 'rate', 500, 52], ['Prescriber’s Signature', 'psig', 552, 130], ['Actual\nCommencing\nTime', 'astart', 682, 58],
+    ['Commenced By\nChecked By', 'gc', 740, 62], ['Time', 'tend', 802, 52], ['Actual Vol.', 'avol', 854, 66]];
+  for (const [lab, k, x, w] of cols) {
+    const top = k === 'tend' || k === 'avol' ? 132 : 116;
+    p.rect(x, top, w, 160 - top);
+    p.text(x + w / 2, top + (k === 'fluid' || k === 'psig' || k === 'date' || k === 'route' ? 26 : 12), lab, { size: 6.4, anchor: 'middle', lh: 8 });
+  }
+  p.rect(802, 116, 118, 16); p.text(861, 127, 'Completion', { size: 6.4, anchor: 'middle' });
+  for (let i = 0; i < 12; i++) {
+    const y = 160 + i * 21, fill = i % 2 ? '#dedede' : '#fff';
+    for (const [lab, k, x, w] of cols) {
+      const name = `IV fluids line ${i + 1} — ${lab.replace(/\n/g, ' ').toLowerCase()}`;
+      if (k === 'gc') gcBox(p, `fl.${i}.gc`, x, y, w, 21, { fill, n: `IV fluids line ${i + 1} — commenced by / checked by` });
+      else { p.rect(x, y, w, 21, { fill }); p.cell(`fl.${i}.${k}`, x, y, w, 21, k === 'fluid' ? 'm' : 't', name, { al: k === 'fluid' || k === 'psig' ? '' : 'c' }); }
+    }
+  }
+  p.rect(20, 116, 900, 160 - 116 + 12 * 21, { sw: 1 });
+  p.text(24, 418, '12', { size: 6 });
+  return p;
+}
+
+/* ── the key printed on page 11: instructions, recommended times, the not-given codes ── */
+function key() {
+  const p = page('key', 660, 214);
+  const lines = [
+    ['GENERAL INSTRUCTIONS', 1], ['1. Use indelible pen only to write on this chart.'], ['2. All users must complete the Sample Signature/Initial Register.'], ['3. Reg. No.   registration number.'],
+    ['Prescriber’s Instructions', 1], ['1. Use approved or generic names only and prescribe using block capitals.'], ['2. Full signature.'],
+    ['3. To stop a medication, enter the stop date, time, sign, and cross through order and administration.'], ['4. To alter therapy, stop the original order as per instruction 3 above, and prescribe on a new line.'],
+    ['Administrator’s Instructions', 1], ['1. Record time of administration using 24-hour clock.'], ['2. For variable dose, record actual dose given.'], ['3. For variable route, record actual route used.'],
+    ['4. If dose not given, record appropriate non-administration code.'], ['5. Giv/Chck   given by/checked by.'],
+  ];
+  lines.forEach(([t, b], i) => p.text(16, 16 + i * 12.6, t, { size: b ? 8 : 6.4, bold: !!b }));
+  const tx = 348;
+  p.rect(tx, 6, 178, 200, { stroke: '#555' });
+  p.text(tx + 89, 17, 'RECOMMENDED', { size: 7.5, bold: true, anchor: 'middle' }); p.text(tx + 89, 26, 'ADMINISTRATION TIMES', { size: 7.5, bold: true, anchor: 'middle' });
+  p.text(tx + 89, 35, 'GUIDELINES ONLY', { size: 6.5, anchor: 'middle' });
+  const rows = [['Morning', 'Mane', ['0800']], ['Night', 'Nocte', ['', '1800 or 2000']], ['Twice\na day', 'BD', ['0800', '', '2000']], ['Three times\na day', 'TDS', ['0800', '1400', '2000']],
+    ['Antibiotic\n8 hourly', 'q8h', ['0600', '1400', '2200']], ['Antibiotic\n6 hourly', 'q6h', ['0600', '1200', '1800', '2400']], ['Four times\na day', 'QID', ['0600', '1200', '1800', '2200']]];
+  rows.forEach(([a, b, ts], i) => {
+    const y = 40 + i * 23.5;
+    p.rect(tx, y, 34, 23.5); p.text(tx + 2, y + (a.includes('\n') ? 9.5 : 14), a, { size: 5.2, lh: 6.2 });
+    p.rect(tx + 34, y, 24, 23.5); p.text(tx + 46, y + 14, b, { size: 5.6, anchor: 'middle' });
+    if (b === 'Nocte') { p.rect(tx + 58, y, 30, 23.5); p.rect(tx + 88, y, 30, 23.5); p.rect(tx + 118, y, 60, 23.5); p.text(tx + 148, y + 14, ts[1], { size: 5.8, anchor: 'middle' }); }
+    else for (let c = 0; c < 4; c++) p.rect(tx + 58 + c * 30, y, 30, 23.5);
+    if (b !== 'Nocte') ts.forEach((t, c) => { if (t) p.text(tx + 58 + c * 30 + 15, y + 14, t, { size: 5.8, anchor: 'middle' }); });
+  });
+  const cx = 534;
+  p.rect(cx, 6, 120, 150, { stroke: '#555' });
+  p.text(cx + 60, 18, 'NON-ADMINISTRATION', { size: 7.5, bold: true, anchor: 'middle' }); p.text(cx + 60, 27, 'CODES', { size: 7.5, bold: true, anchor: 'middle' });
+  [['U', 'Patient unavailable'], ['SM', 'Self-medicating'], ['CP', 'Carer/Parent'], ['R', 'Patient refused'], ['D', 'Prescriber’s instructions'], ['N', 'Not administered']].forEach(([c, t], i) => {
+    p.text(cx + 6, 44 + i * 15, c, { size: 7.5, bold: true }); p.text(cx + 24, 44 + i * 15, t, { size: 6.8 });
+  });
+  p.text(cx + 24, 44 + 5 * 15 + 10, '– document reason in notes', { size: 6.8 });
+  return p;
+}
+
+const BUILD = { front, once, prn, reg, fl: fluids, key };
+const CACHE = {};
+function layout(id) {
+  if (!CACHE[id]) {
+    const p = BUILD[id]();
+    CACHE[id] = { id, w: p.w, h: p.h, form: p.f.join(''), cells: p.cells, blocks: p.blocks };
+  }
+  return CACHE[id];
+}
+/* every cell on the chart: id → {page, cell} */
+function cellIndex() {
+  const m = new Map();
+  for (const { id } of PAGES) for (const c of layout(id).cells) m.set(c.id, { page: id, cell: c });
+  return m;
+}
+
+/* ── the written entries ── */
+const HAND = 'en', TYPED = 'ty';
+function t(x, y, s, size, o = {}) {
+  const str = String(s), est = str.length * size * (o.mono ? 0.6 : 0.5);
+  const fit = o.maxW && est > o.maxW ? ` textLength="${n1(o.maxW)}" lengthAdjust="spacingAndGlyphs"` : '';
+  return `<text x="${n1(x)}" y="${n1(y)}" font-size="${n1(size)}"${o.anchor ? ` text-anchor="${o.anchor}"` : ''}${o.bold ? ' font-weight="700"' : ''}${o.cls ? ` class="${o.cls}"` : ''}${fit}>${esc(str)}</text>`;
+}
+function entries(pg, V, cls = HAND) {
+  const out = [];
+  for (const c of pg.cells) {
+    const v = V[c.src || c.id];
+    if (v == null || v === '') continue;
+    out.push(entry(c, v, cls));
+  }
+  /* crossed-through orders: "cross through order and administration" (the chart's own instruction 3) */
+  for (const [k, v] of Object.entries(V)) {
+    const m = /^(reg|prn)\.([A-Z]{1,2})\.x$/.exec(k); if (!m) continue;
+    const b = pg.blocks[`${m[1]}.${m[2]}`]; if (!b) continue;
+    out.push(`<path class="${cls} cross" d="M${b.x + 4} ${b.y + b.h - 6} L${b.x + b.w - 4} ${b.y + 8} M${b.x + 4} ${b.y + 10} L${b.x + b.w - 4} ${b.y + b.h - 8}" fill="none" stroke-width="1.1"/>`);
+    const a = pg.blocks[`${m[1]}.${m[2]}.adm`];
+    if (a && v.day <= 8) {
+      /* the rest of the cease day, then every day after, crossed out */
+      for (const k2 of v.rows || []) {
+        const y = a.y + k2 * 18 + 9, x0 = a.x + (v.day - 1) * a.dayW;
+        out.push(`<path class="${cls} cross" d="M${x0 + 2} ${y} L${x0 + a.dayW - 2} ${y}" stroke-width="1"/>`);
+      }
+      if (v.day < 8) { const x0 = a.x + v.day * a.dayW; out.push(`<path class="${cls} cross" d="M${x0 + 3} ${a.y + a.h - 4} L${a.x + a.w - 3} ${a.y + 4}" fill="none" stroke-width="1.1"/>`); }
+    }
+  }
+  return out.join('');
+}
+function entry(c, v, cls) {
+  const { x, y, w, h } = c;
+  if (c.k === 'x') return `<path class="${cls} tk" d="M${n1(x + 2)} ${n1(y + h * 0.55)} l${n1(w * 0.28)} ${n1(h * 0.32)} l${n1(w * 0.55)} ${n1(-h * 0.8)}" fill="none" stroke-width="1.3"/>`;
+  if (c.k === 'gc') {
+    if (v.code) return t(x + w / 2, y + h * 0.72, v.code, Math.min(h * 0.62, 11), { anchor: 'middle', bold: true, cls });
+    const fs = Math.min(h * 0.4, 9);
+    return t(x + 1.5, y + fs + 0.5, v.giv || '', fs, { cls, maxW: w * 0.62 }) + t(x + w - 1.5, y + h - 1.8, v.chk || '', fs, { anchor: 'end', cls, maxW: w * 0.62 });
+  }
+  if (c.k === 'sl') {
+    if (v.circle) return `<ellipse class="${cls} ring" cx="${n1(x + 16.5)}" cy="${n1(y + h / 2 + 0.5)}" rx="14" ry="${n1(h / 2 - 1.8)}" fill="none" stroke-width="1"/>`;
+    return t(x + 55, y + h * 0.7, v, 8.5, { anchor: 'middle', cls, maxW: 36 });
+  }
+  if (c.k === 'ds') {
+    const [a, b] = String(v).split('.'), mid = x + w / 2, by = y + h - 5.5, fs = 8.5;
+    return t(mid - 3, by, a, fs, { anchor: 'end', cls, maxW: w / 2 - 6 }) + (b ? t(mid + 3, by, b, fs, { cls, maxW: w / 2 - 6 }) : '');
+  }
+  if (c.k === 'dt') return t(x + w / 2, y + h - 2.2, v, 7, { anchor: 'middle', cls });
+  if (c.k === 'ty') return t(x + 3, y + h - 2.5, v, 8, { cls: TYPED, maxW: w - 4, mono: 1 });
+  const s = typeof v === 'object' ? JSON.stringify(v) : String(v);
+  if (c.k === 'm') {
+    const fs = Math.min(10.5, h * 0.42);
+    return t(x + (c.lab === false ? 4 : 6), y + (h >= 28 ? h - 9 : h * 0.72), s.toUpperCase(), fs, { cls, maxW: w - 10 });
+  }
+  const fs = Math.min(8.5, (c.lab ? h - 9 : h) * 0.62, 8.5);
+  if (c.al === 'c') return t(x + w / 2, y + h / 2 + fs * 0.36 + (c.lab ? 3 : 0), s, fs, { anchor: 'middle', cls, maxW: w - 3 });
+  return t(x + 3, c.lab ? y + h - 3.5 : y + h / 2 + fs * 0.36, s, fs, { cls, maxW: w - 5 });
+}
+
+return { PAGES, REG_LETTERS, PRN_LETTERS, layout, cellIndex, entries };
+})();
+const INK = (() => {
+const getStroke = PF;
+/* The ink engine, PORTED from Giga (gigastudyapp lib/ink-path.js — the engine behind its sketch blocks and
+   whiteboard), for the Chart Sim's handwriting. The two functions below are Giga's, byte for byte, except that
+   `getStroke` is not imported: it comes from the vendored perfect-freehand 1.2.3 build (vendor/), inlined ahead
+   of this file. build-chart.mjs checks both functions against ../gigastudyapp/lib/ink-path.js whenever that
+   repo is checked out beside this one (port, don't re-implement). */
+
+// Turn a perfect-freehand outline (array of [x,y] points) into a filled SVG
+// path. From the perfect-freehand README (it is NOT a package export). Returns
+// '' for a degenerate stroke so callers render nothing.
+function inkPathFromOutline(outline) {
+  if (!outline || outline.length < 2) return '';
+  const d = outline.reduce(
+    (acc, [x0, y0], i, arr) => {
+      const [x1, y1] = arr[(i + 1) % arr.length];
+      acc.push(x0, y0, (x0 + x1) / 2, (y0 + y1) / 2);
+      return acc;
+    },
+    ['M', ...outline[0], 'Q'],
+  );
+  d.push('Z');
+  return d.join(' ');
+}
+
+// Build the filled SVG path for ONE stored sketch stroke (the inline drawing
+// block in course notes). Shared so the editor (SketchNodeView) and the canvas
+// node preview (MindMapNode) render identical ink. Points are [x,y,p] in the
+// sketch's virtual coordinate space; highlighter is flat (thinning:0), pen
+// tapers by velocity/pressure (simulate when drawn with a mouse). Returns '' for
+// a degenerate stroke.
+function sketchStrokePath(stroke) {
+  const pts = stroke?.pts;
+  if (!Array.isArray(pts) || pts.length < 2) return '';
+  const outline = getStroke(pts, {
+    size: stroke.size || 6,
+    thinning: stroke.tool === 'highlighter' ? 0 : 0.6,
+    smoothing: 0.5,
+    streamline: 0.5,
+    simulatePressure: !!stroke.simulate,
+    last: true,
+  });
+  return inkPathFromOutline(outline);
+}
+
+/* ── Chart Sim additions (not in Giga) ── */
+
+/* Giga's pressure rule (SketchNodeView toV): a real pen pressure is used; 0 and the 0.5 that a mouse reports
+   become the neutral 0.5, and the stroke is marked `simulate` so width follows velocity instead. */
+const inkPressure = e => (e.pressure > 0 && e.pressure !== 0.5 ? e.pressure : 0.5);
+
+/* Which cell a stroke was written in: the cell holding most of its points (a stroke that strays over a line
+   still belongs to the box it was mostly in). rects: [{id, x, y, w, h}] in the page's own coordinates.
+   Returns the id, or null when no cell holds at least a third of the points. */
+function strokeCell(stroke, rects) {
+  const pts = stroke.pts || [];
+  if (!pts.length) return null;
+  let best = null, bestN = 0;
+  for (const r of rects) {
+    let n = 0;
+    for (const [x, y] of pts) if (x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h) n++;
+    if (n > bestN) { bestN = n; best = r.id; }
+  }
+  return bestN >= pts.length / 3 ? best : null;
+}
+
+/* Giga's eraser (SketchNodeView eraseAt): removes WHOLE strokes that pass within r of the point. */
+function eraseStrokes(strokes, x, y, r) {
+  const r2 = r * r;
+  return strokes.filter(s => !(s.pts || []).some(([px, py]) => (px - x) ** 2 + (py - y) ** 2 <= r2));
+}
+
+return { inkPathFromOutline, sketchStrokePath, inkPressure, strokeCell, eraseStrokes };
+})();
+/* ── Chart Sim: the page. The chart is chart-render.mjs (CR), what is written on it and every check is
+   chart-engine.mjs (CE), the handwriting is Giga's ink (INK) on perfect-freehand (PF) — all inlined by
+   build-chart.mjs, never retyped here. Progress lives in this browser under the Paper Sim's own prefix. ── */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const LS = k => { try { return JSON.parse(localStorage.getItem(D.prefix + k)); } catch (e) { return null; } };
+const SV = (k, v) => { try { localStorage.setItem(D.prefix + k, JSON.stringify(v)); } catch (e) {} };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const r1 = v => Math.round(v * 10) / 10;
+const SCN = D.scenarios, BYID = new Map(SCN.map(s => [s.id, s]));
+const STAFF = new Set(SCN.flatMap(s => (s.nurses || []).map(n => n.init)));
+const IDX = CR.cellIndex();
+const ME = Object.assign({ name: '', init: '', input: 'tap', finger: false }, LS('chart.me') || {});
+const PROG = LS('chart.p') || {};
+const saveMe = () => SV('chart.me', ME);
+function statusLine() {
+  const tot = SCN.reduce((a, s) => a + s.rounds.length, 0), done = SCN.reduce((a, s) => a + ((PROG[s.id] || {}).stage || 0), 0);
+  let r = 0, n = 0; for (const p of Object.values(PROG)) for (const st of Object.values(p.read || {})) for (const v of Object.values(st)) { n++; r += v ? 1 : 0; }
+  return `${done}/${tot} med rounds charted${n ? ` · ${r}/${n} chart questions right` : ' · read a real NZ chart, then chart it'}`;
+}
+const saveProg = () => { SV('chart.p', PROG); SV('more.chart', statusLine()); };
+const meInit = () => String(ME.init || '').toUpperCase().replace(/[^A-Z]/g, '');
+const meProblem = () => {
+  const i = meInit();
+  if ((ME.name || '').trim().length < 3) return 'Add your name as you would write it in the chart’s register.';
+  if (!/^[A-Z]{2,3}$/.test(i)) return 'Your initials: two or three letters.';
+  if (STAFF.has(i)) return `${i} belongs to one of the nurses on these charts — add a middle initial so yours are yours.`;
+  return '';
+};
+
+/* ── the state of the open patient ── */
+let SC = null, ST = null, C = null, MODE = 'read', PAGE = 'front', Z = 1, TOOL = 'pen';
+let ENT = {}, STROKES = [], UNDO = [], HL = [], GHOST = null, RQ = null, RS = null, PK = null;
+const P = () => (PROG[SC.id] = PROG[SC.id] || { stage: 0, rounds: {}, read: {} });
+const round = () => SC.rounds[P().stage];
+const rctx = R => ({ ...R, you: meInit() || 'ST', name: (ME.name || 'Student Nurse').trim() });
+function stageScenario(k) { let S = SC; for (let i = 0; i < k; i++) S = CE.applyRound(S, rctx(SC.rounds[i])); return S; }
+function load(stage) { ST = stageScenario(stage); C = CE.compile(ST); }
+const dayLabel = d => `${CE.WEEKDAY(C.S, d)} ${CE.dayDate(C.S, d)}`;
+const nowLabel = () => `${dayLabel(C.now.day)} · ${C.now.t} · day ${C.now.day} of the chart`;
+
+/* ── home ── */
+function home() {
+  document.body.classList.remove('simon'); $('#sim').hidden = true; $('#view').hidden = false; SC = null;
+  const card = s => {
+    const p = PROG[s.id] || {}, k = p.stage || 0, n = s.rounds.length;
+    const rd = Object.values(p.read || {}).reduce((a, st) => { for (const v of Object.values(st)) { a.n++; a.r += v ? 1 : 0; } return a; }, { r: 0, n: 0 });
+    const line = k >= n ? `All ${n} rounds charted ✓` : k ? `Round ${k + 1} of ${n} next` : `${n} med rounds to chart`;
+    return `<button class="pcard" data-open="${s.id}"><b>${esc(s.t)}</b><small>${esc(s.sub)}</small><span class="pp">${line}${rd.n ? ` · ${rd.r}/${rd.n} read right` : ''}</span></button>`;
+  };
+  $('#view').innerHTML = `<div class="card intro">
+    <p class="kick">Read a med chart</p><h2>Chart Sim</h2>
+    <p>The <b>NZ 8-Day National Medication Chart</b>, redrawn box for box. Each patient’s chart is already part-filled, like one you pick up on the ward.</p>
+    <p><b>Read</b> — questions about what the chart says; some you answer by tapping the right box. <b>Chart it</b> — the med round happens, and you write it in: your initials, your RN’s check, the time, a code when a dose isn’t given. Then the chart moves on, and there is more to read.</p>
+    <details class="how"><summary>How your charting is marked</summary>
+      <p>Every box on this chart has an address — which medicine, which day, which time line. Each round has an answer key: which boxes should get something, and what.</p>
+      <p><b>👆 Tap to fill</b> (marked for you): tap a box and choose what goes in it — initials, a code, a time, a dose, a route. It checks the right box, the right thing in it, your initials <i>and</i> your RN’s check, a time within 30 minutes, a PRN dose the order allows — and anything written where nothing should be.</p>
+      <p><b>✍️ Handwrite</b> (pen or drawing tablet): where you wrote is marked for you — each stroke counts toward the box it mostly sits in. What you wrote you mark yourself: the right entry appears beside your ink, and you tick whether yours says it, as a preceptor would. Nothing here reads handwriting.</p>
+    </details>
+  </div>
+  <div class="card">
+    <h3 style="margin:.1rem 0 .2rem">You</h3>
+    <div class="fld"><label><span>Name &amp; designation (for the chart’s register)</span><input class="tx" id="meName" autocomplete="name" placeholder="e.g. PARKER, Sam · Student Nurse" value="${esc(ME.name)}"></label></div>
+    <div class="fld"><label><span>Your initials</span><input class="tx time" id="meInit" maxlength="3" autocapitalize="characters" placeholder="SP" value="${esc(ME.init)}"></label></div>
+    <div class="fld"><span>How you chart</span><div class="seg" id="inSeg"><button data-in="tap">👆 Tap to fill</button><button data-in="pen">✍️ Handwrite</button></div>
+      <small>Handwriting: a pen or stylus writes; one finger moves the chart; two fingers zoom.</small></div>
+    <label class="chk"><input type="checkbox" id="meFinger" ${ME.finger ? 'checked' : ''}> No stylus — let my finger write too (then two fingers move the chart)</label>
+    <p class="warnln" id="meWarn"></p>
+  </div>
+  <div class="lsec">Patients</div>
+  ${SCN.map(card).join('')}
+  <p class="foot">Invented patients · typical adult doses — <b>not a dosing guide</b> · the chart is NMC8D (2012 edition) · everything stays in this browser</p>`;
+  const warn = () => { $('#meWarn').textContent = ME.name || ME.init ? meProblem() : ''; };
+  $('#meName').oninput = e => { ME.name = e.target.value; saveMe(); warn(); };
+  $('#meInit').oninput = e => { ME.init = e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3); e.target.value = ME.init; saveMe(); warn(); };
+  $('#meFinger').onchange = e => { ME.finger = e.target.checked; saveMe(); };
+  const seg = () => document.querySelectorAll('#inSeg button').forEach(b => b.classList.toggle('on', b.dataset.in === ME.input));
+  document.querySelectorAll('#inSeg button').forEach(b => b.onclick = () => { ME.input = b.dataset.in; saveMe(); seg(); });
+  seg(); warn();
+  document.querySelectorAll('[data-open]').forEach(b => b.onclick = () => openPatient(b.dataset.open));
+  saveProg();
+}
+
+/* ── the patient ── */
+function openPatient(id, mode) {
+  SC = BYID.get(id); load(P().stage);
+  document.body.classList.add('simon'); $('#view').hidden = true; $('#sim').hidden = false;
+  MODE = mode || 'read'; PAGE = 'front'; HL = []; GHOST = null; PK = null;
+  const saved = LS('chart.w.' + SC.id);
+  ENT = saved && saved.stage === P().stage ? saved.ent || {} : {}; STROKES = saved && saved.stage === P().stage ? saved.ink || [] : []; UNDO = [];
+  RQ = null; RS = null;
+  $('#sWho').textContent = `${SC.t} — ${SC.sub}`;
+  tabs(); drawPage(); fitZoom();
+  setMode(MODE);
+  try { history.replaceState(null, '', '#' + SC.id); } catch (e) {}
+}
+function saveWork() { SV('chart.w.' + SC.id, { stage: P().stage, ent: ENT, ink: STROKES }); }
+function setMode(m) {
+  MODE = m; PK = null; HL = []; GHOST = null;
+  document.querySelectorAll('#modeSeg button').forEach(b => b.classList.toggle('on', b.dataset.mode === m));
+  $('#sNow').textContent = nowLabel();
+  if (m === 'read') { if (!RQ || RQ.stage !== P().stage) newRead(); showRead(); }
+  else { if (!RS || RS.stage !== P().stage) RS = { stage: P().stage, phase: 'brief', askI: 0 }; showRound(); }
+  $('#vp').classList.toggle('pen', penOn());
+  drawOverlays();
+}
+const penOn = () => MODE === 'chart' && ME.input === 'pen' && RS && RS.phase === 'chart';
+
+/* ── pages, zoom ── */
+const svg = $('#svg'), vp = $('#vp');
+function tabs() {
+  $('#tabs').innerHTML = CR.PAGES.map(p => `<button class="tab" data-pg="${p.id}">${p.n}</button>`).join('') +
+    `<span class="zm"><button class="btn sm" data-z="-" title="zoom out">−</button><button class="btn sm" data-z="fit" title="fit the page">⤢</button><button class="btn sm" data-z="+" title="zoom in">+</button></span>`;
+  document.querySelectorAll('[data-pg]').forEach(b => b.onclick = () => { PAGE = b.dataset.pg; drawPage(); fitZoom(); });
+  document.querySelectorAll('[data-z]').forEach(b => b.onclick = () => {
+    const r = vp.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    if (b.dataset.z === 'fit') fitZoom(); else zoomAt(Z * (b.dataset.z === '+' ? 1.35 : 1 / 1.35), cx, cy);
+  });
+}
+function markTabs() {
+  const pages = new Set();
+  for (const h of HL) for (const id of h.ids) { const pg = pageOf(id); if (pg) pages.add(pg); }
+  document.querySelectorAll('[data-pg]').forEach(b => { b.classList.toggle('on', b.dataset.pg === PAGE); b.classList.toggle('dot', pages.has(b.dataset.pg) && b.dataset.pg !== PAGE); });
+}
+const L = () => CR.layout(PAGE);
+const fitZ = () => (vp.clientWidth - 20) / L().w;
+const minZ = () => Math.min(fitZ(), 0.35);
+function sizeSvg() { svg.setAttribute('width', r1(L().w * Z)); svg.setAttribute('height', r1(L().h * Z)); }
+function fitZoom() { Z = fitZ(); sizeSvg(); vp.scrollTop = 0; vp.scrollLeft = 0; }
+const toPage = (cx, cy) => { const r = svg.getBoundingClientRect(); return { x: (cx - r.left) / Z, y: (cy - r.top) / Z }; };
+function zoomAt(z, cx, cy) {
+  const p = toPage(cx, cy); Z = clamp(z, minZ(), 5); sizeSvg();
+  const r = svg.getBoundingClientRect(); vp.scrollLeft += r.left + p.x * Z - cx; vp.scrollTop += r.top + p.y * Z - cy;
+}
+/* bring cells into view, zoomed to read */
+function focusCells(ids) {
+  const cs = ids.flatMap(id => cellsFor(id)).filter(c => c.page === PAGE);
+  if (!cs.length) return;
+  const x0 = Math.min(...cs.map(c => c.x)), y0 = Math.min(...cs.map(c => c.y)), x1 = Math.max(...cs.map(c => c.x + c.w)), y1 = Math.max(...cs.map(c => c.y + c.h));
+  const want = Math.min(vp.clientWidth / (x1 - x0 + 140), vp.clientHeight / (y1 - y0 + 110), 2.4);
+  Z = clamp(Math.max(want, fitZ()), minZ(), 5); sizeSvg();
+  const r = svg.getBoundingClientRect(), v = vp.getBoundingClientRect();      // an SVG has no offsetLeft
+  vp.scrollLeft += r.left - v.left + ((x0 + x1) / 2) * Z - vp.clientWidth / 2;
+  vp.scrollTop += r.top - v.top + ((y0 + y1) / 2) * Z - vp.clientHeight / 2;
+}
+/* a cell id, or 'prefix.*' — every matching cell, with its page */
+function cellsFor(id) {
+  if (id.endsWith('*')) { const pre = id.slice(0, -1); const out = []; for (const [k, v] of IDX) if (k.startsWith(pre)) out.push({ ...v.cell, page: v.page }); return out; }
+  const v = IDX.get(id); return v ? [{ ...v.cell, page: v.page }] : [];
+}
+const pageOf = id => (cellsFor(id)[0] || {}).page;
+function goTo(ids) {
+  const pg = ids.map(pageOf).find(Boolean); if (!pg) return;
+  if (pg !== PAGE) { PAGE = pg; drawPage(); }
+  focusCells(ids);
+}
+
+/* ── drawing the chart ── */
+function drawPage() {
+  const l = L();
+  svg.setAttribute('viewBox', `0 0 ${l.w} ${l.h}`); sizeSvg();
+  svg.innerHTML = `<g>${l.form}</g><g>${CR.entries(l, C.V, 'en')}</g><g id="gMe"></g><g id="gGh"></g><g id="gInk"></g><path id="live" class="inkp"/><g id="gHl"></g>`;
+  drawOverlays(); markTabs();
+}
+function drawOverlays() {
+  if (!svg.querySelector('#gMe')) return;
+  const l = L();
+  svg.querySelector('#gMe').innerHTML = CR.entries(l, ENT, 'me');
+  svg.querySelector('#gGh').innerHTML = GHOST ? CR.entries(l, GHOST, 'gh') : '';
+  svg.querySelector('#gInk').innerHTML = STROKES.filter(s => s.page === PAGE).map(s => `<path class="inkp" d="${INK.sketchStrokePath(s)}"/>`).join('');
+  let h = '';
+  for (const it of HL) for (const id of it.ids) {
+    const cs = cellsFor(id).filter(c => c.page === PAGE); if (!cs.length) continue;
+    const box = id.endsWith('*') ? [{ x: Math.min(...cs.map(c => c.x)), y: Math.min(...cs.map(c => c.y)), w: Math.max(...cs.map(c => c.x + c.w)) - Math.min(...cs.map(c => c.x)), h: Math.max(...cs.map(c => c.y + c.h)) - Math.min(...cs.map(c => c.y)) }] : cs;
+    for (const c of box) h += `<rect class="hl ${it.cls}" x="${c.x - 1}" y="${c.y - 1}" width="${c.w + 2}" height="${c.h + 2}" rx="2"/>`;
+  }
+  svg.querySelector('#gHl').innerHTML = h;
+  markTabs();
+}
+let toastT = 0;
+function toast(html, ms = 3200) { const t = $('#toast'); t.innerHTML = html; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, ms); }
+
+/* ── the panel ── */
+function panel(html) { $('#pbody').innerHTML = html; $('#panel').classList.remove('min'); $('#grab').textContent = '▾ hide'; $('#panel').scrollTop = 0; }
+$('#grab').onclick = () => { const m = $('#panel').classList.toggle('min'); $('#grab').textContent = m ? '▴ show the ' + (MODE === 'read' ? 'question' : 'round') : '▾ hide'; };
+const on = (sel, fn) => { const el = $(sel); if (el) el.onclick = fn; };
+
+/* ── READ: questions made from the chart itself ── */
+function newRead(onlyWrong) {
+  const k = P().stage, seen = (P().read[k] = P().read[k] || {});
+  let qs = shuffle(CE.questions(C, Math.random));
+  if (onlyWrong) qs = qs.filter(q => seen[q.id] === 0);
+  else qs.sort((a, b) => (seen[a.id] === 1) - (seen[b.id] === 1));       // not yet right first
+  RQ = { stage: k, list: qs.slice(0, 12), i: 0, right: 0, done: false, total: CE.questions(C, Math.random).length };
+}
+function showRead() {
+  const k = P().stage, seen = P().read[k] || {}, nRight = Object.values(seen).filter(v => v === 1).length;
+  if (RQ.i >= RQ.list.length) {
+    const nxt = round();
+    panel(`<h3>${RQ.right} of ${RQ.list.length} right</h3>
+      <p class="sub">This moment (${esc(nowLabel())}): ${nRight} of ${RQ.total} questions answered right so far.</p>
+      <div class="acts"><button class="btn primary" id="rMore">Another ${Math.min(12, RQ.total)}</button>
+      ${Object.values(seen).some(v => v === 0) ? '<button class="btn" id="rWrong">Just the ones I missed</button>' : ''}</div>
+      ${nxt ? `<div class="fb">Next on the ward: <b>${esc(nxt.title)}</b> — ${esc(CE.parseAt(nxt.at).t)}. <button class="btn primary wide" id="rGo">Chart it ›</button></div>` : '<p class="small">Every round on this chart is done.</p>'}
+      ${resetLink()}`);
+    on('#rMore', () => { newRead(); showRead(); }); on('#rWrong', () => { newRead(true); showRead(); }); on('#rGo', () => setMode('chart')); wireReset();
+    return;
+  }
+  const q = RQ.list[RQ.i];
+  const head = `<div class="meta"><span>Read · ${esc(q.tag || '')}</span><span>${RQ.i + 1} / ${RQ.list.length}</span></div><p class="q">${esc(q.q)}</p>`;
+  if (q.kind === 'tap') {
+    panel(`${head}<div class="tapnote">👆 Tap the box on the chart. The tabs above change the page; pinch or ± to zoom.</div>
+      <div class="acts"><button class="btn ghost" id="qSkip">I can’t find it — show me</button></div>`);
+    on('#qSkip', () => answerTap(null));
+  } else {
+    panel(`${head}<div class="opts">${q.opts.map((o, i) => `<button class="opt" data-o="${i}">${esc(o)}</button>`).join('')}</div>`);
+    document.querySelectorAll('[data-o]').forEach(b => b.onclick = () => answerMcq(+b.dataset.o));
+  }
+  HL = []; drawOverlays();
+}
+function scoreQ(q, ok) { const k = P().stage; (P().read[k] = P().read[k] || {})[q.id] = ok ? 1 : 0; if (ok) RQ.right++; saveProg(); }
+function after(q, ok, extra = '') {
+  const box = document.createElement('div');
+  box.innerHTML = `<div class="fb ${ok ? 'ok' : 'bad'}">${ok ? '✓ Right.' : '✗ Not quite.'} ${esc(q.why || '')}</div>${extra}
+    <div class="acts">${(q.show || []).length ? '<button class="btn" id="qShow">📍 Show me on the chart</button>' : ''}<button class="btn primary" id="qNext">Next ›</button></div>`;
+  $('#pbody').appendChild(box);
+  on('#qShow', () => { HL = [{ ids: q.show, cls: 'show pulse' }]; goTo(q.show); drawOverlays(); });
+  on('#qNext', () => { RQ.i++; showRead(); });
+  $('#qNext').scrollIntoView({ block: 'nearest' });
+}
+function answerMcq(i) {
+  const q = RQ.list[RQ.i], ok = q.opts[i] === q.a;
+  document.querySelectorAll('[data-o]').forEach(b => { const o = q.opts[+b.dataset.o]; b.disabled = true; if (o === q.a) b.classList.add('ok'); else if (+b.dataset.o === i) b.classList.add('bad'); else b.classList.add('dim'); });
+  scoreQ(q, ok); after(q, ok);
+}
+const accepts = (q, id) => q.accept.some(a => a.endsWith('*') ? id.startsWith(a.slice(0, -1)) : a === id);
+function answerTap(cell) {
+  const q = RQ.list[RQ.i]; if (RQ.answered === RQ.i) return; RQ.answered = RQ.i;
+  const ok = !!cell && accepts(q, cell.id);
+  on('#qSkip', null); const sk = $('#qSkip'); if (sk) sk.remove();
+  HL = [...(cell ? [{ ids: [cell.id], cls: ok ? 'ok' : 'bad' }] : []), ...(ok ? [] : [{ ids: q.accept, cls: 'show pulse' }])];
+  if (!ok) goTo(q.accept);
+  drawOverlays(); scoreQ(q, ok);
+  after({ ...q, show: ok ? [] : q.accept }, ok, cell && !ok ? `<p class="small">You tapped: ${esc(describe(cell))}</p>` : '');
+}
+
+/* what a box is, in words — for a tap outside a question */
+function describe(cell) {
+  const id = cell.id; let m;
+  if ((m = /^(reg|prn)\.([A-Z]{1,2})\.([a-z]+)$/.exec(id)) || (m = /^(reg)\.([A-Z]{1,2})\.(s\d)$/.exec(id))) {
+    const o = (m[1] === 'reg' ? C.reg : C.prn).find(x => x.L === m[2]);
+    return `${m[1] === 'reg' ? 'Regular' : 'PRN'} ${m[2]}${o ? ' (' + o.med + ')' : ' — no order on this line'} · ${cell.n}`;
+  }
+  if (/^(reg\.[A-Z]+\.d|prn\.[A-Z]\.\d|once\.|fl\.|siga\.)/.test(id)) return `${CE.cellLabel(C, id)} · ${cell.n}`;
+  return cell.n;
+}
+function valueOf(v) {
+  if (v == null) return '';
+  if (v.code) return `${v.code} — ${CE.CODES[v.code]}`;
+  if (v.giv !== undefined) return `given by ${v.giv || '—'}${v.chk ? ' · checked by ' + v.chk : ''}`;
+  if (v.tick) return '✓ ticked'; if (v.circle) return 'circled';
+  return String(v);
+}
+
+/* ── CHART IT: one round ── */
+function showRound() {
+  const R = round();
+  if (!R) {
+    panel(`<h3>Every round is charted ✓</h3><p class="sub">${esc(SC.t)}: ${SC.rounds.length} of ${SC.rounds.length}. ${roundScores()}</p>
+      <div class="acts"><button class="btn primary" id="toRead">Read the chart as it is now</button></div>${resetLink()}`);
+    on('#toRead', () => setMode('read')); wireReset(); return;
+  }
+  const prob = meProblem();
+  if (prob) {
+    panel(`<h3>First, who are you on this chart?</h3><p class="sub">Everyone who signs a chart is in its Sample Initials register.</p>
+      <div class="fld"><label><span>Name &amp; designation</span><input class="tx" id="pName" placeholder="e.g. PARKER, Sam · Student Nurse" value="${esc(ME.name)}"></label></div>
+      <div class="fld"><label><span>Your initials</span><input class="tx time" id="pInit" maxlength="3" placeholder="SP" value="${esc(ME.init)}"></label></div>
+      <p class="warnln" id="pWarn">${ME.name || ME.init ? esc(prob) : ''}</p>
+      <div class="fld"><span>How you chart</span><div class="seg" id="pSeg"><button data-in="tap">👆 Tap to fill</button><button data-in="pen">✍️ Handwrite</button></div></div>
+      <button class="btn primary wide" id="pGo">Start the round</button>`);
+    const seg = () => document.querySelectorAll('#pSeg button').forEach(b => b.classList.toggle('on', b.dataset.in === ME.input));
+    document.querySelectorAll('#pSeg button').forEach(b => b.onclick = () => { ME.input = b.dataset.in; saveMe(); seg(); }); seg();
+    $('#pInit').oninput = e => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3); };
+    on('#pGo', () => { ME.name = $('#pName').value; ME.init = $('#pInit').value; saveMe(); const p2 = meProblem(); if (p2) { $('#pWarn').textContent = p2; return; } load(P().stage); drawPage(); showRound(); });
+    return;
+  }
+  const at = CE.parseAt(R.at), rn = (C.S.nurses || []).find(n => n.init === R.rn);
+  const top = `<div class="meta"><span>Round ${P().stage + 1} of ${SC.rounds.length}</span><span>${esc(dayLabel(at.day))} · ${at.t}</span></div>
+    <h3>${esc(R.title)}</h3>
+    <div class="youare">You: <b>${esc(ME.name)}</b> (${esc(meInit())}) · Your RN: <b>${esc(rn ? rn.name : R.rn)}</b> (${esc(R.rn)})</div>`;
+  const brief = `<ul class="brief">${R.brief.map(b => `<li>${esc(b)}</li>`).join('')}</ul>`;
+  if (RS.phase === 'brief') {
+    panel(`${top}${brief}<div class="acts"><button class="btn primary" id="rStart">${(R.ask || []).length ? 'First, a question ›' : 'Chart it ›'}</button></div>`);
+    on('#rStart', () => { RS.phase = (R.ask || []).length ? 'ask' : 'chart'; RS.askI = 0; setMode('chart'); });
+    return;
+  }
+  if (RS.phase === 'ask') {
+    const q = R.ask[RS.askI]; if (!RS.opts || RS.optsFor !== RS.askI) { RS.opts = shuffle([q.a, ...q.w]); RS.optsFor = RS.askI; }
+    panel(`${top}<details><summary class="small">The round</summary>${brief}</details><p class="q">${esc(q.q)}</p>
+      <div class="opts">${RS.opts.map((o, i) => `<button class="opt" data-a="${i}">${esc(o)}</button>`).join('')}</div>`);
+    document.querySelectorAll('[data-a]').forEach(b => b.onclick = () => {
+      const ok = RS.opts[+b.dataset.a] === q.a;
+      document.querySelectorAll('[data-a]').forEach(x => { const o = RS.opts[+x.dataset.a]; x.disabled = true; x.classList.add(o === q.a ? 'ok' : x === b ? 'bad' : 'dim'); });
+      const box = document.createElement('div');
+      box.innerHTML = `<div class="fb ${ok ? 'ok' : 'bad'}">${ok ? '✓ Right.' : '✗ Not quite.'} ${esc(q.why || '')}</div><div class="acts">${(q.show || []).length ? '<button class="btn" id="aShow">📍 Show me</button>' : ''}<button class="btn primary" id="aNext">${RS.askI + 1 < R.ask.length ? 'Next ›' : 'Now chart it ›'}</button></div>`;
+      $('#pbody').appendChild(box);
+      on('#aShow', () => { HL = [{ ids: q.show, cls: 'show pulse' }]; goTo(q.show); drawOverlays(); });
+      on('#aNext', () => { HL = []; if (++RS.askI >= R.ask.length) RS.phase = 'chart'; setMode('chart'); });
+      $('#aNext').scrollIntoView({ block: 'nearest' });
+    });
+    return;
+  }
+  if (RS.phase === 'chart') {
+    if (ME.input === 'pen') {
+      panel(`${top}<details open><summary class="small">The round</summary>${brief}</details>
+        <div class="tools"><button class="btn ${TOOL === 'pen' ? 'on' : ''}" id="tPen">✍️ Pen</button><button class="btn ${TOOL === 'erase' ? 'on' : ''}" id="tErase">🧽 Eraser</button><button class="btn" id="tUndo">↶ Undo</button><button class="btn" id="tClear">Clear all</button></div>
+        <p class="small">Write in the boxes with your pen${ME.finger ? ' or finger' : ''}. ${ME.finger ? 'Two fingers' : 'One finger'} move${ME.finger ? '' : 's'} the chart; two fingers zoom. The eraser takes out whole strokes. ${STROKES.length} stroke${STROKES.length === 1 ? '' : 's'} so far.</p>
+        <div class="acts"><button class="btn primary" id="rCheck">Check my charting</button></div>`);
+      on('#tPen', () => { TOOL = 'pen'; showRound(); }); on('#tErase', () => { TOOL = 'erase'; showRound(); });
+      on('#tUndo', () => { if (UNDO.length) { STROKES = UNDO.pop(); saveWork(); drawOverlays(); showRound(); } });
+      on('#tClear', () => { if (STROKES.length && confirm('Clear all your ink for this round?')) { UNDO.push(STROKES); STROKES = []; saveWork(); drawOverlays(); showRound(); } });
+    } else {
+      const groups = [...new Set(Object.keys(ENT).map(k => groupOf(k)?.b).filter(Boolean))];
+      panel(`${top}<details ${groups.length ? '' : 'open'}><summary class="small">The round</summary>${brief}</details>
+        <p class="small">👆 Tap a box on the chart to write in it — find the right page with the tabs.</p>
+        ${groups.length ? `<ul class="elist">${groups.map(b => `<li><span>${esc(groupText(b))}</span><button class="btn sm ghost" data-ed="${b}">edit</button><button class="btn sm ghost" data-rm="${b}">✕</button></li>`).join('')}</ul>` : '<p class="small">Nothing written yet.</p>'}
+        <div class="acts"><button class="btn primary" id="rCheck">Check my charting</button></div>`);
+      document.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { clearGroup(b.dataset.rm); showRound(); });
+      document.querySelectorAll('[data-ed]').forEach(b => b.onclick = () => { const id = Object.keys(ENT).find(k => k.startsWith(b.dataset.ed + '.')); goTo([id]); openPicker(IDX.get(id).cell); });
+    }
+    on('#rCheck', markRound);
+    return;
+  }
+  if (RS.phase === 'marked') showMarked();
+}
+function roundScores() {
+  const r = P().rounds; const xs = Object.keys(r).sort().map(i => `round ${+i + 1}: ${r[i].got}/${r[i].tot}${r[i].mode === 'pen' ? ' ✍️' : ''}`);
+  return xs.length ? 'Your marks — ' + xs.join(' · ') + '.' : '';
+}
+function resetLink() { return `<p class="small" style="margin-top:14px"><button class="btn ghost sm" id="rReset">↺ Start this patient again</button></p>`; }
+function wireReset() { on('#rReset', () => { if (!confirm(`Start ${SC.t}’s chart again from the beginning? Your marks for this patient are cleared.`)) return; PROG[SC.id] = { stage: 0, rounds: {}, read: {} }; saveProg(); SV('chart.w.' + SC.id, null); openPatient(SC.id); }); }
+
+/* marking */
+function inkedCells() {
+  const set = new Set(); let stray = 0;
+  for (const s of STROKES) { const id = INK.strokeCell(s, CR.layout(s.page).cells); if (id) set.add(id); else stray++; }
+  return { set, stray };
+}
+function markRound() {
+  const R = rctx(round());
+  if (ME.input === 'pen') {
+    const { set, stray } = inkedCells();
+    RS.res = CE.checkInk(C, R, set); RS.stray = stray; RS.key = CE.roundKey(C, R).filter(k => !k.none); RS.self = {}; RS.mode = 'pen';
+    GHOST = CE.modelEntries(C, R);
+  } else { RS.res = CE.checkRound(C, R, ENT); RS.mode = 'tap'; GHOST = null; }
+  RS.phase = 'marked';
+  HL = RS.res.map(r => ({ ids: r.cells || [], cls: r.ok ? 'ok' : 'bad' }));
+  const first = RS.res.find(r => !r.ok && (r.cells || []).length);
+  if (first) goTo(first.cells);
+  drawOverlays(); showRound();
+}
+function showMarked() {
+  const R = round(), res = RS.res, okN = res.filter(r => r.ok).length;
+  const list = `<ul class="res">${res.map((r, i) => `<li class="${r.ok ? 'ok' : ''}" data-r="${i}"><i>${r.ok ? '✓' : '✗'}</i><span>${esc(r.msg)}</span></li>`).join('')}</ul>`;
+  let body;
+  if (RS.mode === 'pen') {
+    const sm = RS.key.map((k, i) => `<div class="self"><b>${esc(k.label)}</b><div class="mdl">${esc(k.model)}</div>
+      <div class="chipset"><button class="chip ${RS.self[i] === 1 ? 'on' : ''}" data-s="${i}" data-v="1">✓ Mine says that</button><button class="chip ${RS.self[i] === 0 ? 'on no' : ''}" data-s="${i}" data-v="0">✗ It doesn’t</button></div></div>`).join('');
+    const selfDone = Object.keys(RS.self).length, selfOk = Object.values(RS.self).filter(v => v === 1).length;
+    body = `<p class="score">Where you wrote: ${okN}/${res.length}</p>
+      <p class="small">Marked for you: which boxes your ink landed in${RS.stray ? ` (${RS.stray} stroke${RS.stray > 1 ? 's' : ''} outside every box, not counted)` : ''}. Tap a line to see it on the chart.</p>${list}
+      <h3 style="margin-top:14px">What you wrote — you mark it</h3>
+      <p class="small">The right entry is drawn in <b style="color:#067a52">green</b> beside your ink. Does yours say the same?</p>${sm}
+      <p class="score">${selfDone < RS.key.length ? `${RS.key.length - selfDone} left to mark` : `What you wrote: ${selfOk}/${RS.key.length} (self-marked)`}</p>`;
+  } else body = `<p class="score">${okN}/${res.length}</p><p class="small">Tap a line to see it on the chart.</p>${list}`;
+  const selfLeft = RS.mode === 'pen' && Object.keys(RS.self).length < RS.key.length;
+  panel(`<div class="meta"><span>Round ${P().stage + 1} of ${SC.rounds.length} · marked</span><span>${esc(R.title)}</span></div>${body}
+    <div class="acts"><button class="btn" id="mGhost">${GHOST ? 'Hide' : 'Show'} the right answer</button><button class="btn" id="mRedo">↺ Redo this round</button></div>
+    <button class="btn primary wide" id="mNext" ${selfLeft ? 'disabled' : ''}>${selfLeft ? 'Mark what you wrote first' : 'Next ›'}</button>
+    <p class="small">Next writes the right answer into the chart, so the next round starts from a correct chart.</p>`);
+  document.querySelectorAll('[data-r]').forEach(li => li.onclick = () => { const r = res[+li.dataset.r]; if ((r.cells || []).length) { HL = [{ ids: r.cells, cls: (r.ok ? 'ok' : 'bad') + ' pulse' }]; goTo(r.cells); drawOverlays(); } });
+  document.querySelectorAll('[data-s]').forEach(b => b.onclick = () => { RS.self[+b.dataset.s] = +b.dataset.v; showMarked(); });
+  on('#mGhost', () => { GHOST = GHOST ? null : CE.modelEntries(C, rctx(round())); drawOverlays(); showMarked(); });
+  on('#mRedo', () => { RS.phase = 'chart'; HL = []; GHOST = null; drawOverlays(); showRound(); $('#vp').classList.toggle('pen', penOn()); });
+  on('#mNext', commitRound);
+}
+function commitRound() {
+  const okN = RS.res.filter(r => r.ok).length, selfOk = RS.mode === 'pen' ? Object.values(RS.self).filter(v => v === 1).length : 0;
+  const tot = RS.res.length + (RS.mode === 'pen' ? RS.key.length : 0);
+  const k = P().stage; P().rounds[k] = { got: okN + selfOk, tot, mode: RS.mode };
+  P().stage = k + 1; saveProg();
+  ENT = {}; STROKES = []; UNDO = []; GHOST = null; HL = []; SV('chart.w.' + SC.id, null);
+  load(P().stage); drawPage(); RQ = null; RS = null;
+  toast(`The chart has moved on to ${esc(C.now.t)}. The right entries are written in.`);
+  setMode('read');
+}
+
+/* ── tap-to-fill: the picker ── */
+function groupOf(id) {
+  let m;
+  if ((m = /^(reg\.[A-Z]{1,2}\.d\d\.s\d)\.(t|dose|gc)$/.exec(id))) return { k: 'adm', b: m[1], f: ['t', 'dose', 'gc'] };
+  if ((m = /^(prn\.[A-H]\.\d+)\.(date|time|dose|route|gc)$/.exec(id))) return { k: 'prn', b: m[1], f: ['date', 'time', 'dose', 'route', 'gc'] };
+  if ((m = /^(once\.\d)\.(dosedt|gc|tstart|tend)$/.exec(id))) return { k: 'once', b: m[1], f: ['dosedt', 'gc'] };
+  if ((m = /^(fl\.\d+)\.(astart|gc|tend|avol)$/.exec(id))) return { k: 'fl', b: m[1], f: ['astart', 'gc', 'tend', 'avol'] };
+  if ((m = /^(siga\.\d+)\.(name|init|reg)$/.exec(id))) return { k: 'reg', b: m[1], f: ['name', 'init', 'reg'] };
+  return null;
+}
+function groupText(b) {
+  const g = groupOf(Object.keys(ENT).find(k => k.startsWith(b + '.')) || '') || { f: [] };
+  const vals = g.f.map(f => ENT[b + '.' + f]).filter(v => v != null && v !== '').map(valueOf);
+  return `${CE.cellLabel(C, b + '.' + g.f[0])}: ${vals.join(' · ')}`;
+}
+function clearGroup(b) { for (const k of Object.keys(ENT)) if (k.startsWith(b + '.')) delete ENT[k]; saveWork(); HL = HL.filter(h => h.cls !== 'sel'); drawOverlays(); }
+const inits = () => [...new Set([meInit(), ...(C.S.nurses || []).map(n => n.init)])].filter(Boolean).sort();
+const chipRow = (name, vals, cur, cls = '') => `<div class="chipset" data-name="${name}">${vals.map(([v, t]) => `<button class="chip ${cls} ${v === cur ? 'on' : ''}" data-v="${esc(v)}" title="${esc(t || '')}">${esc(t || v)}</button>`).join('')}</div>`;
+function wireChips(onPick) {
+  document.querySelectorAll('.chipset[data-name]').forEach(set => set.querySelectorAll('button').forEach(b => b.onclick = () => {
+    set.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); PK[set.dataset.name] = b.dataset.v; if (onPick) onPick(set.dataset.name, b.dataset.v);
+  }));
+}
+function tapToFill(cell) {
+  const g = groupOf(cell.id);
+  if (!g) return toast(`<b>${esc(describe(cell))}</b><br>${cell.id.startsWith('reg.') || cell.id.startsWith('prn.') || cell.id.startsWith('once.') ? 'The prescriber writes here — you read it.' : 'Not a box you write in on this round.'}`);
+  openPicker(cell);
+}
+function openPicker(cell) {
+  const g = groupOf(cell.id), b = g.b;
+  const taken = g.f.filter(f => C.V[b + '.' + f] != null);
+  if (g.k !== 'fl' && taken.length) return toast(`<b>${esc(CE.cellLabel(C, cell.id))}</b> is already written: ${esc(valueOf(C.V[b + '.' + taken[taken.length - 1]]))}.<br>The chart is in indelible pen — you never write over an entry.`, 4200);
+  const cur = f => ENT[b + '.' + f];
+  const dates = [-1, 0, 1].map(o => C.now.day + o).filter(d => d >= 1 && d <= 8).map(d => [CE.dayDate(C.S, d), `${CE.WEEKDAY(C.S, d)} ${CE.dayDate(C.S, d)}`]);
+  const initChips = (name, cur, none) => chipRow(name, [...(none ? [['', '— nobody']] : []), ...inits().map(i => [i, i])], cur);
+  const timeIn = (id, v, label) => `<div class="fld"><label><span>${label}</span><input class="tx time" id="${id}" inputmode="numeric" maxlength="4" placeholder="HHMM" value="${esc(v || '')}"></label><small>24-hour clock, the time it actually happened.</small></div>`;
+  let title = CE.cellLabel(C, cell.id), html = '';
+  PK = { g };
+  if (g.k === 'adm') {
+    const m = /^reg\.([A-Z]+)\.d(\d)\.s(\d)$/.exec(b), o = C.reg.find(x => x.L === m[1]);
+    if (!o) return toast(`Row ${m[1]} has no order on it.`);
+    const gc = cur('gc') || {};
+    PK.what = gc.code || (gc.giv ? 'given' : ''); PK.giv = gc.giv || ''; PK.chk = gc.chk || '';
+    html = `<div class="fld"><span>What happened?</span>${chipRow('what', [['given', '✓ Given'], ...Object.keys(CE.CODES).map(c => [c, c])], PK.what, 'code')}<small id="whatMean">${PK.what && PK.what !== 'given' ? esc(CE.CODES[PK.what]) : 'Given — or a not-given code from the chart’s key.'}</small></div>
+      <div id="givF" ${PK.what === 'given' ? '' : 'hidden'}>${timeIn('pkT', cur('t'), 'Time given')}
+      <div class="fld"><span>Given by</span>${initChips('giv', PK.giv)}</div><div class="fld"><span>Checked by</span>${initChips('chk', PK.chk, 1)}</div>
+      <div class="fld"><label><span>Dose (only for a variable dose)</span><input class="tx" id="pkDose" value="${esc(cur('dose') || '')}" placeholder="leave blank for a fixed dose"></label></div></div>`;
+    title = `Row ${o.L} · ${o.med} · ${dayLabel(+m[2])} · ${o.slots[+m[3]] ? o.slots[+m[3]].t + ' line' : CE.PRINTED[+m[3]] + ' line (nothing is due on it)'}`;
+  } else if (g.k === 'prn') {
+    const m = /^prn\.([A-H])\.(\d+)$/.exec(b), o = C.prn.find(x => x.L === m[1]);
+    if (!o) return toast(`PRN ${m[1]} has no order on it.`);
+    const gc = cur('gc') || {}; Object.assign(PK, { date: cur('date') || '', dose: cur('dose') || '', route: cur('route') || '', giv: gc.giv || '', chk: gc.chk || '' });
+    const doses = [...new Set([o.dose, ...String(o.range || '').split(/[–-]/).map(s => s.trim())].filter(Boolean))].map(d => [`${d} ${o.units}`, `${d} ${o.units}`]);
+    const routes = [...new Set([...String(o.route).split('/'), 'PO', 'IV', 'SC', 'IM', 'NEB', 'SL', 'PR'])].map(r => [r, r]);
+    html = `<div class="fld"><span>Date</span>${chipRow('date', dates, PK.date)}</div>${timeIn('pkT', cur('time'), 'Time given')}
+      <div class="fld"><span>Dose</span>${chipRow('dose', doses, PK.dose)}</div><div class="fld"><span>Route</span>${chipRow('route', routes, PK.route, 'code')}</div>
+      <div class="fld"><span>Given by</span>${initChips('giv', PK.giv)}</div><div class="fld"><span>Checked by</span>${initChips('chk', PK.chk, 1)}</div>`;
+    title = `PRN ${o.L} · ${o.med} · record line ${+m[2] + 1}`;
+  } else if (g.k === 'once') {
+    const i = +b.split('.')[1], o = C.once[i];
+    if (!o || o.hidden) return toast('There is no once-only order here.');
+    const gc = cur('gc') || {}, dt = String(cur('dosedt') || '').split(' ');
+    Object.assign(PK, { date: dt[0] || '', giv: gc.giv || '', chk: gc.chk || '' });
+    html = `<div class="fld"><span>Date of dose</span>${chipRow('date', dates, PK.date)}</div>${timeIn('pkT', dt[1], 'Time of dose')}
+      <div class="fld"><span>Given by</span>${initChips('giv', PK.giv)}</div><div class="fld"><span>Checked by</span>${initChips('chk', PK.chk, 1)}</div>`;
+    title = `Once Only · ${o.med} ${o.dose} ${o.units} ${o.route}`;
+  } else if (g.k === 'fl') {
+    const i = +b.split('.')[1], f = C.fluids[i];
+    if (!f) return toast('No fluid is prescribed on this line.');
+    const started = C.V[b + '.astart'] != null, ended = C.V[b + '.tend'] != null;
+    if (started && ended) return toast(`IV fluids line ${i + 1} is finished and recorded. The chart is in indelible pen — you never write over an entry.`, 4200);
+    const gc = cur('gc') || {}; Object.assign(PK, { giv: gc.giv || '', chk: gc.chk || '' });
+    html = started ? `<p class="small">Started ${esc(C.V[b + '.astart'])} by ${esc(valueOf(C.V[b + '.gc']))}. Record its completion:</p>${timeIn('pkEnd', cur('tend'), 'Completion time')}
+        <div class="fld"><label><span>Actual volume in (mL)</span><input class="tx time" id="pkVol" inputmode="numeric" value="${esc(cur('avol') || '')}"></label></div>`
+      : `${timeIn('pkT', cur('astart'), 'Actual commencing time')}<div class="fld"><span>Commenced by</span>${initChips('giv', PK.giv)}</div><div class="fld"><span>Checked by</span>${initChips('chk', PK.chk, 1)}</div>`;
+    PK.started = started;
+    title = `IV fluids line ${i + 1} · ${f.vol} mL ${f.fluid} at ${f.rate} mL/hr`;
+  } else if (g.k === 'reg') {
+    html = `<div class="fld"><label><span>Name &amp; designation</span><input class="tx" id="pkName" value="${esc(cur('name') || '')}" placeholder="${esc(ME.name)}"></label></div>
+      <div class="fld"><label><span>Initial</span><input class="tx time" id="pkInit" maxlength="3" value="${esc(cur('init') || '')}" placeholder="${esc(meInit())}"></label></div>
+      <div class="fld"><label><span>Reg. No. (a student leaves it blank)</span><input class="tx" id="pkReg" value="${esc(cur('reg') || '')}"></label></div>`;
+    title = `Sample Initials register · line ${+b.split('.')[1] + 1}`;
+  }
+  HL = [...HL.filter(h => h.cls !== 'sel'), { ids: g.f.map(f => b + '.' + f).filter(id => IDX.has(id)), cls: 'sel' }]; drawOverlays();
+  panel(`<div class="meta"><span>Write in the chart</span><span>${esc(round().title)}</span></div><h3>${esc(title)}</h3>${html}
+    <div class="acts"><button class="btn primary" id="pkSave">Write it</button><button class="btn" id="pkClear">Clear</button><button class="btn ghost" id="pkCancel">Cancel</button></div>`);
+  wireChips((name, v) => { if (name === 'what') { $('#givF').hidden = v !== 'given'; $('#whatMean').textContent = v === 'given' ? 'Record the time, your initials and your checker’s.' : CE.CODES[v]; } });
+  on('#pkCancel', () => { PK = null; HL = HL.filter(h => h.cls !== 'sel'); drawOverlays(); showRound(); });
+  on('#pkClear', () => { clearGroup(b); PK = null; showRound(); });
+  on('#pkSave', () => { if (savePicker()) { PK = null; HL = HL.filter(h => h.cls !== 'sel'); saveWork(); drawOverlays(); showRound(); } });
+}
+function savePicker() {
+  const { g } = PK, b = g.b, v = id => ($('#' + id) || {}).value?.trim() || '';
+  const set = (f, val) => { if (val === '' || val == null) delete ENT[b + '.' + f]; else ENT[b + '.' + f] = val; };
+  const t4 = id => { const t = v(id).replace(/\D/g, ''); if (t && !/^\d{4}$/.test(t)) { toast('Write the time as four figures, 24-hour clock — e.g. 0805.'); return null; } return t; };
+  const gc = () => PK.giv || PK.chk ? { giv: PK.giv || '', chk: PK.chk || '' } : '';
+  if (g.k === 'adm') {
+    if (!PK.what) { toast('Choose what happened: given, or a code.'); return false; }
+    if (PK.what !== 'given') { set('gc', { code: PK.what }); set('t', ''); set('dose', ''); return true; }
+    const t = t4('pkT'); if (t === null) return false;
+    set('t', t); set('gc', gc()); set('dose', v('pkDose')); return true;
+  }
+  if (g.k === 'prn') { const t = t4('pkT'); if (t === null) return false; set('date', PK.date); set('time', t); set('dose', PK.dose); set('route', PK.route); set('gc', gc()); return true; }
+  if (g.k === 'once') { const t = t4('pkT'); if (t === null) return false; set('dosedt', [PK.date, t].filter(Boolean).join(' ')); set('gc', gc()); return true; }
+  if (g.k === 'fl') {
+    if (PK.started) { const t = t4('pkEnd'); if (t === null) return false; set('tend', t); set('avol', v('pkVol').replace(/\s*mL$/i, '')); return true; }
+    const t = t4('pkT'); if (t === null) return false; set('astart', t); set('gc', gc()); return true;
+  }
+  if (g.k === 'reg') { set('name', v('pkName')); set('init', v('pkInit').toUpperCase()); set('reg', v('pkReg')); return true; }
+  return false;
+}
+
+/* ── pointers: one finger pans, two pinch, a tap picks a box; in handwriting, the pen writes.
+   The drawing half is Giga's SketchNodeView onDown/onMove/onUp (pressure rule, coalesced samples, a dot for a
+   tap, the whole-stroke eraser), ported to page units; panning, pinching and palm rejection are the Sim's. ── */
+const PTR = new Map(); let G = null, lastPen = 0, mom = 0;
+const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+function cellAt(x, y) { let best = null; for (const c of L().cells) if (x >= c.x && x <= c.x + c.w && y >= c.y && y <= c.y + c.h && (!best || c.w * c.h < best.w * best.h)) best = c; return best; }
+function drawLive() { const p = svg.querySelector('#live'); if (p) p.setAttribute('d', G && G.mode === 'draw' ? INK.sketchStrokePath({ pts: G.pts, size: 2, simulate: G.simulate }) : ''); }
+let liveQ = 0; const liveSoon = () => { if (!liveQ) liveQ = requestAnimationFrame(() => { liveQ = 0; drawLive(); }); };
+function eraseAt(v) {
+  const here = STROKES.filter(s => s.page === PAGE), kept = INK.eraseStrokes(here, v.x, v.y, 5);
+  if (kept.length !== here.length) { STROKES = [...STROKES.filter(s => s.page !== PAGE), ...kept]; drawOverlays(); }
+}
+function stopMomentum() { cancelAnimationFrame(mom); mom = 0; }
+function momentum(vx, vy) {
+  stopMomentum();
+  const step = () => { vx *= 0.93; vy *= 0.93; if (Math.abs(vx) < 0.4 && Math.abs(vy) < 0.4) return; vp.scrollLeft -= vx; vp.scrollTop -= vy; mom = requestAnimationFrame(step); };
+  mom = requestAnimationFrame(step);
+}
+vp.addEventListener('pointerdown', e => {
+  if (e.pointerType === 'mouse' && e.button !== 0) return;
+  stopMomentum();
+  const drawing = penOn(), isPen = e.pointerType === 'pen', isTouch = e.pointerType === 'touch';
+  if (drawing && isTouch && (performance.now() - lastPen < 900 || (G && G.mode === 'draw'))) return;     // a palm, while the pen is busy
+  if (drawing && (isPen || e.pointerType === 'mouse' || (isTouch && ME.finger && PTR.size === 0))) {
+    e.preventDefault(); try { vp.setPointerCapture(e.pointerId); } catch (er) {}
+    if (isPen) lastPen = performance.now();
+    const v = toPage(e.clientX, e.clientY);
+    if (TOOL === 'erase') { UNDO.push(STROKES); G = { mode: 'erase', id: e.pointerId }; eraseAt(v); return; }
+    G = { mode: 'draw', id: e.pointerId, simulate: !isPen, pts: [[r1(v.x), r1(v.y), INK.inkPressure(e)]] };
+    drawLive(); return;
+  }
+  try { vp.setPointerCapture(e.pointerId); } catch (er) {}
+  PTR.set(e.pointerId, { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY });
+  if (PTR.size === 1) G = { mode: 'pan', moved: false, vx: 0, vy: 0, t: 0 };
+  else if (PTR.size === 2) { const [a, b] = [...PTR.values()]; G = { mode: 'pinch', d0: dist(a, b), z0: Z, mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 }; }
+});
+vp.addEventListener('pointermove', e => {
+  if (G && (G.mode === 'draw' || G.mode === 'erase') && e.pointerId === G.id) {
+    const co = e.getCoalescedEvents ? e.getCoalescedEvents() : null, samples = co && co.length ? co : [e];
+    for (const ce of samples) { const v = toPage(ce.clientX, ce.clientY); if (G.mode === 'erase') eraseAt(v); else G.pts.push([r1(v.x), r1(v.y), INK.inkPressure(ce)]); }
+    if (e.pointerType === 'pen') lastPen = performance.now();
+    if (G.mode === 'draw') liveSoon();
+    return;
+  }
+  const p = PTR.get(e.pointerId); if (!p || !G) return;
+  const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY;
+  if (G.mode === 'pan') {
+    if (!G.moved && Math.hypot(p.x - p.x0, p.y - p.y0) > 7) G.moved = true;
+    if (G.moved) { vp.scrollLeft -= dx; vp.scrollTop -= dy; G.vx = dx; G.vy = dy; G.t = performance.now(); }
+  } else if (G.mode === 'pinch' && PTR.size >= 2) {
+    const [a, b] = [...PTR.values()], mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+    vp.scrollLeft -= mx - G.mx; vp.scrollTop -= my - G.my; G.mx = mx; G.my = my;
+    zoomAt(G.z0 * dist(a, b) / G.d0, mx, my);
+  }
+});
+function endPointer(e) {
+  if (G && (G.mode === 'draw' || G.mode === 'erase') && e.pointerId === G.id) {
+    const g = G; G = null;
+    if (g.mode === 'draw') {
+      let pts = g.pts;
+      if (pts.length === 1) { const [x, y, p] = pts[0]; pts = [[x, y, p], [x + 0.8, y + 0.8, p]]; }
+      if (pts.length >= 2) { UNDO.push(STROKES); if (UNDO.length > 40) UNDO.shift(); STROKES = [...STROKES, { page: PAGE, pts: pts.slice(0, 1500), size: 2, simulate: g.simulate }]; }
+      drawLive(); drawOverlays();
+      const n = $('#pbody .small'); if (n && RS && RS.phase === 'chart') showRound();
+    }
+    saveWork(); return;
+  }
+  const p = PTR.get(e.pointerId); if (!p) return;
+  PTR.delete(e.pointerId);
+  if (G && G.mode === 'pan' && PTR.size === 0) {
+    if (!G.moved && e.type === 'pointerup') { const v = toPage(e.clientX, e.clientY), c = cellAt(v.x, v.y); onTap(c); }
+    else if (performance.now() - G.t < 80) momentum(G.vx, G.vy);
+    G = null;
+  } else if (G && G.mode === 'pinch' && PTR.size < 2) G = PTR.size === 1 ? { mode: 'pan', moved: true, vx: 0, vy: 0, t: 0 } : null;
+}
+vp.addEventListener('pointerup', endPointer); vp.addEventListener('pointercancel', endPointer);
+vp.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); zoomAt(Z * Math.exp(-e.deltaY * 0.01), e.clientX, e.clientY); }, { passive: false });
+vp.addEventListener('contextmenu', e => e.preventDefault());
+function onTap(cell) {
+  if (!cell) return;
+  if (MODE === 'read' && RQ && RQ.list[RQ.i] && RQ.list[RQ.i].kind === 'tap' && RQ.answered !== RQ.i) return answerTap(cell);
+  if (MODE === 'chart' && RS && RS.phase === 'chart' && ME.input === 'tap') return tapToFill(cell);
+  const v = C.V[cell.src || cell.id] ?? ENT[cell.id];
+  toast(`<b>${esc(describe(cell))}</b>${v != null ? '<br>' + esc(valueOf(v)) : ''}`);
+}
+addEventListener('resize', () => { if (!$('#sim').hidden && Z < fitZ()) fitZoom(); });
+
+/* ── chrome ── */
+$('#simBack').onclick = () => { try { history.replaceState(null, '', location.pathname); } catch (e) {} home(); };
+document.querySelectorAll('#modeSeg button').forEach(b => b.onclick = () => setMode(b.dataset.mode));
+{ document.documentElement.style.setProperty('--tool', D.hue);
+  const ic = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="${D.hue}"/><text x="32" y="45" font-size="38" text-anchor="middle">📋</text></svg>`;
+  const l = document.createElement('link'); l.rel = 'icon'; l.href = 'data:image/svg+xml,' + encodeURIComponent(ic); document.head.appendChild(l);
+  $('#backLink').textContent = '‹ ' + D.back;
+  document.title = 'Chart Sim · ' + D.short; }
+if (LS('theme') === 'light') document.documentElement.dataset.theme = 'light';
+$('#themeBtn').onclick = () => { const r = document.documentElement, to = r.dataset.theme === 'light' ? '' : 'light';
+  to ? r.dataset.theme = 'light' : delete r.dataset.theme; SV('theme', to); };
+$('#helpBtn').onclick = () => {
+  $('#help').innerHTML = `<h2 style="margin-top:0">What is this?</h2>
+  <p><b>Chart Sim</b> is the <b>NZ 8-Day National Medication Chart</b> (NMC8D, 2012 edition) redrawn box for box — the front page with allergies and the registers, Once Only / Verbal Orders / Oxygen, PRN orders facing their record, Regular orders facing their 8 days, the IV fluid record, and the key printed inside the chart (instructions, recommended times, the not-given codes). Each of the ${SCN.length} patients comes part-charted, like a chart you pick up on the ward.</p>
+  <h3>Read</h3><p>Questions made from the chart itself, so they can never disagree with it: allergies, doses, times, who gave what, what a code means, what is due next, whether a PRN can be given now, what has been stopped — plus some each patient asks. Some you answer by tapping the right box. Tap any box, any time, to see what it is.</p>
+  <h3>Chart it</h3><p>The med round happens — what you gave, what was refused, what the prescriber said. You write it in. Then the chart moves on (with the right answer written in), and there is more to read.</p>
+  <h3>How it is marked</h3>
+  <p><b>👆 Tap to fill:</b> every box has an address, and each round has an answer key. It checks the right box (medicine, day, time line), the right thing in it (initials, or which code), your initials and your RN’s check, a time within 30 minutes, a PRN line with a dose and route the order allows — and flags anything written where nothing should be, by name.</p>
+  <p><b>✍️ Handwrite:</b> nothing here reads handwriting. <i>Where</i> you wrote is marked for you — each stroke belongs to the box it mostly sits in, so crossing a line a little is fine. <i>What</i> you wrote you mark yourself, against the right entry drawn beside your ink. The pen writes, one finger moves the chart, two fingers zoom; a mouse or drawing tablet writes too.</p>
+  <h3>Honest limits</h3>
+  <p>The patients are invented and the doses are typical adult doses so the chart looks real — <b>not a dosing guide</b>. Your hospital’s policies (who checks what, which codes, where a code is written) win where they differ. The chart is redrawn from the 2012 edition’s own pages; a later edition may differ in small ways.</p>
+  <h3>Your data</h3><p>Progress lives in this browser only; the Paper Sim’s home row shows a one-line summary. Nothing is sent anywhere.</p>
+  <h3>For whoever maintains this</h3><p>Built by <code>node build-chart.mjs</code> from <code>content/chart/*.js</code> (the scenario format is at the top of <code>content/chart/index.js</code>), <code>chart-engine.mjs</code>, <code>chart-render.mjs</code>, <code>ink.mjs</code> (Giga’s ink, checked against Giga’s source when it is checked out beside this repo) and the vendored perfect-freehand 1.2.3 (MIT), into <code>chart-template.html</code>. Built ${esc(D.built)}.</p>
+  <button class="btn primary wide" onclick="this.closest('dialog').close()">Close</button>`;
+  $('#help').showModal(); };
+{ const id = decodeURIComponent(location.hash.slice(1)); if (BYID.has(id)) openPatient(id); else home(); }
+saveProg();
+</script>
+</body>
+</html>

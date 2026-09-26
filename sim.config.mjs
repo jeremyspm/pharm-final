@@ -49,7 +49,11 @@ export const META = {
      chart, drilled — is terms.html, built by build-terms.mjs from content/terms/; it leaves its progress line under
      phf.more.terms, which replaces `s` once it exists. */
   more: [{ sec: 'Read a med chart', href: 'terms.html', ic: '💬', key: 'terms', t: 'Chart Speak',
-    s: 'OD, BD, TDS, PRN, stat… every med-chart term, drilled' }],
+    s: 'OD, BD, TDS, PRN, stat… every med-chart term, drilled' },
+    /* Chart Sim — the NZ 8-Day National Medication Chart redrawn, to read and to chart on (tap or handwrite) — is
+       chart.html, built by build-chart.mjs from content/chart/; its progress line is phf.more.chart */
+    { sec: 'Read a med chart', href: 'chart.html', ic: '📋', key: 'chart', t: 'Chart Sim',
+      s: 'The real NZ 8-day chart: read it, then chart the med round — tap or handwrite' }],
   banner: '<b>There is no lecturer question bank for this paper.</b> Its only Canvas quizzes are medication-calculation practice tests; nothing on pharmacology itself has ever been set. Every question here was written by this tool — from the course’s lecture decks, Joan’s own Escape Room answer sheet and her recorded 16 Sep lecture — and each one names the slide or lecture moment its answer comes from. It trains the content; it is not Joan’s wording.',
   pickIntro: 'The first rows are short answers <b>in the format Joan described</b> (a definition plus an example). Below them, one row per lecture topic — the tool’s questions, multi-choice then written.',
   help: {
