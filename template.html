@@ -253,6 +253,7 @@ a{color:var(--primary)}
 .ltx b{display:block;font-size:.97rem;font-weight:650}
 .ltx small{display:block;font-size:.8rem;color:var(--muted-fg);line-height:1.35;margin-top:1px}
 .lch{flex:0 0 auto;color:var(--muted-fg);font-size:1.3rem;line-height:1}
+a.lrow{text-decoration:none}   /* a row that opens another page of this tool (META.more) */
 /* the paper's banner on home: its bold first sentence always shows, the rest is one tap away */
 .bnote{margin:0 0 10px}
 .bnote>summary{cursor:pointer;list-style:none}
@@ -712,6 +713,20 @@ function bannerHTML(){
   if(!b.startsWith('<b>') || i<0 || i+4>=b.length) return `<div class="note" style="border-left-color:var(--danger);color:var(--fg)">${b}</div>`;
   return `<details class="note bnote" style="border-left-color:var(--danger);color:var(--fg)"><summary>${b.slice(0,i+4)}</summary>${b.slice(i+4)}</details>`;
 }
+/* other pages of this same tool (META.more: [{href, ic, t, s, key?, sec?}], 26 Sep 2026 — first used by pharm-final's
+   Chart Speak trainer): each is a home row that opens the page in this tab, so the phone's back button comes straight
+   back here. `key` names a one-line status that page leaves under this sim's prefix (LS('more.'+key)); once it exists
+   it replaces `s`. A sim without META.more shows no such rows. */
+const MORE = Array.isArray(META.more) ? META.more : [];
+function moreRows(){
+  let out = '', sec = null;
+  for(const m of MORE){
+    if(m.sec && m.sec!==sec){ sec = m.sec; out += `<div class="lsec">${esc(m.sec)}</div>`; }
+    const live = m.key ? LS('more.'+m.key) : null;
+    out += `<a class="lrow" href="${esc(m.href)}"><span class="lic" aria-hidden="true">${m.ic||'↗'}</span><span class="ltx"><b>${esc(m.t)}</b><small>${esc(typeof live==='string'&&live?live:m.s||'')}</small></span><span class="lch" aria-hidden="true">›</span></a>`;
+  }
+  return out;
+}
 function launcher(){
   const up = nextUp(), r = LS('resume'), shape = META.shape;
   const seen = CLOSED.filter(q=>S.seen[q.id]).length, nm = Object.keys(S.miss).length;
@@ -722,6 +737,7 @@ function launcher(){
   <div class="lsec">Practise</div>
   ${row('learn','📖','Learn as you go',`${seen} of ${CLOSED.length} seen${r&&r.ids&&r.ids.length?' · a run is waiting':' · marks itself as you go'}`)}
   ${row('pick','🗂','Pick my rep',`${DATA.quizzes.length} quizzes${S.pick.length?` · ${S.pick.length} ticked`:' · tick any, run them as one'}`)}
+  ${moreRows()}
   ${SCR.saq?`<div class="lsec">Write</div>
   ${row('saq','✍️','SAQ trainer',`${SAQD.filter(x=>sqS(x.id).lock).length} of ${SAQD.length} locked · ${shape.saq?shape.saq+' on the real paper':shape.saqMarks?'~'+shape.saqMarks+' of the marks on the paper':'one at a time'}`)}`:''}
   <div class="lsec">Test yourself</div>
@@ -1624,7 +1640,7 @@ $('#helpBtn').onclick=()=>{const H=META.help||{}, nAuth=DATA.questions.filter(q=
   Every screen leads with one line and keeps the full explanation under <b>ⓘ How this works</b>. The blue <b>Next up</b> card at
   the top is the tool picking for you: a Learn run you stopped partway comes first; otherwise a Learn set from the whole bank,
   your misses first and then the questions you have seen least, each marked the moment you check it. Leaving a mock test with
-  the back button asks first; a Learn run is saved as you go, so it just stops.</p>
+  the back button asks first; a Learn run is saved as you go, so it just stops.${MORE.length?` ${MORE.length===1?'One row opens':'Some rows open'} another page of this tool — ${MORE.map(m=>`<b>${esc(m.t)}</b>`).join(', ')} — in this tab; your phone's back button returns here.`:''}</p>
   <h3>Where the questions come from</h3>
   <p>${DATA.stats.n-nAuth?`${DATA.stats.n-nAuth} questions captured from ${DATA.quizzes.filter(z=>!z.authored).length} Canvas quizzes, answer keys
   extracted from the graded pages — stems, options and keys exactly as set, nothing invented.`:(H.noBank||'This paper has no Canvas quizzes, so nothing here was captured.')}

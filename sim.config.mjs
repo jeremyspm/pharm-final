@@ -45,6 +45,11 @@ export const META = {
   /* the rows in Joan's stated format come first: they are the closest thing here to her paper */
   quizOrder: ['joan-found', 'joan-pkpd', 'joan-admin', 'joan-life', 'joan-law', 'joan-ethics', 'joan-devmkt', 'joan-cam', 'concepts1', 'concepts2', 'calcs', 'pk1', 'pk2', 'pd', 'admin', 'educ', 'elderly', 'lifespan', 'legal', 'devmkt', 'allergy'],
   playlist: null,
+  /* other pages of this tool, as home rows (template: META.more). Chart Speak — every abbreviation and term on a med
+     chart, drilled — is terms.html, built by build-terms.mjs from content/terms/; it leaves its progress line under
+     phf.more.terms, which replaces `s` once it exists. */
+  more: [{ sec: 'Read a med chart', href: 'terms.html', ic: '💬', key: 'terms', t: 'Chart Speak',
+    s: 'OD, BD, TDS, PRN, stat… every med-chart term, drilled' }],
   banner: '<b>There is no lecturer question bank for this paper.</b> Its only Canvas quizzes are medication-calculation practice tests; nothing on pharmacology itself has ever been set. Every question here was written by this tool — from the course’s lecture decks, Joan’s own Escape Room answer sheet and her recorded 16 Sep lecture — and each one names the slide or lecture moment its answer comes from. It trains the content; it is not Joan’s wording.',
   pickIntro: 'The first rows are short answers <b>in the format Joan described</b> (a definition plus an example). Below them, one row per lecture topic — the tool’s questions, multi-choice then written.',
   help: {

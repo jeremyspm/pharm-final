@@ -57,6 +57,49 @@ says all this in a banner, not in a footnote.
   leaves the legal-standards outcome out of the exam's list, and she said on tape it is assessed.
 - Slide images and warm-up chains are not ported yet.
 
+## Chart Speak — every med-chart term, drilled (`terms.html`)
+
+**Live: https://jeremyspm.github.io/pharm-final/terms.html**, and a row on the home screen under
+*Read a med chart*. A trainer for reading a medication chart before placement: **414 abbreviations,
+symbols and terms** in 11 topics (when & how often · routes · forms & release · doses, units & rates ·
+the chart itself · the danger list · IV, lines, tubes & oxygen · obs & labs · notes shorthand ·
+the course's pharmacology words · law, regulators & roles), **35 real-looking orders** to decode,
+**17 dangerous ways of writing** to spot, and **31 chart-rule scenarios** (which section, which
+not-given code, PRN maths, the 30-minute window).
+
+- **Every term says where it comes from.** 19 are the course's own Must-Know abbreviations list
+  (Concepts (2) slides 77–80). 155 name the course deck and slide they come from — the
+  pharmacology words use the decks' definitions, the same ones the Joan-format short answers teach.
+  217 are everyday NZ ward usage in the tool's words, and 23 come from the international
+  error-prone list. The page says the hospital's own list wins where they differ.
+- **The not-given codes** (A absent · F fasting · L leave · N not available · R refused ·
+  S self-administered · V vomiting · W withheld) are the national-chart letters; the page says the
+  key printed on the chart wins. HQSC's own user guide could not be read while this was built —
+  check a code or rule there if it matters.
+- **Not a dosing guide.** The orders use typical adult doses so they look like a real chart, and
+  every order says so.
+- **How it drills.** A wrong option is a real trap (the term's listed confusions first, then its
+  sub-group, then its topic), never a synonym or a same-spelled term (PR the route / PR the pulse,
+  OD daily / OD overdose). 2 right in a row locks a term, the second at least 10 minutes after the
+  first; a locked term comes back after a week. Every wrong chart reading is the right sentence with
+  one thing changed. Progress lives in this browser under `phf.cs.*`; a one-line summary under
+  `phf.more.terms` feeds the home row.
+
+```
+node build-terms.mjs          # content/terms/*.js + terms-engine.mjs + terms-template.html -> terms.html
+node build-terms.mjs --lint   # also print meanings that repeat their own term's words
+```
+
+The page wears `template.html`'s own stylesheet, copied in at build time, so the two cannot drift.
+The build fails on: a broken reference; two terms with one meaning that could meet in a question;
+a danger line with more than one dangerous part; a wrong chart reading that changes more than one
+thing or is much longer or shorter than the right one; a rule question whose answer is the longest
+option. It also deals every term question 40 times, both ways round, with the page's own engine
+(`terms-engine.mjs` is inlined, never retyped), and fails if a question is short of options, shows
+its answer twice, repeats an option, offers two right answers, or biases where the answer sits.
+The home row is `META.more` in `sim.config.mjs`, a generic hook in the shared template that does
+nothing in a sim without it.
+
 ## How it is built
 
 Template + `sim.config.mjs` + `content/`, on the shared pipeline (`node shared-check.mjs` proves
