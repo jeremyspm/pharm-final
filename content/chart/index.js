@@ -11,11 +11,13 @@
      EVERYTHING WRITTEN CARRIES ITS MOMENT, and the chart shows only what had been written by then — so a scenario
      can script its whole timeline (the night nurse's 0600 signatures included) and a round the next morning finds
      them. Orders appear from `at` ('day@HHMM', else their day and first time); a cancel from its time.
-     patient { family, given, gender, dob, nhi, weight, height }
+     patient { family, given, called? (the name questions use, if not the given name), gender, dob, nhi, weight, height }
      prescribers [{ id, name, sig, reg }] · nurses [{ name, init, reg }] (the Sample Initials register, in order)
-     allergies / adverse [{ med, rx, by }] (empty → the "No" box ticked and signed by allergyBy / adverseBy)
+     allergies / adverse [{ med, rx, by, new? ('day@HHMM' — found during the stay: "New on this admission") }]
+                 (no admission entries → the "No" box ticked and signed by allergyBy / adverseBy)
      special ['renal'|'preg'|'hep'|'bf'] · supplementary ['insulin'|'analgesia'|'heparin'|'warfarin'] · vte {…}
-     regular [{ L (I–O), day, startT, med, dose, units, route, freq, times 'HHMM …', by, inst?, range?, calc?,
+     regular [{ L (I–O), day, at?, startT, med, dose, units, route, freq, times 'HHMM …', by, inst?, range?, calc?, days? (weekly:
+                chart days it is due — every other day is ruled off),
                 given { 'day@HHMM': 'AK' | 'AK/LT' | '0815 AK/LT' | a code U SM CP R D N }, cease? { at, by } }]
      prn [{ L (A–H), day, med, dose, units, route, freq, max, gapH, maxAmount (in the order's units), ind, by,
             given ['day@HHMM dose route AK/LT', …] }]
@@ -34,5 +36,9 @@ import cellulitis from './cellulitis.js';
 import parkinsons from './parkinsons.js';
 import liver from './liver.js';
 import surgery from './surgery.js';
+import stroke from './stroke.js';
+import postnatal from './postnatal.js';
+import pe from './pe.js';
+import weekly from './weekly.js';
 
-export const SCENARIOS = [hip, copd, cellulitis, parkinsons, liver, surgery];
+export const SCENARIOS = [hip, copd, cellulitis, parkinsons, liver, surgery, stroke, postnatal, pe, weekly];

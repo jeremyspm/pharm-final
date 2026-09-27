@@ -462,6 +462,12 @@ export function entries(pg, V, cls = HAND) {
     if (v == null || v === '') continue;
     out.push(entry(c, v, cls));
   }
+  /* a weekly order: the days it is not due are ruled off, one stroke across each day's boxes */
+  for (const [k, v] of Object.entries(V)) {
+    const m = /^reg\.([A-Z]{1,2})\.nd$/.exec(k); if (!m) continue;
+    const a = pg.blocks[`reg.${m[1]}.adm`]; if (!a) continue;
+    for (const d of v.days) { const x0 = a.x + (d - 1) * a.dayW; out.push(`<path class="${cls} cross" d="M${n1(x0 + 3)} ${n1(a.y + a.h - 3)} L${n1(x0 + a.dayW - 3)} ${n1(a.y + 3)}" fill="none" stroke-width="0.9"/>`); }
+  }
   /* crossed-through orders: "cross through order and administration" (the chart's own instruction 3) */
   for (const [k, v] of Object.entries(V)) {
     const m = /^(reg|prn)\.([A-Z]{1,2})\.x$/.exec(k); if (!m) continue;

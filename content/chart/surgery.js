@@ -1,7 +1,8 @@
 /* Sione Taufa — the day after a bowel resection. Teaches: TWO supplementary charts ticked (his morphine PCA and his
    insulin live elsewhere, so there is no PRN opioid here); D for a hold the prescriber wrote on the order itself;
    a BP limit on the order read and passed; an aspirin allergy that matters for NSAIDs; two antiemetics — the
-   8-hour gap decides which one; a fluid bag with potassium added, finished and replaced. */
+   8-hour gap decides which one; a fluid bag with potassium added, finished and replaced. Day 3 (Wednesday): eating
+   again, so the metformin hold is over; a BP under the order's limit (D); the PCA down and a PRN opioid charted. */
 export default {
   id: 'bowel', t: 'Sione Taufa, 58', sub: 'Day 1 after bowel surgery — PCA running',
   story: 'Sione had part of his large bowel removed on Monday morning. He is on a morphine PCA (its own chart) and his diabetes is managed on the insulin chart while he is not eating; his metformin is on hold until he is eating and drinking normally. He has asthma, and aspirin makes him wheeze. Overnight he needed ondansetron at 0600 for nausea. He is on clear fluids, IV fluids running. It is Tuesday, 0730.',
@@ -24,11 +25,11 @@ export default {
   o2: { target: '92–96', rows: [{ start: 1, device: 'Nasal prongs', flow: '2 L/min', by: 'ak' }] },
   regular: [
     { L: 'I', day: 1, startT: '1800', med: 'PARACETAMOL', dose: '1', units: 'g', route: 'PO', freq: 'QID', times: '0600 1200 1800 2200', by: 'ak', inst: 'Max 4 g in 24 h from all sources',
-      given: { '1@1800': 'KW', '1@2200': 'KW', '2@0600': 'RH' } },
+      given: { '1@1800': 'KW', '1@2200': 'KW', '2@0600': 'RH', '2@1800': 'KW', '2@2200': 'RH', '3@0600': 'RH' } },
     { L: 'J', day: 1, startT: '1800', med: 'ENOXAPARIN', dose: '40', units: 'mg', route: 'SC', freq: 'daily', times: '1800', by: 'ak',
-      given: { '1@1800': 'KW' } },
+      given: { '1@1800': 'KW', '2@1800': 'KW' } },
     { L: 'K', day: 1, startT: '0800', med: 'METFORMIN', dose: '1', units: 'g', route: 'PO', freq: 'BD', times: '0800 1800', by: 'ak', inst: 'WITHHOLD until eating and drinking normally',
-      given: { '1@0800': 'D', '1@1800': 'D' } },
+      given: { '1@0800': 'D', '1@1800': 'D', '2@1800': 'D' } },
     { L: 'L', day: 1, startT: '0800', med: 'AMLODIPINE', dose: '5', units: 'mg', route: 'PO', freq: 'mane', times: '0800', by: 'ak',
       given: { '1@0800': 'D' } },
     { L: 'M', day: 1, startT: '0800', med: 'OMEPRAZOLE', dose: '20', units: 'mg', route: 'PO', freq: 'mane', times: '0800', by: 'ak',
@@ -38,14 +39,15 @@ export default {
   ],
   prn: [
     { L: 'A', day: 1, med: 'ONDANSETRON', dose: '4', units: 'mg', route: 'PO/IV', freq: 'q8h', max: '12 mg', gapH: 8, maxAmount: 12, ind: 'Nausea', by: 'ak',
-      given: ['1@1600 4mg IV KW', '2@0600 4mg IV RH'] },
+      given: ['1@1600 4mg IV KW', '2@0600 4mg IV RH', '2@1900 4mg PO KW'] },
     { L: 'B', day: 1, med: 'CYCLIZINE', dose: '50', range: '25 – 50', units: 'mg', route: 'PO/IV', freq: 'q8h', max: '150 mg', gapH: 8, maxAmount: 150, ind: 'Nausea (2nd line)', by: 'ak', given: [] },
     { L: 'C', day: 1, med: 'SALBUTAMOL', dose: '200', units: 'mcg', route: 'INH', freq: 'q4h', max: '1200 mcg', gapH: 4, maxAmount: 1200, ind: 'Wheeze', by: 'ak', inst: '2 puffs via spacer', given: [] },
+    { L: 'D', day: 3, at: '3@0800', med: 'OXYCODONE', dose: '5', range: '5 – 10', units: 'mg', route: 'PO', freq: 'q4h', max: '40 mg', gapH: 4, maxAmount: 40, ind: 'Pain', by: 'ak', inst: 'Controlled drug. PCA stopped 4/11', given: [] },
   ],
   fluids: [
     { day: 1, time: '1200', vol: 1000, fluid: 'PLASMA-LYTE 148', route: 'IV', rate: 100, by: 'ak', started: { at: '1@1230', by: 'KW', chk: 'LK' }, done: { at: '1@2230', vol: 1000 } },
     { day: 1, time: '2230', vol: 1000, fluid: 'PLASMA-LYTE 148', route: 'IV', rate: 100, by: 'tm', started: { at: '1@2235', by: 'KW', chk: 'RH' } },
-    { day: 2, at: '2@0700', time: '0830', vol: 1000, fluid: 'SODIUM CHLORIDE 0.9% + KCl 20 mmol', route: 'IV', rate: 83, by: 'tm' },
+    { day: 2, at: '2@0700', time: '0830', vol: 1000, fluid: 'SODIUM CHLORIDE 0.9% + KCl 20 mmol', route: 'IV', rate: 83, by: 'tm', done: { at: '2@2045', vol: 1000 } },
   ],
   questions: [
     { id: 'nsaid', tag: 'Front page', q: 'The registrar suggests ibuprofen for Sione’s pain. What does his chart tell you?', a: 'His allergy is aspirin (wheeze) — ibuprofen can do the same; query it',
@@ -102,5 +104,25 @@ export default {
         w: ['Opioids are never given after bowel surgery', 'It was left off by mistake — give oxycodone anyway', 'He is allergic to opioids, so none are charted'],
         show: ['sup.analg'], why: 'Supplementary Charts, front page: Specialised analgesia is ticked. The PCA has its own chart, and the acute pain team runs it.' }],
       expect: [{ do: 'sign', c: 'reg.I.d2.s2', t: '1205' }] },
+    { at: '3@0815', rn: 'LK', title: 'Wednesday: 0800 med round',
+      brief: ['Wednesday — your second morning with Sione and Leilani (LK). He ate a full breakfast, and on the ward round Dr Kapoor says he is eating and drinking normally again.',
+        'His BP at 0800 is 104/66. Leilani checks with Dr Kapoor, who says to give the amlodipine and hold the cilazapril.',
+        '0815 — with Leilani checking, you give Sione his 0800 medicines — his metformin too, now that he is eating.'],
+      ask: [{ id: 'r5bp', tag: 'Regular', q: 'His BP is 104/66. Row N (cilazapril) says withhold if SBP < 110. What goes in the box?', a: 'D — withheld on the prescriber’s instruction',
+        w: ['Your initials — 104 is close enough to 110', 'R — he would not take it this morning', 'N — not given, with the reason in the notes'],
+        show: ['reg.N.inst', 'reg.N.d2.s1.gc'], why: 'The same order that was given yesterday (SBP 132) is held today (SBP 104). The limit on the order decides each morning.' }],
+      expect: [
+        { do: 'sign', c: 'reg.K.d3.s1', t: '0815' },
+        { do: 'sign', c: 'reg.L.d3.s1', t: '0815' },
+        { do: 'sign', c: 'reg.M.d3.s1', t: '0815' },
+        { do: 'code', c: 'reg.N.d3.s1', code: 'D', why: 'Withheld under the order’s own limit (SBP 104 < 110), and Dr Kapoor’s say-so.' },
+      ] },
+    { at: '3@0930', rn: 'LK', title: 'PCA off',
+      brief: ['0800 — the acute pain team took down his PCA and charted oxycodone PRN (row D on the PRN page).',
+        '0925 — his pain is 6/10 when he walks. After checking the chart with Leilani, you give him oxycodone 5 mg PO. It is a controlled drug, so Leilani checks it with you.'],
+      ask: [{ id: 'r6pca', tag: 'PRN', q: 'His PCA has come down. Where is his opioid charted now?', a: 'PRN D — oxycodone, charted at 0800 today',
+        w: ['Still on the specialised analgesia chart', 'In the Once Only section, as a stat dose', 'Nowhere — no opioid is given after a PCA'],
+        show: ['prn.D.med', 'prn.D.inst'], why: 'A new PRN order, dated today: oxycodone 5–10 mg q4h, max 40 mg. The PCA chart has finished.' }],
+      expect: [{ do: 'prn', L: 'D', dose: ['5mg', '5 mg', '5'], route: 'PO', t: '0930' }] },
   ],
 };

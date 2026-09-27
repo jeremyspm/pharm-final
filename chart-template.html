@@ -106,8 +106,9 @@ ul.brief li{margin:.25rem 0}
 .self{border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin:0 0 6px;font-size:.88rem}
 .self .mdl{font-family:var(--hand);color:#067a52;font-size:1rem;margin:3px 0 6px}
 .self .chipset .chip.on.no{background:var(--danger);border-color:var(--danger)}
-.tools{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
-.tools .btn{padding:8px 11px}
+.tools{display:flex;gap:5px;flex-wrap:wrap;margin:6px 0;align-items:center}
+.tools .btn{padding:6px 9px;font-size:.84rem;gap:5px}
+.tools .btn svg{flex:0 0 auto}
 .tools .btn.on{border-color:var(--primary);box-shadow:inset 0 0 0 1px var(--primary)}
 .small{font-size:.82rem;color:var(--muted-fg)}
 .toast{position:absolute;left:0;right:0;top:8px;margin:0 auto;width:max-content;max-width:calc(100% - 20px);background:rgb(15 18 25/.92);color:#fff;border-radius:10px;padding:8px 12px;font-size:.86rem;line-height:1.35;z-index:4;pointer-events:none;box-shadow:0 4px 16px rgb(0 0 0/.35)}
@@ -159,7 +160,11 @@ const r1 = v => Math.round(v * 10) / 10;
 const SCN = D.scenarios, BYID = new Map(SCN.map(s => [s.id, s]));
 const STAFF = new Set(SCN.flatMap(s => (s.nurses || []).map(n => n.init)));
 const IDX = CR.cellIndex();
-const ME = Object.assign({ name: '', init: '', input: 'tap', finger: false }, LS('chart.me') || {});
+const ME = Object.assign({ name: '', init: '', input: 'tap', finger: false, pen: 'fine' }, LS('chart.me') || {});
+/* line widths in page units: 'fine' is about a ballpoint beside the chart's own lettering (the first version drew
+   every stroke at 2, a felt-tip) */
+const PEN = { fine: 1, medium: 1.5, thick: 2.2 };
+const penSize = () => PEN[ME.pen] || PEN.fine;
 const PROG = LS('chart.p') || {};
 const saveMe = () => SV('chart.me', ME);
 function statusLine() {
@@ -216,7 +221,7 @@ function home() {
     <div class="fld"><label><span>Your initials</span><input class="tx time" id="meInit" maxlength="3" autocapitalize="characters" placeholder="SP" value="${esc(ME.init)}"></label></div>
     <div class="fld"><span>How you chart</span><div class="seg" id="inSeg"><button data-in="tap">👆 Tap to fill</button><button data-in="pen">✍️ Handwrite</button></div>
       <small>Handwriting: a pen or stylus writes; one finger moves the chart; two fingers zoom.</small></div>
-    <label class="chk"><input type="checkbox" id="meFinger" ${ME.finger ? 'checked' : ''}> No stylus — let my finger write too (then two fingers move the chart)</label>
+    <label class="chk"><input type="checkbox" id="meFinger" ${ME.finger ? 'checked' : ''}> No stylus — let my finger write too (then two fingers move and zoom the chart)</label>
     <p class="warnln" id="meWarn"></p>
   </div>
   <div class="lsec">Patients</div>
@@ -438,9 +443,9 @@ function showRound() {
     return;
   }
   const at = CE.parseAt(R.at), rn = (C.S.nurses || []).find(n => n.init === R.rn);
-  const top = `<div class="meta"><span>Round ${P().stage + 1} of ${SC.rounds.length}</span><span>${esc(dayLabel(at.day))} · ${at.t}</span></div>
-    <h3>${esc(R.title)}</h3>
-    <div class="youare">You: <b>${esc(ME.name)}</b> (${esc(meInit())}) · Your RN: <b>${esc(rn ? rn.name : R.rn)}</b> (${esc(R.rn)})</div>`;
+  const meta = `<div class="meta"><span>Round ${P().stage + 1} of ${SC.rounds.length}</span><span>${esc(dayLabel(at.day))} · ${at.t}</span></div>`;
+  const who = `<div class="youare">You: <b>${esc(ME.name)}</b> (${esc(meInit())}) · Your RN: <b>${esc(rn ? rn.name : R.rn)}</b> (${esc(R.rn)})</div>`;
+  const top = `${meta}<h3>${esc(R.title)}</h3>${who}`;
   const brief = `<ul class="brief">${R.brief.map(b => `<li>${esc(b)}</li>`).join('')}</ul>`;
   if (RS.phase === 'brief') {
     panel(`${top}${brief}<div class="acts"><button class="btn primary" id="rStart">${(R.ask || []).length ? 'First, a question ›' : 'Chart it ›'}</button></div>`);
@@ -465,11 +470,16 @@ function showRound() {
   }
   if (RS.phase === 'chart') {
     if (ME.input === 'pen') {
-      panel(`${top}<details open><summary class="small">The round</summary>${brief}</details>
+      panel(`${meta}
         <div class="tools"><button class="btn ${TOOL === 'pen' ? 'on' : ''}" id="tPen">✍️ Pen</button><button class="btn ${TOOL === 'erase' ? 'on' : ''}" id="tErase">🧽 Eraser</button><button class="btn" id="tUndo">↶ Undo</button><button class="btn" id="tClear">Clear all</button></div>
-        <p class="small">Write in the boxes with your pen${ME.finger ? ' or finger' : ''}. ${ME.finger ? 'Two fingers' : 'One finger'} move${ME.finger ? '' : 's'} the chart; two fingers zoom. The eraser takes out whole strokes. ${STROKES.length} stroke${STROKES.length === 1 ? '' : 's'} so far.</p>
+        <div class="tools"><span class="small" style="align-self:center">Line</span>${Object.entries(PEN).map(([k, w]) => `<button class="btn ${ME.pen === k ? 'on' : ''}" data-pen="${k}" title="${k} line"><svg width="30" height="12" aria-hidden="true"><path d="M2 8 C 9 2, 16 11, 28 4" fill="none" stroke="currentColor" stroke-width="${(w * 1.6).toFixed(1)}" stroke-linecap="round"/></svg>${k}</button>`).join('')}</div>
+        <label class="chk"><input type="checkbox" id="tFinger" ${ME.finger ? 'checked' : ''}> ☝️ My finger writes too (no stylus)</label>
+        <details ${STROKES.length ? '' : 'open'}><summary class="small">The round: ${esc(R.title)}</summary>${who}${brief}</details>
+        <p class="small">${ME.finger ? 'One finger writes; <b>two fingers</b> move and zoom the chart.' : 'Your pen writes; one finger moves the chart, two fingers zoom.'} The eraser takes out whole strokes. ${STROKES.length} stroke${STROKES.length === 1 ? '' : 's'} so far.</p>
         <div class="acts"><button class="btn primary" id="rCheck">Check my charting</button></div>`);
       on('#tPen', () => { TOOL = 'pen'; showRound(); }); on('#tErase', () => { TOOL = 'erase'; showRound(); });
+      document.querySelectorAll('[data-pen]').forEach(b => b.onclick = () => { ME.pen = b.dataset.pen; saveMe(); TOOL = 'pen'; showRound(); });
+      $('#tFinger').onchange = e => { ME.finger = e.target.checked; saveMe(); showRound(); };
       on('#tUndo', () => { if (UNDO.length) { STROKES = UNDO.pop(); saveWork(); drawOverlays(); showRound(); } });
       on('#tClear', () => { if (STROKES.length && confirm('Clear all your ink for this round?')) { UNDO.push(STROKES); STROKES = []; saveWork(); drawOverlays(); showRound(); } });
     } else {
@@ -589,6 +599,7 @@ function openPicker(cell) {
   if (g.k === 'adm') {
     const m = /^reg\.([A-Z]+)\.d(\d)\.s(\d)$/.exec(b), o = C.reg.find(x => x.L === m[1]);
     if (!o) return toast(`Row ${m[1]} has no order on it.`);
+    if (o.days && !o.days.includes(+m[2])) return toast(`<b>${esc(o.med)}</b> is not due on ${esc(dayLabel(+m[2]))} — this day is ruled off. ${esc(o.freq || '')}: only on the days left open.`, 4200);
     const gc = cur('gc') || {};
     PK.what = gc.code || (gc.giv ? 'given' : ''); PK.giv = gc.giv || ''; PK.chk = gc.chk || '';
     html = `<div class="fld"><span>What happened?</span>${chipRow('what', [['given', '✓ Given'], ...Object.keys(CE.CODES).map(c => [c, c])], PK.what, 'code')}<small id="whatMean">${PK.what && PK.what !== 'given' ? esc(CE.CODES[PK.what]) : 'Given — or a not-given code from the chart’s key.'}</small></div>
@@ -663,10 +674,16 @@ function savePicker() {
 /* ── pointers: one finger pans, two pinch, a tap picks a box; in handwriting, the pen writes.
    The drawing half is Giga's SketchNodeView onDown/onMove/onUp (pressure rule, coalesced samples, a dot for a
    tap, the whole-stroke eraser), ported to page units; panning, pinching and palm rejection are the Sim's. ── */
-const PTR = new Map(); let G = null, lastPen = 0, mom = 0;
+const PTR = new Map(); let G = null, lastPen = -1e9, mom = 0;     // -1e9: a touch in the page's first second is not a palm
 const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 function cellAt(x, y) { let best = null; for (const c of L().cells) if (x >= c.x && x <= c.x + c.w && y >= c.y && y <= c.y + c.h && (!best || c.w * c.h < best.w * best.h)) best = c; return best; }
-function drawLive() { const p = svg.querySelector('#live'); if (p) p.setAttribute('d', G && G.mode === 'draw' ? INK.sketchStrokePath({ pts: G.pts, size: 2, simulate: G.simulate }) : ''); }
+function drawLive() { const p = svg.querySelector('#live'); if (p) p.setAttribute('d', G && G.mode === 'draw' ? INK.sketchStrokePath({ pts: G.pts, size: G.size, simulate: G.simulate }) : ''); }
+/* a finished stroke becomes ink — Giga's onUp: a tap becomes a dot, points capped */
+function commitStroke(g) {
+  let pts = g.pts;
+  if (pts.length === 1) { const [x, y, p] = pts[0]; pts = [[x, y, p], [x + 0.8, y + 0.8, p]]; }
+  if (pts.length >= 2) { UNDO.push(STROKES); if (UNDO.length > 40) UNDO.shift(); STROKES = [...STROKES, { page: PAGE, pts: pts.slice(0, 1500), size: g.size, simulate: g.simulate }]; }
+}
 let liveQ = 0; const liveSoon = () => { if (!liveQ) liveQ = requestAnimationFrame(() => { liveQ = 0; drawLive(); }); };
 function eraseAt(v) {
   const here = STROKES.filter(s => s.page === PAGE), kept = INK.eraseStrokes(here, v.x, v.y, 5);
@@ -682,13 +699,25 @@ vp.addEventListener('pointerdown', e => {
   if (e.pointerType === 'mouse' && e.button !== 0) return;
   stopMomentum();
   const drawing = penOn(), isPen = e.pointerType === 'pen', isTouch = e.pointerType === 'touch';
+  /* finger-writing: a second finger means the first one was starting a two-finger move, not writing. A stroke that
+     young is dropped (an older one is kept), and both fingers go to pan and pinch. Before this, the second finger
+     was taken for a resting palm and ignored, so two fingers never moved the chart. */
+  if (drawing && isTouch && G && G.touch && (G.mode === 'draw' || G.mode === 'erase')) {
+    if (G.mode === 'draw' && performance.now() - G.t0 > 450 && G.pts.length > 12) commitStroke(G);
+    PTR.clear(); PTR.set(G.id, { x: G.cx, y: G.cy, x0: G.cx, y0: G.cy }); PTR.set(e.pointerId, { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY });
+    try { vp.setPointerCapture(e.pointerId); } catch (er) {}
+    const [a, b] = [...PTR.values()];
+    G = { mode: 'pinch', d0: dist(a, b) || 1, z0: Z, mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 };
+    drawLive(); drawOverlays(); saveWork(); return;
+  }
   if (drawing && isTouch && (performance.now() - lastPen < 900 || (G && G.mode === 'draw'))) return;     // a palm, while the pen is busy
   if (drawing && (isPen || e.pointerType === 'mouse' || (isTouch && ME.finger && PTR.size === 0))) {
     e.preventDefault(); try { vp.setPointerCapture(e.pointerId); } catch (er) {}
     if (isPen) lastPen = performance.now();
     const v = toPage(e.clientX, e.clientY);
-    if (TOOL === 'erase') { UNDO.push(STROKES); G = { mode: 'erase', id: e.pointerId }; eraseAt(v); return; }
-    G = { mode: 'draw', id: e.pointerId, simulate: !isPen, pts: [[r1(v.x), r1(v.y), INK.inkPressure(e)]] };
+    const at = { id: e.pointerId, touch: isTouch, t0: performance.now(), cx: e.clientX, cy: e.clientY };
+    if (TOOL === 'erase') { UNDO.push(STROKES); G = { mode: 'erase', ...at }; eraseAt(v); return; }
+    G = { mode: 'draw', ...at, size: penSize(), simulate: !isPen, pts: [[r1(v.x), r1(v.y), INK.inkPressure(e)]] };
     drawLive(); return;
   }
   try { vp.setPointerCapture(e.pointerId); } catch (er) {}
@@ -700,6 +729,7 @@ vp.addEventListener('pointermove', e => {
   if (G && (G.mode === 'draw' || G.mode === 'erase') && e.pointerId === G.id) {
     const co = e.getCoalescedEvents ? e.getCoalescedEvents() : null, samples = co && co.length ? co : [e];
     for (const ce of samples) { const v = toPage(ce.clientX, ce.clientY); if (G.mode === 'erase') eraseAt(v); else G.pts.push([r1(v.x), r1(v.y), INK.inkPressure(ce)]); }
+    G.cx = e.clientX; G.cy = e.clientY;
     if (e.pointerType === 'pen') lastPen = performance.now();
     if (G.mode === 'draw') liveSoon();
     return;
@@ -719,9 +749,7 @@ function endPointer(e) {
   if (G && (G.mode === 'draw' || G.mode === 'erase') && e.pointerId === G.id) {
     const g = G; G = null;
     if (g.mode === 'draw') {
-      let pts = g.pts;
-      if (pts.length === 1) { const [x, y, p] = pts[0]; pts = [[x, y, p], [x + 0.8, y + 0.8, p]]; }
-      if (pts.length >= 2) { UNDO.push(STROKES); if (UNDO.length > 40) UNDO.shift(); STROKES = [...STROKES, { page: PAGE, pts: pts.slice(0, 1500), size: 2, simulate: g.simulate }]; }
+      commitStroke(g);
       drawLive(); drawOverlays();
       const n = $('#pbody .small'); if (n && RS && RS.phase === 'chart') showRound();
     }

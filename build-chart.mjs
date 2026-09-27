@@ -75,7 +75,11 @@ for (const S0 of SCENARIOS) {
     for (const g of o.given || []) { const r = E.parsePrn(g); if (isNaN(E.doseAmount(r.dose, o.units))) fail(`${W}: PRN ${o.L} record "${g}" — dose not in ${o.units}`); if (!inits.includes(r.giv) || (r.chk && !inits.includes(r.chk))) fail(`${W}: PRN ${o.L} record "${g}" — initials not in the register`); }
   }
   for (const L of [...(S0.regular || []), ...(S0.prn || [])].map(o => o.L)) if ([...(S0.regular || []), ...(S0.prn || [])].filter(o => o.L === L).length > 1) fail(`${W}: row ${L} used twice`);
-  for (const o of S0.regular || []) for (const [k, v] of Object.entries(o.given || {})) { const a = E.parseAdmin(v, '0000'); if (a.giv && (!inits.includes(a.giv) || (a.chk && !inits.includes(a.chk)))) fail(`${W}: regular ${o.L} ${k} "${v}" — initials not in the register`); }
+  for (const o of S0.regular || []) for (const [k, v] of Object.entries(o.given || {})) {
+    const a = E.parseAdmin(v, '0000'); if (a.giv && (!inits.includes(a.giv) || (a.chk && !inits.includes(a.chk)))) fail(`${W}: regular ${o.L} ${k} "${v}" — initials not in the register`);
+    if (o.days && !o.days.includes(E.parseAt(k).day)) fail(`${W}: regular ${o.L} ${k} is on a day the weekly order rules off`);
+  }
+  for (const o of S0.regular || []) if (o.days && (!o.days.length || o.days.some(d => !(d >= 1 && d <= 8)))) fail(`${W}: regular ${o.L} days must be chart days 1–8`);
   for (const o of S0.once || []) by('once only', o.by);
   for (const f of S0.fluids || []) by('fluid', f.by);
   let S = S0;
@@ -83,7 +87,7 @@ for (const S0 of SCENARIOS) {
     const WS = `${W} stage ${st}`;
     let C;
     try { C = E.compile(S); } catch (e) { fail(`${WS}: does not compile — ${e.message}`); break; }
-    for (const k of Object.keys(C.V)) if (!IDX.has(k) && !/^(reg|prn)\.[A-Z]{1,2}\.x$/.test(k)) fail(`${WS}: writes ${k}, which is not a box on the chart`);
+    for (const k of Object.keys(C.V)) if (!IDX.has(k) && !/^(reg|prn)\.[A-Z]{1,2}\.x$/.test(k) && !/^reg\.[A-Z]{1,2}\.nd$/.test(k)) fail(`${WS}: writes ${k}, which is not a box on the chart`);
     /* the questions, dealt many times */
     for (let d = 0; d < DEALS; d++) {
       const qs = E.questions(C, rnd), qids = new Set();
@@ -125,6 +129,7 @@ for (const S0 of SCENARIOS) {
         /* a dose is signed near its time; a code can be written when the patient is back (U after X-ray) */
         if (Math.abs(due - at.m) > (x.do === 'code' ? 240 : 120)) fail(`${WR}: ${x.c} — due ${slot.t} on day ${m[2]}, far from the round (${Rd.at})`);
         if (x.do === 'code' && !E.CODES[x.code]) fail(`${WR}: ${x.code} is not on the chart’s key`);
+        if (o.days && !o.days.includes(+m[2])) fail(`${WR}: ${x.c} — day ${m[2]} is ruled off for this weekly order`);
         const scripted = (rawReg(m[1]).given || {})[`${m[2]}@${slot.t}`];
         if (scripted != null) fail(`${WR}: ${x.c} is already scripted in the scenario ("${scripted}") — it would collide with the round`);
         if (x.dose) {
@@ -144,7 +149,11 @@ for (const S0 of SCENARIOS) {
       if (x.do === 'none') {
         const mp = /^prn\.([A-H])$/.exec(x.c), mr = /^reg\.([A-Z]{1,2})\.d(\d)$/.exec(x.c);
         if (mp) { const o = RC.prn.find(p => p.L === mp[1]); if (!o) fail(`${WR}: no PRN ${mp[1]}`); else if (E.prnStatus(o, at.m).can) fail(`${WR}: withholds PRN ${mp[1]}, but the chart says it could be given at ${at.t}`); }
-        else if (mr) { const o = RC.reg.find(r => r.L === mr[1]); if (!o) fail(`${WR}: no regular ${mr[1]}`); else if (!o.ceaseAt || o.ceaseAt.m > at.m) notes.push(`${WR}: "none" on active row ${mr[1]}`); }
+        else if (mr) {
+          const o = RC.reg.find(r => r.L === mr[1]);
+          if (!o) fail(`${WR}: no regular ${mr[1]}`);
+          else if ((!o.ceaseAt || o.ceaseAt.m > at.m) && !(o.days && !o.days.includes(+mr[2]))) notes.push(`${WR}: "none" on active row ${mr[1]}, due that day`);
+        }
         else fail(`${WR}: "none" c must be prn.X or reg.L.dD`);
       }
       const onc = RC.once[x.i], fl = RC.fluids[x.i], raw = x.do === 'once' ? (S0.once || [])[x.i] : (S0.fluids || [])[x.i];
@@ -186,7 +195,7 @@ for (const S0 of SCENARIOS) {
     S = next;
   }
 }
-for (const [i, n] of allStaff) if (n > 1) notes.push(`initials ${i} are on ${n} charts (fine — different patients)`);
+notes.push(`staff initials: ${allStaff.size} across all charts (a student’s own must not match any of them)`);
 const tot4 = pos.reduce((a, b) => a + b, 0), exp4 = tot4 / 4, sd = Math.sqrt(tot4 * 0.25 * 0.75);
 if (tot4 && pos.some(n => Math.abs(n - exp4) > 3.5 * sd)) fail(`answer position is biased: ${pos.join('/')}`);
 /* the ink library draws: a stroke comes back as a closed SVG path */

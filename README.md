@@ -108,8 +108,8 @@ nothing in a sim without it.
 8-Day National Medication Chart** (NMC8D, 2012 edition) redrawn box for box from the booklet's own pages — front page
 (allergies, adverse reactions, special care, supplementary charts, both registers), Once Only / Verbal Orders /
 Oxygen, PRN orders facing their record, VTE + Regular orders facing their 8 days, the IV fluid record, and the key
-printed inside the chart. Six invented patients, each part-charted like a chart picked up on the ward, with 4–5 med
-rounds each (28 in all), most running into a second day:
+printed inside the chart. Ten invented patients, each part-charted like a chart picked up on the ward, with 3–6 med
+rounds each (45 in all), most running into a second day:
 
 | Patient | What it teaches |
 |---|---|
@@ -118,7 +118,11 @@ rounds each (28 in all), most running into a second day:
 | Grace, 58 — leg cellulitis | a therapy change is a ceased line plus a new line; N with its reason in the notes; CP for her husband's eye drops on an afternoon shift |
 | Tom, 74 — Parkinson's + UTI | time-critical levodopa at his own times (the 30-minute window works both ways); an IV dose the RN gives and signs, so the student signs nothing; R; metoclopramide on his Adverse Reactions |
 | Daniel, 48 — liver disease | a recharted chart; hepatic impairment; a variable dose (the dose given goes in the Dose column); N when pharmacy has not supplied it; a 2 g paracetamol maximum — a round where the right move is to give nothing |
-| Sione, 58 — day 1 after bowel surgery | two supplementary charts (PCA, insulin); D written on the order itself; an aspirin allergy that matters for NSAIDs; two antiemetics where the 8-hour gap decides; a fluid bag with KCl |
+| Sione, 58 — day 1 after bowel surgery | two supplementary charts (PCA, insulin); D written on the order itself; an aspirin allergy that matters for NSAIDs; two antiemetics where the 8-hour gap decides; a fluid bag with KCl; day 3 — metformin back once he is eating, a BP under the order's limit, the PCA down and a PRN opioid charted |
+| Ropata, 71 — stroke, nil by mouth | a change of route is a new line (aspirin PR crossed through, aspirin NG below); a CR tablet that cannot be crushed for the NG tube (D, then rewritten); calf pumps in the VTE box; a two-route PRN where the route used is recorded; a last bag with no next bag written |
+| Aroha, 31 — day 1 after a caesarean | breastfeeding in Special Care; an allergy found in theatre under "New on this admission"; midwives (RM) as checkers; an IV dose the midwife gives and signs; a PRN dose range; codeine avoided while breastfeeding |
+| Frank, 69 — PE and new AF | treatment-dose enoxaparin from the Dose calculation box (mg/kg); digoxin held and given on the apical pulse; two loading doses on the Once Only page; a cancelled PRN replaced by another; a second oxygen line |
+| Betty, 79 — broken wrist, three weekly medicines | methotrexate (Mondays only), alendronate (Wednesdays, before food) and folic acid (Thursdays) with every other day ruled off — signing nothing where nothing is due |
 
 **The chart keeps time.** Everything written carries its moment and the chart shows only what had been written by
 then, so a scenario scripts its whole timeline (the night nurse's 0600 signatures, a verbal order signed late, an
@@ -138,7 +142,11 @@ charting shows it as the next round finds it.
   dose and route the order allows, the register line on a first signature — and anything written where nothing
   should be, by name. *Handwrite* (pen, drawing tablet, or finger if chosen): nothing reads handwriting. Where the
   ink landed is marked for you (`checkInk`; a stroke belongs to the box holding most of its points); what it says is
-  self-marked against the right entry drawn beside it. The page says so.
+  self-marked against the right entry drawn beside it. The page says so. The line width is chosen in the pen tools
+  (fine by default — about a ballpoint beside the chart's lettering; the first version drew a felt-tip). With "my finger
+  writes too", one finger writes and two fingers move and zoom the chart: a second finger landing turns a stroke that
+  has only just begun into a two-finger move (the first version took the second finger for a resting palm, so two
+  fingers never moved the chart).
 - **The ink is Giga's.** `ink.mjs` carries `inkPathFromOutline` and `sketchStrokePath` from gigastudyapp
   `lib/ink-path.js` byte for byte (the build diffs them whenever `../gigastudyapp` is checked out), and the pointer
   handling follows its SketchNodeView (pressure rule, coalesced samples, a dot for a tap, whole-stroke eraser) on the
@@ -157,7 +165,7 @@ a patient's own question gives its answer away by length; if a round's model ans
 with nothing written, with the wrong day, without the RN's check, with the student signing a dose the RN gave, or
 with stray ink; if the story contradicts the chart (a PRN the round gives that the chart says cannot be given then,
 or that would take the 24-hour total past the maximum, or one it withholds that could be given); if a scripted
-signature sits in a box a round asks the student to fill; if, after the round, anything the model wrote is not
+signature sits in a box a round asks the student to fill, or anything is signed on a day a weekly order rules off; if, after the round, anything the model wrote is not
 where it put it; or if a stroke drawn across a box is not placed in it. The modules are inlined as namespaces (never retyped) and the page's
 script is parsed before it ships. Progress lives under `phf.chart.*`; `phf.more.chart` feeds the home row.
 

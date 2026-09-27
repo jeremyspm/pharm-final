@@ -83,14 +83,19 @@ export function compile(S) {
   if (S.recharted) put('recharted', date(S.recharted));
   if (P.weight) { put('wt.0', P.weight); put('wt.0d', date(P.wday || 1)); }
   if (P.height) { put('ht', P.height); put('htd', date(P.wday || 1)); }
-  /* front: allergies and adverse reactions — "No" ticked only when the list is empty */
-  for (const [k, list] of [['alg', S.allergies || []], ['adr', S.adverse || []]]) {
+  /* front: allergies and adverse reactions — "No" ticked only when the admission list is empty. One found during the
+     stay ({new: 'day@HHMM'}) goes under "New on this admission", from its moment. */
+  const known = {};
+  for (const [k, all] of [['alg', S.allergies || []], ['adr', S.adverse || []]]) {
+    const list = all.filter(a => !a.new), fresh = all.filter(a => a.new && seen(parseAt(a.new).m));
     if (!list.length) { put(k + '.none', { tick: 1 }); if (S[k === 'alg' ? 'allergyBy' : 'adverseBy']) { put(k + '.sig', sig(S[k === 'alg' ? 'allergyBy' : 'adverseBy'])); put(k + '.date', date(1)); } }
     list.forEach((a, i) => { put(`${k}.${i}.med`, a.med); put(`${k}.${i}.rx`, a.rx); });
     if (list.length) { put(k + '.sig', sig(list[0].by)); put(k + '.date', date(list[0].day || 1)); }
+    if (fresh.length) { put(k + '.new', fresh.map(a => `${a.med} — ${a.rx}`).join('; ')); put(k + '.newsig', sig(fresh[0].by)); put(k + '.newdate', date(parseAt(fresh[0].new).day)); }
+    known[k] = [...list, ...fresh];
     /* the summary box the Once Only page carries */
-    put(k + '2.' + (list.length ? 'yes' : 'no'), { tick: 1 });
-    if (list.length) put(k + '2.list', list.map(a => a.med).join(', '));
+    put(k + '2.' + (known[k].length ? 'yes' : 'no'), { tick: 1 });
+    if (known[k].length) put(k + '2.list', known[k].map(a => a.med).join(', '));
   }
   const SC = { renal: 'sc.renal', preg: 'sc.preg', hep: 'sc.hep', bf: 'sc.bf' }, SU = { insulin: 'sup.insulin', analgesia: 'sup.analg', heparin: 'sup.heparin', warfarin: 'sup.warfarin' };
   if (!(S.special || []).length) put('sc.none', { tick: 1 });
@@ -107,6 +112,7 @@ export function compile(S) {
     if (v.stockings != null) put(v.stockings ? 'vte.stock.y' : 'vte.stock.n', { tick: 1 });
     if (v.ipc != null) put(v.ipc ? 'vte.ipc.y' : 'vte.ipc.n', { tick: 1 });
     if (v.none) put('vte.' + v.none, { tick: 1 });
+    if (v.other) put('vte.other', v.other);
   }
   /* once only — `at` is when it was charted (else the start of its day) */
   const once = (S.once || []).map((o, i) => {
@@ -132,7 +138,7 @@ export function compile(S) {
   if (S.o2) {
     put('o2.target', S.o2.target);
     S.o2.rows.forEach((r, i) => {
-      if (!seen(abs(r.start, '0000'))) return;
+      if (!seen(atM(r.startAt, r.start))) return;
       const stopped = r.stop && seen(atM(r.stopAt, r.stop));
       put(`o2.${i}.start`, date(r.start)); put(`o2.${i}.device`, r.device); put(`o2.${i}.flow`, r.flow); put(`o2.${i}.sig`, sig(r.by)); if (stopped) put(`o2.${i}.stop`, date(r.stop));
       o2.push({ ...r, i, stopped });
@@ -155,6 +161,8 @@ export function compile(S) {
     for (const f of ['med', 'dose', 'units', 'route', 'freq', 'calc', 'range', 'inst']) put(`reg.${L}.${f}`, o[f]);
     put(`reg.${L}.date`, date(o.day)); put(`reg.${L}.psig`, sig(o.by));
     slots.forEach((s, k) => { if (s) put(`reg.${L}.s${k}`, s.circled ? { circle: 1 } : s.t); });
+    /* a weekly order (days: [chart days it is due]): every other day is ruled off, as the prescriber does */
+    if (o.days) put(`reg.${L}.nd`, { days: [1, 2, 3, 4, 5, 6, 7, 8].filter(d => !o.days.includes(d)) });
     let cease = null;
     if (o.cease && seen(parseAt(o.cease.at).m)) {
       cease = parseAt(o.cease.at); put(`reg.${L}.cancel`, `${sig(o.cease.by)} ${date(cease.day)} ${cease.t}`);
@@ -187,7 +195,7 @@ export function compile(S) {
     return { ...f, i, running: !!st && !dn, started: st, done: dn };
   });
   const now = parseAt(S.now);
-  return { S, V, now, once, verbal, prn, reg, fluids, o2, dates: [1, 2, 3, 4, 5, 6, 7, 8].map(date) };
+  return { S, V, now, once, verbal, prn, reg, fluids, o2, allergies: known.alg, adverse: known.adr, dates: [1, 2, 3, 4, 5, 6, 7, 8].map(date) };
 }
 /* the chart as the round finds it: its moment, not the last stage's */
 export const atRound = (S, R) => ({ ...S, now: R.at });
@@ -196,7 +204,7 @@ export const atRound = (S, R) => ({ ...S, now: R.at });
 /* a regular order's next due dose after a moment: {day, t, slot} — null when ceased first or past day 8 */
 export function nextDue(o, m) {
   for (let d = 1; d <= 8; d++) for (let k = 0; k < 5; k++) {
-    const s = o.slots[k]; if (!s) continue;
+    const s = o.slots[k]; if (!s || (o.days && !o.days.includes(d))) continue;
     const at = abs(d, s.t);
     if (at <= m || at < o.start) continue;
     if (o.ceaseAt && at >= o.ceaseAt.m) return null;
@@ -214,14 +222,14 @@ export function prnStatus(o, m) {
   return { last, n24: day24.length, amount, nextOk, maxHit, can: !o.ceaseAt && m >= nextOk && !maxHit };
 }
 export const when = (C, m) => {
-  const d = Math.floor(m / 1440) + 1, day = d === C.now.day ? 'today' : d === C.now.day - 1 ? 'yesterday' : d === C.now.day + 1 ? 'tomorrow' : 'day ' + d;
+  const d = Math.floor(m / 1440) + 1, day = d === C.now.day ? 'today' : d === C.now.day - 1 ? 'yesterday' : d === C.now.day + 1 ? 'tomorrow' : `${WEEKDAY(C.S, d)} ${dayDate(C.S, d)}`;
   return `${day} at ${hhmm(m)}`;
 };
 
 /* ── the reading questions, generated from the chart itself (so they can never disagree with it) ──
    {id, kind:'mcq'|'tap', q, opts?, a?, accept?:[cell ids or 'prefix*'], show:[cell ids], why, tag} */
 export function questions(C, rnd) {
-  const S = C.S, out = [], first = S.patient.given, nowTxt = `${WEEKDAY(S, C.now.day)} ${dayDate(S, C.now.day)}, ${C.now.t}`;
+  const S = C.S, out = [], first = S.patient.called || S.patient.given, nowTxt = `${WEEKDAY(S, C.now.day)} ${dayDate(S, C.now.day)}, ${C.now.t}`;
   const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const pick = (a, n) => shuffle(a).slice(0, n);
   const mcq = (id, tag, q, a, wrong, show, why) => {
@@ -237,14 +245,16 @@ export function questions(C, rnd) {
   const regByL = L => C.reg.find(o => o.L === L);
 
   /* allergies */
-  const alg = S.allergies || [], adr = S.adverse || [];
+  const alg = C.allergies, adr = C.adverse, algNew = alg.filter(a => a.new);
   if (alg.length) {
     const a = alg.map(x => `${x.med} — ${x.rx}`).join('; ');
     const meds = [...new Set([...C.reg.map(o => o.med), ...C.prn.map(o => o.med), ...adr.map(x => x.med)])].filter(m => !alg.some(x => x.med === m));
     mcq('alg', 'Front page', `What is ${first} allergic to?`, a,
       [...meds.slice(0, 4).map(m => `${m} — ${alg[0].rx}`), ...adr.map(x => `${x.med} — ${x.rx}`), 'Nothing — no known allergies'],
-      alg.map((_, i) => `alg.${i}.med`), 'The Allergies box on the front page. Check it before every first dose — and ask the patient too.');
+      [...alg.filter(a => !a.new).map((_, i) => `alg.${i}.med`), ...(algNew.length ? ['alg.new'] : [])], `The Allergies box on the front page${algNew.length ? ' — including “New on this admission”' : ''}. Check it before every first dose — and ask the patient too.`);
     tap('alg-tap', 'Front page', `Tap where the chart records ${first}’s allergies.`, ['alg.*'], 'The Allergies box, top left of the front page.');
+    if (algNew.length) tap('alg-new', 'Front page', `An allergy was found during this admission (${algNew[0].med}). Tap where it is recorded.`, ['alg.new', 'alg.newsig', 'alg.newdate'],
+      '“New on this admission”, inside the Allergies box: an allergy found during the stay goes there, signed and dated — and everyone giving medicines checks it.');
   } else {
     mcq('alg', 'Front page', `What does the chart say about ${first}’s allergies?`, 'No known allergies — the “No” box is ticked and signed',
       ['The box is blank, so there are no allergies', 'PENICILLIN — rash', 'It says to check the notes', 'Allergies are not recorded on this chart'],
@@ -279,7 +289,14 @@ export function questions(C, rnd) {
     mcq(`dose-${o.L}`, 'Regular', `What dose and route is ${nm(o)} charted at?`, `${o.dose} ${o.units} ${o.route}`,
       [...C.reg.filter(x => x !== o).map(x => `${x.dose} ${x.units} ${x.route}`), `${o.dose} ${o.units === 'mg' ? 'mcg' : 'mg'} ${o.route}`, `${o.dose} ${o.units} ${o.route === 'PO' ? 'IV' : 'PO'}`],
       [`reg.${o.L}.dose`, `reg.${o.L}.units`, `reg.${o.L}.route`], 'The order line: Dose · Units · Route, written by the prescriber.');
-    mcq(`times-${o.L}`, 'Regular', `At what time(s) is ${nm(o)} due each day?`, timesTxt(o),
+    if (o.days) {
+      const wd = [...new Set(o.days.map(d => WEEKDAY(S, d)))], NAMES = { Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday' };
+      const say = w => w.map(x => NAMES[x] + 's').join(' and ') + ' only';
+      mcq(`days-${o.L}`, 'Regular', `${nm(o)} is not given every day. Which day is it given?`, say(wd),
+        [...Object.keys(NAMES).filter(x => !wd.includes(x)).slice(0, 4).map(x => say([x])), 'Every day, at the same time'],
+        [`reg.${o.L}.freq`, `reg.${o.L}.inst`], 'The order’s Frequency and instructions — and every other day’s boxes are ruled off, so nothing can be signed there by mistake.');
+    }
+    mcq(`times-${o.L}`, 'Regular', o.days ? `At what time is ${nm(o)} given, on its day?` : `At what time(s) is ${nm(o)} due each day?`, timesTxt(o),
       [...C.reg.filter(x => x !== o).map(timesTxt), '0800 and 1400', '0600 and 1800', '2200'],
       o.slots.map((s, k) => s ? `reg.${o.L}.s${k}` : null).filter(Boolean), 'The “Circle or actual time” column beside the order: circled printed times, or a time written in the box.');
   }
@@ -314,6 +331,12 @@ export function questions(C, rnd) {
     tap(`tapceased-${o.L}`, 'Regular', 'Tap the regular order that has been stopped.', [`reg.${o.L}.*`], `Row ${o.L} — crossed through, with the cancel box signed.`);
   }
 
+  const cancelled = C.prn.filter(o => o.ceaseAt && o.ceaseAt.m <= m);
+  if (cancelled.length) {
+    const o = cancelled[0];
+    mcq(`prnceased-${o.L}`, 'PRN', 'Which PRN order has been cancelled?', `${o.med} (PRN ${o.L})`, C.prn.filter(x => x !== o).map(x => `${x.med} (PRN ${x.L})`).concat('None — every PRN order is current'), [`prn.${o.L}.cancel`],
+      '“Sign, date and time to cancel” is filled in and the order is crossed through. Nothing more is given from it.');
+  }
   /* PRN: last dose, can it be given now, 24-hour total */
   for (const o of C.prn) {
     const st = prnStatus(o, m);
