@@ -254,6 +254,23 @@ a{color:var(--primary)}
 .ltx small{display:block;font-size:.8rem;color:var(--muted-fg);line-height:1.35;margin-top:1px}
 .lch{flex:0 0 auto;color:var(--muted-fg);font-size:1.3rem;line-height:1}
 a.lrow{text-decoration:none}   /* a row that opens another page of this tool (META.more) */
+/* a featured row (META.more[].hl, 2 Oct 2026 — his pick "B, exactly like B" for pharm-final's Chart Sim): a taller card
+   in its own colour (--hl, with --hl2 for the gradient), a kicker line, a pill button and specks drifting up behind it */
+.lrow.fb{position:relative;overflow:hidden;padding:14px;gap:14px;border-color:color-mix(in srgb,var(--hl) 60%,var(--border));
+  background:radial-gradient(120% 140% at 0% 0%,color-mix(in srgb,var(--hl) 34%,var(--card)),var(--card) 70%)}
+.lrow.fb:hover{border-color:var(--hl)}
+.fb .lic{flex-basis:52px;height:52px;border-radius:14px;font-size:1.6rem;background:linear-gradient(135deg,var(--hl),var(--hl2));
+  box-shadow:0 6px 18px -6px var(--hl)}
+.fb .ltx b{font-size:1.05rem}
+.fb .kick{display:block;font-size:.68rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--hl2)}
+.fb .go{flex:0 0 auto;font-size:.8rem;font-weight:700;padding:7px 12px;border-radius:99px;background:var(--hl);color:#fff;white-space:nowrap}
+.fb .dot{position:absolute;width:4px;height:4px;border-radius:50%;background:#fff;opacity:0;pointer-events:none;animation:fbrise 4s linear infinite}
+.fb .d1{left:62%}.fb .d2{left:74%;animation-delay:1.3s;width:3px;height:3px}
+.fb .d3{left:86%;animation-delay:2.6s}.fb .d4{left:55%;animation-delay:3.3s;width:2px;height:2px}
+@keyframes fbrise{0%{bottom:-4px;opacity:0}20%{opacity:.9}100%{bottom:100%;opacity:0}}
+:root[data-theme=light] .fb .kick{color:color-mix(in srgb,var(--hl) 80%,#000)}
+:root[data-theme=light] .fb .dot{background:var(--hl)}
+@media(prefers-reduced-motion:reduce){.fb .dot{animation:none}}
 /* the paper's banner on home: its bold first sentence always shows, the rest is one tap away */
 .bnote{margin:0 0 10px}
 .bnote>summary{cursor:pointer;list-style:none}
@@ -279,6 +296,7 @@ header{border-top:4px solid var(--tool)}
   .idtx b{font-size:1.25rem;margin:1px 0 2px}
   .idtx small,.idtx>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .lrow{padding:6px 12px;margin-bottom:5px}
+  .lrow.fb{padding:10px 12px}
   .lic{flex-basis:36px;height:36px}
   .lsec{margin:8px 4px 4px}
   .hero{padding-top:9px;padding-bottom:9px}
@@ -716,14 +734,18 @@ function bannerHTML(){
 /* other pages of this same tool (META.more: [{href, ic, t, s, key?, sec?}], 26 Sep 2026 — first used by pharm-final's
    Chart Speak trainer): each is a home row that opens the page in this tab, so the phone's back button comes straight
    back here. `key` names a one-line status that page leaves under this sim's prefix (LS('more.'+key)); once it exists
-   it replaces `s`. A sim without META.more shows no such rows. */
+   it replaces `s`. A sim without META.more shows no such rows. `hl: {c, c2, kick, go}` makes the row a featured card
+   (.lrow.fb): c and c2 its two colours, kick the line above the name, go the pill's label. */
 const MORE = Array.isArray(META.more) ? META.more : [];
 function moreRows(){
   let out = '', sec = null;
   for(const m of MORE){
     if(m.sec && m.sec!==sec){ sec = m.sec; out += `<div class="lsec">${esc(m.sec)}</div>`; }
     const live = m.key ? LS('more.'+m.key) : null;
-    out += `<a class="lrow" href="${esc(m.href)}"><span class="lic" aria-hidden="true">${m.ic||'↗'}</span><span class="ltx"><b>${esc(m.t)}</b><small>${esc(typeof live==='string'&&live?live:m.s||'')}</small></span><span class="lch" aria-hidden="true">›</span></a>`;
+    const s = esc(typeof live==='string'&&live?live:m.s||''), h = m.hl;
+    out += h
+      ? `<a class="lrow fb" href="${esc(m.href)}" style="--hl:${esc(h.c)};--hl2:${esc(h.c2||h.c)}"><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span><span class="dot d4"></span><span class="lic" aria-hidden="true">${m.ic||'↗'}</span><span class="ltx">${h.kick?`<span class="kick">${esc(h.kick)}</span>`:''}<b>${esc(m.t)}</b><small>${s}</small></span><span class="go" aria-hidden="true">${esc(h.go||'Open ›')}</span></a>`
+      : `<a class="lrow" href="${esc(m.href)}"><span class="lic" aria-hidden="true">${m.ic||'↗'}</span><span class="ltx"><b>${esc(m.t)}</b><small>${s}</small></span><span class="lch" aria-hidden="true">›</span></a>`;
   }
   return out;
 }
