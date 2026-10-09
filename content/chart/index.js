@@ -40,5 +40,6 @@ import stroke from './stroke.js';
 import postnatal from './postnatal.js';
 import pe from './pe.js';
 import weekly from './weekly.js';
+import luke from './luke.js';
 
-export const SCENARIOS = [hip, copd, cellulitis, parkinsons, liver, surgery, stroke, postnatal, pe, weekly];
+export const SCENARIOS = [hip, copd, cellulitis, parkinsons, liver, surgery, stroke, postnatal, pe, weekly, luke];

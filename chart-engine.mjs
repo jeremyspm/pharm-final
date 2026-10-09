@@ -9,7 +9,10 @@
 /* The regular-medicine time boxes printed on the NZ chart (NMC8D) beside every order */
 export const PRINTED = ['0600', '0800', '1400', '1800', '2200'];
 /* The chart's own non-administration key (NMC8D, 2012 ed., p. 11) */
-export const CODES = { U: 'Patient unavailable', SM: 'Self-medicating', CP: 'Carer/Parent', R: 'Patient refused', D: 'Prescriber’s instructions', N: 'Not administered — reason in notes' };
+// The non-administration key as printed on the CURRENT chart (NMC8D, February 2021 print — Mr Luke's chart on the 722.544
+// Canvas) and defined in the HQSC National Medication Chart user guide, 3rd ed. 2021, Figure 22. The 2012 booklet this
+// tool was first copied from printed only six (no RV, no W). Same order as the 2021 chart.
+export const CODES = { CP: 'Carer/parent administered', D: 'Prescriber’s instructions', N: 'Not administered — reason in notes', R: 'Patient refused', RV: 'Review (with W: ask the prescriber to review)', SM: 'Self-medicating', U: 'Patient unavailable', W: 'Withheld — reason in the notes' };
 export const PRN_LINES = 20;      // record lines per PRN order: 4 groups × 5 (NMC8D p. 5)
 
 export const toMin = hhmm => { const t = String(hhmm).padStart(4, '0'); return +t.slice(0, 2) * 60 + +t.slice(2); };
@@ -312,7 +315,7 @@ export function questions(C, rnd) {
   for (const o of C.reg) for (const e of o.adm.filter(x => x.code)) {
     const cell = `reg.${o.L}.d${e.day}.s${e.slot}.gc`;
     mcq(`code-${o.L}-${e.day}-${e.slot}`, 'Regular', `The ${e.due} ${nm(o)} on ${dayDate(S, e.day)} has a code instead of initials. What does it mean?`, `${e.code} — ${CODES[e.code]}`,
-      Object.entries(CODES).map(([k, v]) => `${k} — ${v}`), [cell], `A code in the Giv/Chck box instead of initials: no nurse gave that dose. The key is printed on the chart (U, SM, CP, R, D, N)${e.code === 'N' ? ' — N means the reason is in the clinical notes' : ''}.`);
+      Object.entries(CODES).map(([k, v]) => `${k} — ${v}`), [cell], `A code in the Giv/Chck box instead of initials: no nurse gave that dose. The key is printed on the chart (${Object.keys(CODES).join(', ')})${e.code === 'N' ? ' — N means the reason is in the clinical notes' : ''}.`);
     tap(`tapcode-${o.L}-${e.day}-${e.slot}`, 'Regular', `Tap the box that shows the ${e.due} ${nm(o)} on ${dayDate(S, e.day)} was NOT given by a nurse.`, [cell], `Row ${o.L}: the box with “${e.code}” in it.`);
   }
   const m = abs(C.now.day, C.now.t);

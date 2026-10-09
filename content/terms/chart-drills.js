@@ -232,9 +232,10 @@ export const ORDERS = [
    codes), or 'mcq' (its own options, the first is the answer — the page shuffles them; the build fails if the
    answer is much longer than the others, the classic way a right answer gives itself away). */
 export const SECTION_OPTS = ['Regular Medicine', 'As Required (PRN) Medicines', 'Once Only', 'Verbal Orders', 'IV & Subcut Fluids', 'Oxygen Therapy & Medical Gases'];
-/* the NZ 8-Day National Medication Chart's own non-administration key (NMC8D, 2012 ed., p. 11) */
-export const CODE_OPTS = ['U — Patient unavailable', 'SM — Self-medicating', 'CP — Carer/Parent', 'R — Patient refused', 'D — Prescriber’s instructions', 'N — Not administered (reason in notes)'];
-const NMC = 'NZ 8-Day National Medication Chart (NMC8D, 2012 ed.), p. 11';
+/* the non-administration key as printed on the CURRENT NZ chart (NMC8D, February 2021 print) and defined in the HQSC
+   NMC user guide 2021, Figure 22. The 2012 booklet first used here printed only six codes (no RV, no W). */
+export const CODE_OPTS = ['CP — Carer/parent administered', 'D — Prescriber’s instructions', 'N — Not administered (reason in notes)', 'R — Patient refused', 'RV — Review', 'SM — Self-medicating', 'U — Patient unavailable', 'W — Withheld'];
+const NMC = 'NZ 8-Day National Medication Chart (NMC8D, Feb 2021 print) key; HQSC NMC user guide 2021, Fig. 22';
 const MA1 = 'Med Admin (1) 2026, ';
 export const SCENES = [
   { id: 's-adr', k: 'sec', q: 'Adrenaline 0.5 mg IM stat — anaphylaxis.', a: 'Once Only', why: 'A stat dose is a single dose, now — the once-only section.', src: MA1 + 'slides 54–55' },
@@ -260,9 +261,13 @@ export const SCENES = [
     why: 'A competent refusal: explain, document the reason, inform the prescriber and the next shift, and discard the dose.', src: MA1 + 'slide 39' },
   { id: 'c-self', k: 'code', q: 'The patient uses her own inhaler and records her doses herself, as ward policy allows.', a: 'SM — Self-medicating', why: 'The patient takes this one themselves, as agreed — SM.', src: NMC },
   { id: 'c-vomit', k: 'code', q: 'Mr L has vomited twice this morning and his 0800 tablets are due.', a: 'N — Not administered (reason in notes)', why: 'N, and the notes say why (vomiting). Tell the prescriber — another route may be needed.', src: NMC },
-  { id: 'c-hr', k: 'code', q: 'The order says “withhold if HR < 60”. The apical pulse is 54.', a: 'D — Prescriber’s instructions', why: 'The prescriber’s own hold parameter says not to give it: D, the reason (HR 54) in the notes, and tell the RN. Some wards use N with a note for a hold parameter — follow yours.', src: NMC },
+  { id: 'c-hr', k: 'code', q: 'The order says “withhold if HR < 60”. The apical pulse is 54.', a: 'D — Prescriber’s instructions', why: 'The prescriber’s own hold parameter says not to give it: D, the reason (HR 54) in the notes, and tell the RN. (If there were no hold parameter and you and the RN decided to hold it, that would be W.)', src: NMC },
   { id: 'c-sbp', k: 'code', q: 'An antihypertensive says “withhold if SBP < 100”. The BP is 92/58.', a: 'D — Prescriber’s instructions', why: 'The systolic (92) is under 100, so the prescriber’s hold parameter applies: D, documented and reported.', src: NMC },
-  { id: 'c-parent', k: 'code', q: 'On the children’s ward, Lily’s mum gives her 1400 paracetamol liquid while you watch.', a: 'CP — Carer/Parent', why: 'Given by the carer or parent — CP.', src: NMC },
+  { id: 'c-parent', k: 'code', q: 'On the children’s ward, Lily’s mum gives her 1400 paracetamol liquid while you watch.', a: 'CP — Carer/parent administered', why: 'Given by the carer or parent — CP, with the nurse watching and her initials alongside.', src: NMC },
+  { id: 'c-withheld', k: 'code', q: 'Mr Luke’s pulse is 52 at 0800. His metoprolol order has no hold parameter; you and the RN decide not to give it and to tell the doctor.', a: 'W — Withheld',
+    why: 'The decision to hold it was yours and the RN’s, not the prescriber’s: W, with a clear reason in the notes (HR 52), and the prescriber told. D is for the prescriber’s own instruction.', src: NMC },
+  { id: 'c-review', k: 'code', q: 'Today Mr K’s ACE inhibitor was withheld (W) for poor kidney function. What code goes in its box three days from now, so staff ask the prescriber to look at it again?', a: 'RV — Review',
+    why: 'RV is used with W as a trigger: written on a later day, it reminds staff to get the prescriber to review the prescription (HQSC NMC user guide 2021, Figure 22).', src: NMC },
   { id: 'c-warf', k: 'code', q: 'The registrar asks you to hold tonight’s warfarin — the INR is 4.2.', a: 'D — Prescriber’s instructions', why: 'Not given because the prescriber said so — D, with the reason in the notes.', src: NMC },
   { id: 'r-blank', k: 'mcq', q: 'The allergy box on the chart is blank. Before giving the first dose you…',
     opts: ['Ask the patient, and get it documented first', 'Take it to mean no known allergies', 'Give it and watch closely for a reaction', 'Write NKDA in the box yourself'],

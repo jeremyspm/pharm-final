@@ -412,8 +412,9 @@ function key() {
   p.rect(tx, 6, 178, 200, { stroke: '#555' });
   p.text(tx + 89, 17, 'RECOMMENDED', { size: 7.5, bold: true, anchor: 'middle' }); p.text(tx + 89, 26, 'ADMINISTRATION TIMES', { size: 7.5, bold: true, anchor: 'middle' });
   p.text(tx + 89, 35, 'GUIDELINES ONLY', { size: 6.5, anchor: 'middle' });
+  // the times table as printed on the current chart (February 2021 print, e.g. Mr Luke's on the 722.544 Canvas)
   const rows = [['Morning', 'Mane', ['0800']], ['Night', 'Nocte', ['', '1800 or 2000']], ['Twice\na day', 'BD', ['0800', '', '2000']], ['Three times\na day', 'TDS', ['0800', '1400', '2000']],
-    ['Antibiotic\n8 hourly', 'q8h', ['0600', '1400', '2200']], ['Antibiotic\n6 hourly', 'q6h', ['0600', '1200', '1800', '2400']], ['Four times\na day', 'QID', ['0600', '1200', '1800', '2200']]];
+    ['Four times\na day', 'QID', ['0600', '1200', '1800', '2200']], ['Strict\n8 hourly', 'Q8H', ['0600', '1400', '2200']], ['Strict\n6 hourly', 'Q6H', ['0600', '1200', '1800', '2400']]];
   rows.forEach(([a, b, ts], i) => {
     const y = 40 + i * 23.5;
     p.rect(tx, y, 34, 23.5); p.text(tx + 2, y + (a.includes('\n') ? 9.5 : 14), a, { size: 5.2, lh: 6.2 });
@@ -423,12 +424,15 @@ function key() {
     if (b !== 'Nocte') ts.forEach((t, c) => { if (t) p.text(tx + 58 + c * 30 + 15, y + 14, t, { size: 5.8, anchor: 'middle' }); });
   });
   const cx = 534;
-  p.rect(cx, 6, 120, 150, { stroke: '#555' });
+  // the 2021 print's eight codes (RV and W are not on the 2012 booklet) — keep in step with chart-engine.mjs CODES
+  p.rect(cx, 6, 120, 186, { stroke: '#555' });
   p.text(cx + 60, 18, 'NON-ADMINISTRATION', { size: 7.5, bold: true, anchor: 'middle' }); p.text(cx + 60, 27, 'CODES', { size: 7.5, bold: true, anchor: 'middle' });
-  [['U', 'Patient unavailable'], ['SM', 'Self-medicating'], ['CP', 'Carer/Parent'], ['R', 'Patient refused'], ['D', 'Prescriber’s instructions'], ['N', 'Not administered']].forEach(([c, t], i) => {
-    p.text(cx + 6, 44 + i * 15, c, { size: 7.5, bold: true }); p.text(cx + 24, 44 + i * 15, t, { size: 6.8 });
+  let ky = 44;
+  [['CP', 'Carer/parent administered'], ['D', 'Prescriber’s instructions'], ['N', 'Not administered –', 'document reason in notes'], ['R', 'Patient refused'], ['RV', 'Review'], ['SM', 'Self-medicating'], ['U', 'Patient unavailable'], ['W', 'Withheld']].forEach(([c, t, t2]) => {
+    p.text(cx + 6, ky, c, { size: 7.5, bold: true }); p.text(cx + 24, ky, t, { size: 6.4 });
+    if (t2) { ky += 9; p.text(cx + 24, ky, t2, { size: 6.4 }); }
+    ky += 17;
   });
-  p.text(cx + 24, 44 + 5 * 15 + 10, '– document reason in notes', { size: 6.8 });
   return p;
 }
 

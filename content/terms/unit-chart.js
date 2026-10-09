@@ -3,7 +3,7 @@ const U = { c: 'unit' };
 const H = { c: 'chart' };
 const CALC = 'Medication Calculations 2026, ';
 const MA1 = 'Med Admin (1) 2026, ';
-const NMC = 'NZ 8-Day National Medication Chart (NMC8D, 2012 ed.), p. 11';
+const NMC = 'NZ 8-Day National Medication Chart (NMC8D, Feb 2021 print) key; HQSC NMC user guide 2021, Fig. 22';
 
 export const TERMS = [
   /* ── mass ── */
@@ -86,22 +86,26 @@ export const TERMS = [
 
   /* ── not-given codes. Letters as on the national charts; YOUR chart prints its own key, and that key wins. ── */
   { ...H, s: 'code', kd: 'term', id: 'nonadmin', t: 'non-administration code', m: 'A letter in the dose box saying why a dose was not given', k: 'deck', src: MA1 + 'slide 55',
-    x: 'Every dose box gets either initials or a code — never left blank. The NZ 8-day chart’s key (page 11): U unavailable, SM self-medicating, CP carer/parent, R refused, D prescriber’s instructions, N not administered (reason in the notes).', cf: ['withhold'] },
-  /* the codes as printed on the NZ 8-Day National Medication Chart's own key (NMC8D, 2012 ed., p. 11) */
+    x: 'Every dose box gets either initials or a code — never left blank. The NZ chart’s key (2021 print): CP carer/parent administered, D prescriber’s instructions, N not administered (reason in the notes), R refused, RV review, SM self-medicating, U unavailable, W withheld.', cf: ['withhold'] },
+  /* the codes as printed on the current NZ chart's key (NMC8D, February 2021 print) — RV and W are not on the 2012 booklet */
   { ...H, s: 'code', id: 'cU', t: 'U', m: 'Patient unavailable — off the ward when it was due', k: 'nmc', src: NMC,
     x: 'e.g. in X-ray, theatre, the physio gym or on leave. Follow it up when they are back: with the RN, decide whether the dose is still given.',
     w: 'On this chart U means patient unavailable — one more reason never to write U for units.', cf: ['cN'] },
   { ...H, s: 'code', id: 'cSM', t: 'SM', m: 'Self-medicating — the patient takes this one themselves', k: 'nmc', src: NMC,
     x: 'Only where policy allows and it has been agreed — e.g. their own inhaler.', cf: ['cCP'] },
-  { ...H, s: 'code', id: 'cCP', t: 'CP', m: 'Given by the carer or parent', k: 'nmc', src: NMC,
+  { ...H, s: 'code', id: 'cCP', t: 'CP', m: 'Carer/parent administered — given by the carer or parent', k: 'nmc', src: NMC,
     x: 'e.g. a parent giving a child’s dose while the nurse supervises.', cf: ['cSM'] },
   { ...H, s: 'code', id: 'cR', t: 'R', m: 'Patient refused', k: 'nmc', src: NMC + '; Med Admin (1) slide 39',
     x: 'Explain the consequences, document the reason, inform the prescriber and the next shift, and discard the dose.', cf: ['cD'] },
   { ...H, s: 'code', id: 'cD', t: 'D', m: 'Not given on the prescriber’s instructions', k: 'nmc', src: NMC,
-    x: 'e.g. the doctor has said to hold it, or the order’s own hold parameter is met (“withhold if HR < 60”). Document why. Some wards use N with a note for a hold parameter — follow yours.', cf: ['cN', 'cR'] },
+    x: 'e.g. the doctor has said to hold it, or the order’s own hold parameter is met (“withhold if HR < 60”). Document why. If the decision to hold is yours and the RN’s, not the prescriber’s, it is W.', cf: ['cW', 'cN', 'cR'] },
   { ...H, s: 'code', id: 'cN', t: 'N', m: 'Not administered — the reason goes in the notes', k: 'nmc', src: NMC,
     x: 'For any other reason — vomiting, the medicine not on the ward, no IV access. The code alone is not enough: the notes say why, and the prescriber is told if it matters.', cf: ['cD', 'cU'] },
 
+  { ...H, s: 'code', id: 'cW', t: 'W', m: 'Withheld — a decision was made not to give it; the reason goes in the notes', k: 'nmc', src: NMC,
+    x: 'e.g. you and the RN hold a beta blocker because the pulse is 52 and there is no hold parameter on the order. Write a clear reason in the notes and tell the prescriber.', cf: ['cD', 'cRV'] },
+  { ...H, s: 'code', id: 'cRV', t: 'RV', m: 'Review — used with W to get the prescriber to review the order on a given day', k: 'nmc', src: NMC,
+    x: 'Written in a later day’s box (e.g. 3 days after an ACE inhibitor was withheld for kidney function) as a reminder to check with the prescriber before restarting.', cf: ['cW'] },
   /* ── charting rules and ward words ── */
   { ...H, s: 'rule', kd: 'term', id: 'charted', t: 'charted', a: ['written up'], m: 'Prescribed — written up by a prescriber',
     x: '“Is there any pain relief charted?” = has anything been prescribed? “Can you chart it?” = please prescribe it.', cf: ['cease'] },
