@@ -5,8 +5,8 @@
 A practice paper for **Introduction to Pharmacology (722.544)** in the Paper Sim format
 ([hs2-test2](https://jeremyspm.github.io/hs2-test2/) is the format of record).
 
-The final: **Fri 6 Nov 2026, afternoon (time not confirmed) · 80 min · 50 marks · 30 multi-choice +
-short answers · 50%**. Joan, 16 Sep 2026: a short answer is **a definition plus an example in 3–4
+The final: **Thu 5 Nov 2026, in an AM or PM group (group and time not advised yet) · 80 min · 50
+marks · 30 multi-choice + short answers · 50%** (moved from Fri 6 Nov on 7 Oct 2026). Joan, 16 Sep 2026: a short answer is **a definition plus an example in 3–4
 lines**, and she will **not ask about specific drugs**.
 
 ## The thing to know before anything else
