@@ -20,6 +20,7 @@ export const META = {
   /* the home title card, header stripe and tab icon: what tells the four Paper Sims apart */
   tool: { kick: 'Intro to Pharmacology · 722.544', name: 'Pharm Final exam', sub: '30 multi-choice + 11 short answers · 80 min', icon: '💊', hue: '#9333ea' }   /* Pharm's purple, as on the hub */,
   short: 'Pharm Paper Sim',
+  hub: 'ph/exam',                       // its exam on the hub (jeremyspm.github.io/#ph/exam): where ‹ Home and the header link go
   paper: 'Introduction to Pharmacology',
   bankOf: 'this tool’s',
   who: 'Joan',

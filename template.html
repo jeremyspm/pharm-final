@@ -398,6 +398,11 @@ const DATA = /*@BANK@*/;
    sitting, the real paper's shape, the groups, the storage prefix. The build emits it
    from sim.config.mjs; nothing below this line names a paper, a lecturer or a date. */
 const META = DATA.meta;
+/* 20 Oct 2026: a sim that has an exam on the hub (META.hub, e.g. 'inp/exam') sends its header link and ‹ Home
+   back to that exam's sides, not to the hub's front page or this page's menu. */
+const HUB = META.hub ? 'https://jeremyspm.github.io/#' + META.hub : '';
+{ const b = document.querySelector('header .back');
+  if (HUB && b) { b.href = HUB; b.textContent = '‹ ' + META.tool.name; b.title = 'Back to ' + META.tool.name + ' on the BN2 study tools'; } }
 const FC = META.focusCopy || {};
 /* references: q.refs = [{k:'slide'|'her'|'patton', src, slide|t, ...}] in authority order —
    her slide, her prose, Patton. A bank built with the older single q.ref still renders. */
@@ -1086,7 +1091,9 @@ function bindView(){
   bindSaq();
   document.querySelectorAll('[data-scr]').forEach(b=>b.onclick=()=>nav(b.dataset.scr));
   const hb=$('[data-hero]'); if(hb) hb.onclick=()=>HERO[hb.dataset.hero]();
-  const bk=$('#homeB'); if(bk) bk.onclick=()=>{ if(history.state&&history.state.scr&&!history.state.sit) history.back(); else nav('') };
+  /* opened straight at a screen (the hub's Rep / Write buttons do that), ‹ Home goes back to the exam on the hub */
+  const bk=$('#homeB'); if(bk) bk.onclick=()=>{ if(history.state&&history.state.scr&&!history.state.sit) history.back();
+    else if(HUB) location.assign(HUB+'/'+(['saq','mock'].includes(curScr())?'write':'rep')); else nav('') };
   document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>start(b.dataset.go,!!b.dataset.learn));
   document.querySelectorAll('[data-quiz]').forEach(b=>b.onclick=()=>start('quiz:'+b.dataset.quiz,!!b.dataset.learn));
   document.querySelectorAll('[data-sys]').forEach(b=>b.onclick=()=>start('sys:'+b.dataset.sys,!!b.dataset.learn));
