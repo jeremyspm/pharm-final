@@ -257,7 +257,10 @@ function paintGloss() {
 }
 
 function bindView() {
-  const hb = $('#homeB'); if (hb) hb.onclick = () => { if (history.state && history.state.scr && !history.state.run) history.back(); else nav(''); };
+  /* 20 Oct 2026: opened straight at a screen, which only the hub's Pharm exam does (its Abbreviations side),
+     ‹ Home goes back to that side on the hub. Opened from this page's menu, it still goes back to the menu. */
+  const hb = $('#homeB'); if (hb) hb.onclick = () => { if (history.state && history.state.scr && !history.state.run) history.back();
+    else location.assign('https://jeremyspm.github.io/#ph/exam/terms'); };
   document.querySelectorAll('[data-scr]').forEach(b => b.onclick = () => nav(b.dataset.scr));
   const hero = $('#heroB'); if (hero) hero.onclick = () => HERO();
   document.querySelectorAll('[data-cat]').forEach(b => b.onclick = () => startTerms(b.dataset.cat));
