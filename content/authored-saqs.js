@@ -2220,8 +2220,7 @@ export const AUTHORED_SAQS = [
    "From age 3 months, paracetamol may be given using an mg/kg dose."
   ],
   "pts": 3,
-  "src": "Lifespan 2026 slide 29 (BPAC NZ, 2018)",
-  "noMock": true
+  "src": "Lifespan 2026 slide 29 (BPAC NZ, 2018)"
  },
  {
   "quiz": "lifespan",
@@ -2235,8 +2234,7 @@ export const AUTHORED_SAQS = [
    "A normal adult dose is 1 g / 1000 mg — nearly four times Tama's dose, and not safe for him."
   ],
   "pts": 3,
-  "src": "Lifespan 2026 slides 30–31",
-  "noMock": true
+  "src": "Lifespan 2026 slides 30–31"
  },
  {
   "quiz": "lifespan",

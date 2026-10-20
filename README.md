@@ -5,56 +5,76 @@
 A practice paper for **Introduction to Pharmacology (722.544)** in the Paper Sim format
 ([hs2-test2](https://jeremyspm.github.io/hs2-test2/) is the format of record).
 
-The final: **Thu 5 Nov 2026, in an AM or PM group (group and time not advised yet) · 80 min · 50
-marks · 30 multi-choice + short answers · 50%** (moved from Fri 6 Nov on 7 Oct 2026). Joan, 16 Sep 2026: a short answer is **a definition plus an example in 3–4
-lines**, and she will **not ask about specific drugs**.
+The final: **Thu 5 Nov 2026, a morning or an afternoon sitting (group not advised yet) · 80 min · 41
+questions, 50 marks · 30 multi-choice (1 mark) + 11 short answers worth 1–4 marks (20 marks) under three
+clinical scenarios · 50%** (her exam-prep slides; Joan in class, 20 Oct 2026). Sat on **MIT computers in the
+ECHO exam software** — practice sessions 27/28 Oct. Joan, 16 Sep: a short answer is **a definition plus an
+example**; 20 Oct: applied and nurse-focused, with **a few questions on the drug classes she named**
+(paracetamol, salbutamol, aspirin/warfarin/heparin, GTN, the penicillins, morphine) and a few easy
+calculations, no working shown.
 
 ## The thing to know before anything else
 
-**There is no lecturer question bank for this paper.** Its only Canvas quizzes are medication-
-calculation practice tests (formative tests 1–5, answers on Canvas — not mined yet); nothing on
-pharmacology itself has ever been set, so nothing here was captured. Every question is the tool's, from two sources, and each names the
-slide or lecture moment that supplies its answer:
+**Joan's own questions are in here — but only these.** On 20 Oct 2026 she published three **Formative
+mini-exams** with answers (Assessment Information → Exam Practice (Formative) Tests): Word documents, her
+key highlighted, her model answers in red. **54 questions — 36 multi-choice, 18 short answers — verbatim**
+in `content/formatives/` (one file per mini-exam, aggregated by `content/hers.js`), listed first on the
+page and carrying no "tool's question" tag. The tool changes two things, and the card says so: mini-exam 1
+**Q4 is keyed B**, not the document's C, because she corrected it in class (20 Oct [1:48:07–1:50:15]); her
+working, which leaked into mini-exam 3 Q8's stem, is moved into its explanation. Mini-exam 1's explanations
+are the tool's, written from her spoken feedback that morning and cited by timestamp.
 
-- **75 short answers in Joan's stated format** — a definition plus an example, 2–3 marks, no
-  question about a specific drug. Hand-written (19 Sep 2026) in `content/joan/`, one file per
-  topic, from her own Escape Room answer sheet, her recorded 16 Sep Legal & Ethical lecture (cited
-  by timestamp), deck 13 (the self-directed Drug Development package), the Rongoā Māori deck, and
-  the definitions in the Module 1–6 decks. Eight rows named "In Joan's format", listed first.
+There are still **no Canvas quizzes on pharmacology**: the only ones are medication-calculation practice
+tests. Everything else is the tool's, from two sources, and each names the slide or lecture moment that
+supplies its answer:
+
+- **75 short answers in Joan's stated format** — a definition plus an example, 2–3 marks. Hand-written
+  (19 Sep 2026) in `content/joan/`, one file per topic, from her own Escape Room answer sheet, her recorded
+  16 Sep Legal & Ethical lecture (cited by timestamp), deck 13 (the self-directed Drug Development
+  package), the Rongoā Māori deck, and the definitions in the Module 1–6 decks.
 - **289 questions — 100 multi-choice, 189 written — from the
-  [intro-pharm](https://jeremyspm.github.io/intro-pharm/) hub**, written from the 14 lecture decks
-  and carried across unchanged. Each multi-choice carries a short explanation that is the tool's.
+  [intro-pharm](https://jeremyspm.github.io/intro-pharm/) hub**, written from the 14 lecture decks and
+  carried across unchanged. Each multi-choice carries a short explanation that is the tool's.
 
-`port-intro-pharm.mjs` merges the two into the generated `content/authored-*.js`. The home screen
-says all this in a banner, not in a footnote.
+`port-intro-pharm.mjs` merges the two into the generated `content/authored-*.js`. The home screen says all
+this in a banner, not in a footnote.
+
+### Her questions, and the shared pipeline
+
+`content/hers.js` is an **optional hook in the shared `build.mjs`**: the lecturer's own questions that were
+never a Canvas quiz. They are pushed with `her: 1` (no `authored`), so the page treats them as hers; a
+written answer's source line reads "Question and model answer are Joan's". A written question may carry
+`any: k` — her answer lists alternatives and any k of them earn its marks ("one piece of safe advice…"); the
+template marks such a line as pts/k and caps the question at its marks, the results screen says so, and the
+written-answers trainer locks it at k lines. Her 18 short answers have short versions in
+`content/shorts/hers.js`. A sim without `content/hers.js` is untouched (inp-final rebuilt to identical data).
 
 ## What is honest about its limits
 
-- **The Joan-format questions are the tool's reading of her format, not her questions.** Her one
-  worked example ("what is the meaning of contraindication, and give an example") is the first of
-  them. The 9 Sep lecture was an essay briefing with no standalone pharmacology content, so nothing
-  was taken from it.
-- **intro-pharm's written questions pre-date her description of the exam.** They all stay under
-  Pick my rep, but a mock, which claims the paper's shape, leaves out 97 of the 189: any that carry
-  4+ marks, name a specific drug, ask for the lecture's own drug examples, or are worked
-  calculations. The rule is written down in `port-intro-pharm.mjs` (`--list` prints every hit);
-  the multi-choice are untouched.
-- **The number of short answers is unpublished.** The mock deals written questions to **20 marks**
-  (50 − 30, assuming one mark per multi-choice), spread one per topic, and says that is arithmetic,
-  not knowledge. The formative mini exams in the revision sessions (21, 27, 28 Oct) may settle it.
-- **The bank is Modules 1–7 — everything taught before the mid-semester break.** Modules 8, 9 and
-  10 have not been taught: Immunology, Vaccines & Allergy (Wed 7 Oct; only the ASCIA plan is here),
-  Socioeconomic Factors & CAM (Wed 14 Oct — a self-directed **Canvas quiz**, the first lecturer
-  questions this paper will ever have: capture the graded page; its Rongoā Māori part was lectured
-  15 Sep and IS in the bank, written from its deck), Licit & Illicit Drugs & Toxicology
-  (Tue 20 Oct). Examinable. Revision sessions with formative mini exams: 21, 27, 28 Oct.
+- **The Joan-format questions are the tool's reading of her format, not her questions.** Her one worked
+  example ("what is the meaning of contraindication, and give an example") is the first of them.
+- **intro-pharm's written questions pre-date her description of the exam.** They all stay under Pick my
+  rep, but a mock leaves out 95 of the 189: any that carry 4+ marks, name a drug she has NOT named as
+  examinable, ask for the lecture's own drug examples, or are worked calculations. On 20 Oct she named the
+  classes that will come up, so paracetamol, aspirin, morphine, amoxicillin and adrenaline no longer keep a
+  question out (`OFFLIST` in `port-intro-pharm.mjs`; `--list` prints every hit).
+- **The mock's written section** deals 11 questions up to 20 marks (`shape.saq` + `shape.saqMarks`, the
+  template keeping at least a mark for every slot still to fill — 200 test deals all came out 30 + 11 = 20).
+  It does **not** yet group them into three clinical scenarios, and the page says so. Once on 20 Oct she
+  said "there are 60" [0:14:30]; her slide and her own count four minutes later say 41.
+- **The tool's own questions cover Modules 1–7 plus Rongoā Māori.** Module 8 (Immunology, Vaccines &
+  Allergy, taught 7 Oct) has decks on Canvas not yet built into questions — the tool has only the ASCIA
+  plan. Module 10 part 2 (CAM, self-directed 14 Oct) and Module 9 (Licit & Illicit, moved to a
+  self-directed session Wed 21 Oct, 1–5 pm, because of the strike; its Canvas module was empty on 20 Oct)
+  have only her formative questions. All examinable.
 - **Deck 13, Drug Development & Marketing, was never lectured** — a self-directed online package.
-- **The focus checklist** (`content/focus.js`, 18 rows) is built: per topic what you must be able
-  to DO, the shape Joan described, where it stops. The build counts each row's questions and fails
-  unless every question sits in exactly one row. **Counts rank nothing here** (every question is
-  the tool's): the top band is what she said on tape on 16 Sep, then topics an assessed learning
-  outcome names, then the rest, then calculations. The page flags one contradiction: the syllabus
-  leaves the legal-standards outcome out of the exam's list, and she said on tape it is assessed.
+- **The focus checklist** (`content/focus.js`, 19 rows) is built: per topic what you must be able to DO,
+  the shape Joan described, where it stops. The build counts each row's questions and fails unless every
+  question sits in exactly one row; her formative questions are claimed by mini-exam and question number
+  (`F()`). **Counts rank nothing here.** The top band is what she said on tape — 16 Sep (legal and
+  ethical, drug development) and 20 Oct (abbreviations, the signs of drug allergy, the drug classes, a
+  row of its own with no questions yet) — then topics an assessed learning outcome names, then the rest,
+  then calculations.
 - Slide images and warm-up chains are not ported yet.
 
 ## Chart Speak — every med-chart term, drilled (`terms.html`)

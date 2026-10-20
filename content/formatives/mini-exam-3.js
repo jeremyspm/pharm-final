@@ -1,0 +1,103 @@
+/* Joan’s Formative mini-exam 3 — HER questions, answer key and model answers, VERBATIM (her typos kept), from the
+   answers document on Canvas (Assessment Information → Exam Practice (Formative) Tests, published 20 Oct 2026).
+   Transcribed by script from the .docx (yellow/green highlight = her key, red text = her model answer), then read by
+   hand against the document. `why` is the TOOL’s explanation.
+   `any: k` = her answer lists alternatives and any k of them earn the marks. */
+const R = { quiz: 'form3', quizName: 'Joan’s formative · mini-exam 3' };
+const D = 'Joan’s Formative mini-exam 3, answers document';
+
+export const MCQS = [
+  { ...R, sys: "found", q: "Trevor is 62, and is currently admitted to hospital with cellulitis and severe pain of his left lower leg. Trevor is prescribed an IV antibiotic and an oral analgesic. Trevor’s oral analgesic is prescribed BD prn. What does “BD prn” mean?",
+    options: ["Give the medication twice daily as required", "Give the medication every hour intranasally", "Give the medication every 12 hours via the rectal route", "Give the medication four times a day as required"], correct: 0,
+    src: D + ', Q1' },
+  { ...R, sys: "pkpd", q: "Which statement is true about a drug (medication) that has high potency?",
+    options: ["A very high dose is required to achieve the intended effect", "The drug is highly bound to albumin and is slow to distribute to tissues", "The drug is rapidly eliminated from the bloodstream after absorption", "A lower dose is required to achieve the intended effect"], correct: 3,
+    src: D + ', Q2' },
+  { ...R, sys: "pkpd", q: "Trevor is prescribed a loading dose of his IV antibiotic. What is the purpose of a loading dose?",
+    options: ["To relieve the patient of the symptoms of his condition", "To quickly reach therapeutic plasma levels of the drug", "To avoid having to give any smaller doses at regular intervals", "To quickly prime the syringe antibiotic"], correct: 1,
+    src: D + ', Q3' },
+  { ...R, sys: "admin", q: "The Registered Nurse (RN) accidently gave Trevor a half dose of his antibiotic. Which of the following steps is NOT an appropriate action for the RN after they realise that they have made this medication error?",
+    options: ["Call 0800POISON to discuss possible toxicity risks", "Complete an incident report", "Document the error in the medication chart and the patient notes", "Contact the prescriber to notify them and get advice"], correct: 0,
+    src: D + ', Q4' },
+  { ...R, sys: "tox", q: "What is the definition of drug addiction?",
+    options: ["A physical state where repeated doses of the drug causes decreasing effects in the body", "A behavioural pattern of drug use, where the person experiences overwhelming involvement in getting the drug and using the drug.", "The change of a drug’s legal classification from controlled drug to prescription-only drug", "The combined, illegal use of stimulant and depressant drugs"], correct: 1,
+    src: D + ', Q5' },
+  { ...R, sys: "found", q: "How are topical medications administered?",
+    options: ["Through the mucosa of the inner cheek", "Directly on to a body surface", "Into an intravenous line", "Via nebulised inhaler"], correct: 1,
+    src: D + ', Q6' },
+  { ...R, sys: "life", q: "Cherry is 18 months old and is on carbamazepine (Tegretol), an anti-epileptic medication. Cherry is refusing to take her medication today. Which is the most appropriate strategy to support Cherry to take her due dose?",
+    options: ["Tell Cherry that the medication is actually a special lolly treat", "Conceal the medication in Cherry’s morning porridge", "Use simple choices, like asking Cherry if she wants to choose the syringe or the medicine cup", "Tell Cherry that you will have to call the Police if she doesn’t tke her medicine"], correct: 2,
+    src: D + ', Q7' },
+  { ...R, sys: "calc", q: "Cherry weighs 11 kg and is prescribed carbamazepine 4mg/kg bd. The medicine comes as 100mg/5mL. How many mL should be given as a single dose?",
+    options: ["2.2mL", "11.3 mL", "0.2mL", "44mL"], correct: 0,
+    why: "Her working, printed under the question in her answers document: 11 × 4 = 44 mg; 44 mg ÷ 100 mg × 5 mL = 2.2 mL.",
+    src: D + ', Q8' },
+  { ...R, sys: "pkpd", q: "When thinking about an oral medication, what does the process of dissolution involve?",
+    options: ["Transport of a drug across the intestinal wall into the bloodstream", "Chemical conversion of a drug into metabolites in the live", "Crushing tablets before administration", "A medication dissolves in gastrointestinal fluids to form a solution"], correct: 3,
+    src: D + ', Q9' },
+  { ...R, sys: "found", q: "Which of these medication formulations is to be administered by the oral route?",
+    options: ["Codeine elixir", "Corticosteroid ointment", "Paracetamol suppository", "Insulin injection"], correct: 0,
+    src: D + ', Q10' },
+  { ...R, sys: "pkpd", q: "What occurs in the process of receptor down-regulation, which can sometimes occur when a medication is taken long term:",
+    options: ["Cells reduce the number of receptors on their surface", "Cells increase the number of ion channels in their cell membrane", "The number of enzymes produced by the liver reduces", "The number of nephrons in the kidney increases"], correct: 0,
+    src: D + ', Q11' },
+  { ...R, sys: "imm", q: "Cherry is also due for one of her childhood vaccinations from the Aotearoa immunisation schedule. When talking about vaccinations, what does the term herd immunity mean?",
+    options: ["Both humans and livestock are protected by vaccines", "A whole community is protected from an infection because a most community members have been vaccinated", "This is a type of adaptive immunity, involving t-cells, b-cells, and the immune memory process", "This is a term used for people who refuse vaccinations"], correct: 1,
+    src: D + ', Q12' },
+];
+
+export const SAQS = [
+  { ...R, sys: "pkpd", pts: 4, q: "Name the four (4) key processes of pharmacokinetics that Angie’s anti-inflammatory medication will go through once is has been orally administered (4pt)",
+    scenario: "Angie is a 17-year-old female. She has been brought into the Emergency Department because she has sprained her knee while out drinking alcohol and partying with her friends. She has been prescribed an anti-inflammatory medication to help reduce the pain and swelling in her knee. She is having her first dose of medication in hospital, then she will be picked up by her dad to go home. Answer the 3 (three) questions below in relation to this scenario",
+    steps: [
+      "A  Absorption into the bloodstream in the small intestine",
+      "D  Distribution of the drug throughout the body in the blood stream bound to plasma proteins",
+      "M  Metabolism in the liver by enzymes to make the drug water soluble and less toxic",
+      "E  Elimination of the drug in the urine by the kidneys",
+    ],
+    src: D + ', short answer Q13' },
+  { ...R, sys: "admin", pts: 2, q: "What are three (2) important factors you would talk about with Angie, so that she can safely manage her anti-inflammatory medication at home? (2pt)",
+    scenario: "Angie is a 17-year-old female. She has been brought into the Emergency Department because she has sprained her knee while out drinking alcohol and partying with her friends. She has been prescribed an anti-inflammatory medication to help reduce the pain and swelling in her knee. She is having her first dose of medication in hospital, then she will be picked up by her dad to go home. Answer the 3 (three) questions below in relation to this scenario",
+    any: 2,
+    steps: [
+      "1 When to take it – explain prescribed times spaced out over the day. Do not tke more frequently",
+      "2 How to take it: swallow whole, with food and a glass of water",
+      "How long to take it for – until symptoms subside, advice from doctor or pharmacist",
+    ],
+    src: D + ', short answer Q14' },
+  { ...R, sys: "law", pts: 2, q: "Angie’s anti-inflammatory medication is available as a General Sale medication. Other legal classifications of medications in Aotearoa New Zealand include: Prescription Medicines Restricted Medicines (Pharmacist Only) Pharmacy-Only Medicines Choose one (1) of the three medication classifications listed about, and describe what this classification means (how would a patient access this type of medication?) (2pt)",
+    scenario: "Angie is a 17-year-old female. She has been brought into the Emergency Department because she has sprained her knee while out drinking alcohol and partying with her friends. She has been prescribed an anti-inflammatory medication to help reduce the pain and swelling in her knee. She is having her first dose of medication in hospital, then she will be picked up by her dad to go home. Answer the 3 (three) questions below in relation to this scenario",
+    any: 1,
+    steps: [
+      "Prescription Medicines – only available with a prescription from an authorised prescriber eg doctor, NP, midwife",
+      "Restricted Medicines (Pharmacist Only) – only available at a Pharmacy after consultation and advice from a pharmacist. A record is kept.",
+      "Pharmacy-Only Medicines – only available at a Pharmacy or hospital pharmacy (in rural areas at a licenced shop)",
+    ],
+    src: D + ', short answer Q15' },
+  { ...R, sys: "admin", pts: 2, q: "Identify one (1) of the rights of medication administration that the nurse will need to adhere to administer medication to Mr Mokaraka AND give a brief example of how this might be applied differently in the aged care setting (2pt)",
+    scenario: "Mr. Mokaraka is 92. He is living in aged residential care because he has a diagnosis of dementia and cannot look after himself at home anymore. Mr Mokaraka is prescribed seven medications to manage a range of diagnoses. Answer the 3 (three) questions below in relation to this scenario",
+    any: 1,
+    steps: [
+      "Right person - identity may be checked with a photo",
+      "Drug – some drugs are contraindicated in the elderly",
+      "Dose – some normal ranges do not apply in the elderly eg “start low and go slow”",
+      "Time – coordinate with meals, sleep times etc",
+      "Route – may have difficulties swallowing. Check with patient and liaise with prescriber",
+      "Refusal - involvement of whanau/family and EPA",
+    ],
+    src: D + ', short answer Q16' },
+  { ...R, sys: "imm", pts: 1, q: "Mr. Mokaraka is due for his annual influenza vaccination. Name the correct route of administration for an influenza vaccination? (1pt)",
+    scenario: "Mr. Mokaraka is 92. He is living in aged residential care because he has a diagnosis of dementia and cannot look after himself at home anymore. Mr Mokaraka is prescribed seven medications to manage a range of diagnoses. Answer the 3 (three) questions below in relation to this scenario",
+    steps: [
+      "IM deltoid muscle",
+    ],
+    src: D + ', short answer Q17' },
+  { ...R, sys: "admin", pts: 1, q: "Mr. Mokaraka has a new prescription in his medication chart: Paracetamol 10g PO QID. The Registered Nurse on shift notices that this is an unusually high dose. Describe one (1) appropriate next step that the RN should take, before administering Paracetamol to Mr. Mokaraka (1pt)",
+    scenario: "Mr. Mokaraka is 92. He is living in aged residential care because he has a diagnosis of dementia and cannot look after himself at home anymore. Mr Mokaraka is prescribed seven medications to manage a range of diagnoses. Answer the 3 (three) questions below in relation to this scenario",
+    any: 1,
+    steps: [
+      "Hold off giving the drug until you have notified the prescriber and checked the dose",
+      "Do not refuse to give paracetamol – he needs analgesia",
+    ],
+    src: D + ', short answer Q18' },
+];

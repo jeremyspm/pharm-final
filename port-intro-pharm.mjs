@@ -44,17 +44,23 @@ export const TOPIC_SYS = {
    out any whose STEM:
      long   carries 4 or more marks — "name the four…", "compare…", "give six…": a list
             question, not a definition and an example in 3–4 lines;
-     drug   names a specific drug or substance (the list below — read from all 189 stems);
+     drug   names a specific drug or substance she has not named (OFFLIST below — read from all 189 stems);
      recall asks for "the lecture's example(s)" — those examples are named drugs;
      calc   is a worked calculation (the calcs topic, with a quantity in it) — medication
             calculations are their own assessment, and a calculation is not a definition.
    Every hit was read by hand on 19 Sep 2026 (`node port-intro-pharm.mjs --list`). Multi-choice
-   questions are untouched: she gave no such rule for them. */
+   questions are untouched: she gave no such rule for them.
+   20 Oct 2026: in her first revision session she named the drugs and classes that WILL come up —
+   paracetamol, salbutamol, aspirin, warfarin, heparin, GTN, the penicillins/amoxicillin, morphine
+   (opioids) — applied and nurse-focused, and her own formatives name amoxicillin, paracetamol and
+   adrenaline. Those no longer keep a written question out of a mock; any other named drug still
+   does (OFFLIST). A stem in Joan's format (content/joan/) is still checked against the whole list. */
 const DRUG = /\b(paracetamol|aspirin|digoxin|furosemide|ampicillin|prednisone|adrenaline|morphine|amoxicillin|methadone|alcohol|nicotine|cannabis|caffeine|opioid)\b/i;
+const OFFLIST = /\b(digoxin|furosemide|ampicillin|prednisone|methadone|alcohol|nicotine|cannabis|caffeine)\b/i;
 const RECALL = /lecture['’]s (?:\w+[- ])?examples?\b|lecture['’]s two examples|\bfrom the lecture\b/i;
 const QUANTITY = /\d\s?(?:mg|mcg|g|mL|L|kg|gtt|drops|hours)\b|\b1:1000\b/;
 const noMockWhy = (topic, r) =>
-  r.marks >= 4 ? 'long' : DRUG.test(r.q) ? 'drug' : RECALL.test(r.q) ? 'recall' : (topic === 'calcs' && QUANTITY.test(r.q)) ? 'calc' : null;
+  r.marks >= 4 ? 'long' : OFFLIST.test(r.q) ? 'drug' : RECALL.test(r.q) ? 'recall' : (topic === 'calcs' && QUANTITY.test(r.q)) ? 'calc' : null;
 
 const mcqs = [], saqs = [], hits = [];
 for (const t of src.topics) {

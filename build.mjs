@@ -7,7 +7,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { CHAINS } from './content/chains.js';
 import { CASES } from './content/cases.js';
 import { AUTHORED_SAQS } from './content/authored-saqs.js';
@@ -227,6 +227,44 @@ for (const z of bank.quizzes) {
   quizzes.push(...rows.values());
 }
 
+/* the lecturer's OWN questions that were never a Canvas quiz (content/hers.js, optional — a sim without it has none):
+   a formative mini exam handed out as a document, say. Stem, options, key, marks and model answer are hers, verbatim,
+   so these carry no `authored` flag and the page treats them as hers; a `why` is the tool's explanation and is labelled
+   so. `any: k` on a written question = her answer lists alternatives, any k of which earn its marks. Shape:
+   HER_MCQS [{quiz, quizName, sys, q, options, correct, why?, src}] · HER_SAQS [{quiz, quizName, sys, q, scenario?,
+   steps, pts, any?, src}]. Gated like the tool's questions; a written answer may be a single line. */
+{
+  const FILE = path.join(HERE, 'content', 'hers.js');
+  const { HER_MCQS = [], HER_SAQS = [] } = fs.existsSync(FILE) ? await import(pathToFileURL(FILE).href) : {};
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const rows = new Map(), seen = new Set();
+  const row = (a) => {
+    if (!rows.has(a.quiz)) rows.set(a.quiz, { id: a.quiz, name: a.quizName, sys: 'mixed', n: 0, her: 1 });
+    rows.get(a.quiz).n++; return a.quiz;
+  };
+  const die = (why, a) => { console.error('BUILD FAILED: her question ' + why + ': ' + JSON.stringify(a).slice(0, 140)); process.exit(1); };
+  for (const a of [...HER_MCQS, ...HER_SAQS]) if (!a.quiz || !a.quizName || !a.q || !a.src || !META.sys[a.sys]) die('needs quiz, quizName, q, src and a META.sys group', a);
+  for (const a of HER_MCQS) {
+    if (!Array.isArray(a.options) || a.options.length < 2 || new Set(a.options).size !== a.options.length) die('needs 2+ distinct options', a);
+    if (!Number.isInteger(a.correct) || !a.options[a.correct]) die('has no valid key', a);
+    if (seen.has('m|' + a.q)) die('repeats a stem', a); seen.add('m|' + a.q);
+    questions.push({ id: qid(a.quiz, a.q, a.options[a.correct]), quiz: row(a), sys: a.sys, pts: 1, q: a.q,
+      qh: '<p>' + esc(a.q) + '</p>', qt: a.q, imgs: [], type: 'mcq', her: 1, opts: a.options, key: [a.options[a.correct]],
+      src: a.src, ...(a.why ? { why: a.why } : {}) });
+  }
+  for (const a of HER_SAQS) {
+    if (!Array.isArray(a.steps) || !a.steps.length || a.steps.some(s => !String(s).trim())) die('needs 1+ model answer lines', a);
+    if (!Number.isInteger(a.pts) || a.pts < 1) die('needs its marks', a);
+    if ('any' in a && !(Number.isInteger(a.any) && a.any >= 1 && a.any < a.steps.length)) die('has an `any` that is not fewer than its lines', a);
+    if (seen.has('s|' + a.q)) die('repeats a stem', a); seen.add('s|' + a.q);
+    questions.push({ id: qid(a.quiz, a.q, a.steps), quiz: row(a), sys: a.sys, pts: a.pts, q: a.q,
+      qh: '<p>' + esc(a.q) + '</p>', qt: a.q, imgs: [], type: 'essay', her: 1, ...(a.scenario ? { scenario: a.scenario } : {}),
+      saq: { steps: a.steps, src: `Question and model answer are ${META.who || 'the lecturer'}’s · ${a.src}`, ...(a.any ? { any: a.any } : {}) } });
+  }
+  quizzes.push(...rows.values());
+  if (rows.size) console.log(`her own questions (content/hers.js): ${HER_MCQS.length} multi-choice + ${HER_SAQS.length} written in ${rows.size} rows`);
+}
+
 /* ── the explain layer: video + judged text references per question ──
    each file is optional: a sim with no video shelf or no judged references ships none,
    and the page says so rather than showing an empty row */
@@ -359,7 +397,7 @@ const reached = new Set();
 for (const q of questions) if (q.vid) { reached.add(q.vid.id); if (q.vid.alt) reached.add(q.vid.alt.id); }
 const DATA = {
   built: new Date().toISOString().slice(0, 10),
-  stats: { n: questions.length, nAuthored: questions.filter(q => q.authored).length, held: held.length, videos: videos.length, videosReached: reached.size,
+  stats: { n: questions.length, nAuthored: questions.filter(q => q.authored).length, nHer: questions.filter(q => q.her).length, held: held.length, videos: videos.length, videosReached: reached.size,
     videosFill: videos.filter(v => v.ch).length,
     withVideo: questions.filter(q => q.vid).length,
     withRef: nRef, withHer: questions.filter(q => q.refs && q.refs.some(r => r.k === 'slide' || r.k === 'her')).length, withCourse: nCourse,
