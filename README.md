@@ -28,10 +28,14 @@ There are still **no Canvas quizzes on pharmacology**: the only ones are medicat
 tests. Everything else is the tool's, from two sources, and each names the slide or lecture moment that
 supplies its answer:
 
-- **75 short answers in Joan's stated format** — a definition plus an example, 2–3 marks. Hand-written
+- **96 short answers in Joan's stated format** — a definition plus an example, 2–3 marks. Hand-written
   (19 Sep 2026) in `content/joan/`, one file per topic, from her own Escape Room answer sheet, her recorded
   16 Sep Legal & Ethical lecture (cited by timestamp), deck 13 (the self-directed Drug Development
-  package), the Rongoā Māori deck, and the definitions in the Module 1–6 decks.
+  package), the Rongoā Māori deck, and the definitions in the Module 1–6 decks. **Module 8** (immunology,
+  vaccines & allergy) followed on 20 Oct 2026 in `content/joan/imm.js`: 21 short answers plus **18
+  multi-choice**, from its three Canvas files (Allergic Reactions · Vaccinations & Recognising Allergy ·
+  Immunology for Nurses), each naming its deck and slide. A topic file may export `MCQS` beside `SAQS`;
+  `content/joan-saqs.js` collects both.
 - **289 questions — 100 multi-choice, 189 written — from the
   [intro-pharm](https://jeremyspm.github.io/intro-pharm/) hub**, written from the 14 lecture decks and
   carried across unchanged. Each multi-choice carries a short explanation that is the tool's.
@@ -62,9 +66,12 @@ written-answers trainer locks it at k lines. Her 18 short answers have short ver
   template keeping at least a mark for every slot still to fill — 200 test deals all came out 30 + 11 = 20).
   It does **not** yet group them into three clinical scenarios, and the page says so. Once on 20 Oct she
   said "there are 60" [0:14:30]; her slide and her own count four minutes later say 41.
-- **The tool's own questions cover Modules 1–7 plus Rongoā Māori.** Module 8 (Immunology, Vaccines &
-  Allergy, taught 7 Oct) has decks on Canvas not yet built into questions — the tool has only the ASCIA
-  plan. Module 10 part 2 (CAM, self-directed 14 Oct) and Module 9 (Licit & Illicit, moved to a
+- **The tool's own questions cover Modules 1–8 plus Rongoā Māori.** Module 8 (Immunology, Vaccines &
+  Allergy, taught 7 Oct) was built from its decks on 20 Oct: the tool wrote the questions, not Joan or the
+  presenters, and its 18 multi-choice are the only tool-written multi-choice outside the intro-pharm hub.
+  Two of its decks are mostly pictures (the schedule card, the ASCIA signs), read by eye; the Immunology
+  deck's deeper material (MHC classes, T-cell types, antibody genetics) is left out on purpose — the
+  allergy row's `cap` says so. Module 10 part 2 (CAM, self-directed 14 Oct) and Module 9 (Licit & Illicit, moved to a
   self-directed session Wed 21 Oct, 1–5 pm, because of the strike; its Canvas module was empty on 20 Oct)
   have only her formative questions. All examinable.
 - **Deck 13, Drug Development & Marketing, was never lectured** — a self-directed online package.

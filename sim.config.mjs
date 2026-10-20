@@ -49,7 +49,7 @@ export const META = {
   sysShort: { found: 'Foundations', calc: 'Calcs', pkpd: 'PK/PD', admin: 'Admin', life: 'Lifespan', law: 'Legal', imm: 'Allergy', tox: 'Licit/illicit', cam: 'Rongoā' },
   hue: { found: 210, calc: 38, pkpd: 268, admin: 158, life: 28, law: 340, imm: 190, tox: 0, cam: 120 },
   /* the rows in Joan's stated format come first: they are the closest thing here to her paper */
-  quizOrder: ['form1', 'form2', 'form3', 'joan-found', 'joan-pkpd', 'joan-admin', 'joan-life', 'joan-law', 'joan-ethics', 'joan-devmkt', 'joan-cam', 'concepts1', 'concepts2', 'calcs', 'pk1', 'pk2', 'pd', 'admin', 'educ', 'elderly', 'lifespan', 'legal', 'devmkt', 'allergy'],
+  quizOrder: ['form1', 'form2', 'form3', 'joan-found', 'joan-pkpd', 'joan-admin', 'joan-life', 'joan-law', 'joan-ethics', 'joan-devmkt', 'joan-imm', 'joan-cam', 'concepts1', 'concepts2', 'calcs', 'pk1', 'pk2', 'pd', 'admin', 'educ', 'elderly', 'lifespan', 'legal', 'devmkt', 'allergy'],
   playlist: null,
   /* other pages of this tool, as home rows (template: META.more). Chart Speak — every abbreviation and term on a med
      chart, drilled — is terms.html, built by build-terms.mjs from content/terms/; it leaves its progress line under
