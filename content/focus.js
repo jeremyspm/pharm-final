@@ -173,11 +173,11 @@ export const FOCUS = [
   src:'Her 20 Oct revision session · her Formative mini-exams 1 and 2' },
 
 { id:'tox', sys:'tox', tier:2, t:'Licit and illicit drugs and toxicology (Module 9)', flag:'SD',
-  from:[F({1:[4], 3:[5]})],
-  done:'Define addiction, dependence and tolerance and tell them apart: ADDICTION is compulsive use with craving, loss of control and use despite harm; DEPENDENCE is withdrawal symptoms if a drug is stopped abruptly — and “medical dependence” (an inhaler every day, insulin) is not addiction; TOLERANCE needs more for the same effect. Know the common myths about addiction [1:22:21].',
-  ask:'Her formative Q4 (mini-exam 1) and Q5 (mini-exam 3) are exactly this. Mini-exam 1’s answer document keys Q4 as C; she corrected it in class to B [1:48:07–1:50:15].',
-  cap:'Moved to a self-directed session on Wed 21 Oct, 1–5 pm, because the lecturers are on strike [0:30:35–0:31:41]; the Canvas module was still empty on 20 Oct. The row is her two formative questions until its material is on Canvas.',
-  src:'Her 20 Oct revision session · her Formative mini-exams 1 and 3' },
+  from:[{ quiz:['tox','joan-tox'] }, F({1:[4], 3:[5]})],
+  done:'Define the seven terms and tell them apart — licit, illicit, misuse, abuse, dependence, addiction, tolerance: ADDICTION is compulsive use with craving, loss of control and use despite harm; DEPENDENCE is withdrawal symptoms if a drug is stopped abruptly — and “medical dependence” (an inhaler every day, insulin) is not addiction; TOLERANCE needs more for the same effect. Then: the four groups of risk factors; checking an interaction in the NZ Formulary; where to refer (CADS, Te Ātea Marinō, Tupu, Altered High); acute and chronic poisoning, poisonous and venomous, when to call the Poisons Centre (0800 764 766); what an antidote does — naloxone (an opioid antagonist), NAC (paracetamol).',
+  ask:'Her announcement: “Note key words and definitions eg addiction, dependence, as the L/O for this session will be tested in the Exam.” Her formative Q4 (mini-exam 1) and Q5 (mini-exam 3) are exactly this; mini-exam 1’s document keys Q4 as C, and she corrected it in class to B [1:48:07–1:50:15]. Her rule on the deck (slide 3): a slide with Pusheen the cat is tested on the concept, not its statistics or finer details.',
+  cap:'Self-directed, Wed 21 Oct (the lecturers were on strike [0:30:35–0:31:41]); the deck went up on Canvas that afternoon and was never lectured. The Pusheen slides — the withdrawal symptom list, the eleven disorder criteria and their counts, stimulant or depressant, the slang, the drug-combination chart and every statistic — are asked here as a concept only.',
+  src:'Deck “Licit and Illicit Drugs” (41 slides) · her 20 Oct revision session · her Formative mini-exams 1 and 3' },
 
 /* ══════════ TIER 3 — has its own assessment ══════════ */
 { id:'calcs', sys:'calc', tier:3, t:'Medication calculations', flag:'',

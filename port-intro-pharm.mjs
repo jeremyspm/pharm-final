@@ -8,7 +8,7 @@
       (TOPIC_SYS below — must agree with META.sys) and the noMock flag (rule below).
    2. content/joan-saqs.js — HAND-WRITTEN short answers in the format Joan described on
       16 Sep 2026 (a definition plus an example, 3–4 lines, no specific-drug questions), and
-      the multi-choice some of those topic files carry (Module 8 so far). Appended as they
+      the multi-choice some of those topic files carry (Modules 8 and 9 so far). Appended as they
       are. Edit those files, never the generated output.
 
    Output: content/authored-mcqs.js + content/authored-saqs.js (generated — edit the

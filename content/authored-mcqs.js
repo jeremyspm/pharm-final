@@ -1772,5 +1772,260 @@ export const AUTHORED_MCQS = [
   "correct": 2,
   "why": "CARM monitors and reviews reported adverse reactions to medicines, vaccines and other therapeutic products in NZ and shares anonymised data with the WHO programme. Medsafe approves; PHARMAC funds.",
   "src": "the Vaccinations & Recognising Allergy deck (Module 8), slide 10"
+ },
+ {
+  "quiz": "tox",
+  "quizName": "M9 · Licit & illicit drugs, toxicology",
+  "sys": "tox",
+  "q": "Which of these is a LICIT drug?",
+  "options": [
+   "A Class A controlled drug",
+   "A general sale medicine",
+   "Any drug that is not permitted",
+   "A drug bought without a prescription from a dealer"
+  ],
+  "correct": 1,
+  "why": "Licit = lawful and permitted: prescription, restricted, pharmacy-only and general sale medicines, and some Class B and C controlled drugs. Every Class A drug is illicit.",
+  "src": "deck Licit and Illicit Drugs (Module 9), slide 7"
+ },
+ {
+  "quiz": "tox",
+  "quizName": "M9 · Licit & illicit drugs, toxicology",
+  "sys": "tox",
+  "q": "Which statement about illicit drugs is correct?",
+  "options": [
+   "They include every Class A controlled drug, some Class B and a few Class C",
+   "They include every controlled drug",
+   "They include only Class C controlled drugs",
+   "They are drugs that can be prescribed but are often misused"
+  ],
+  "correct": 0,
+  "why": "Illicit = unlawful or not permitted: all Class A, some Class B and a few Class C. Some controlled drugs (some of Class B and C) are licit — morphine, for example, is prescribed.",
+  "src": "deck Licit and Illicit Drugs (Module 9), slide 7"
+ },
+ {
+  "quiz": "tox",
+  "quizName": "M9 · Licit & illicit drugs, toxicology",
+  "sys": "tox",
+  "q": "Under Aotearoa New Zealand law, “drug misuse” refers to",
+  "options": [
+   "Taking any medicine more than once a day",
+   "Any illegal, harmful or unauthorised use of a controlled drug under the Misuse of Drugs Act 1975",
+   "Any use of alcohol or tobacco",
+   "Forgetting to take a prescribed medicine"
+  ],
+  "correct": 1,
+  "why": "Clinically, misuse is using any substance for a purpose different from legal or medical guidelines (WHO). Legally, in NZ, it is illegal, harmful or unauthorised use of a controlled drug under the Misuse of Drugs Act 1975.",
+  "src": "deck Licit and Illicit Drugs (Module 9), slide 8"
+ },
+ {
+  "quiz": "tox",
+  "quizName": "M9 · Licit & illicit drugs, toxicology",
+  "sys": "tox",
+  "q": "Self-administration of a substance in chronically excessive amounts, differing from approved medical use or usual social patterns, and resulting in physical or psychological harm, is",
+  "options": [
+   "Drug tolerance",
+   "Drug misuse",
+   "Drug abuse",
+   "Physical dependence"
+  ],
+  "correct": 2,
+  "why": "That is the deck’s definition of drug abuse: chronically excessive amounts, outside approved or usual use, AND harm.",
+  "src": "deck Licit and Illicit Drugs (Module 9), slide 9"
+ },
+ {
+  "quiz": "tox",
+  "quizName": "M9 · Licit & illicit drugs, toxicology",
+  "sys": "tox",
+  "q": "Which describes PHYSICAL dependence?",
+  "options": [
+   "Out-of-control cravings, often with denial",
+   "Needing a higher dose for the same effect",
+   "Withdrawal symptoms when the drug is not used",
+   "Overwhelming involvement in getting and using the drug"
+  ],
+  "correct": 2,
+  "why": "Physical dependence: not using the drug causes withdrawal symptoms. Cravings with denial is psychological dependence; a higher dose for the same effect is tolerance; overwhelming involvement is addiction.",
+  "src": "deck Licit and Illicit Drugs (Module 9), slide 10"
+ },
+ {
+  "quiz": "tox",
+  "quizName": "M9 · Licit & illicit drugs, toxicology",
+  "sys": "tox",
+  "q": "Drug addiction impairs which three functional systems?",
+  "options": [
+   "Motivation-reward, mood and behavioural inhibition",
+   "Absorption, distribution and excretion",
+   "Memory, hearing and vision",
+   "Breathing, heart rate and temperature"
+  ],
+  "correct": 0,
+  "why": "Addiction is a behavioural pattern of use, with impairment in motivation-reward, mood and behavioural inhibition, and a high tendency to relapse.",
+  "src": "deck Licit and Illicit Drugs (Module 9), slide 12"
+ },
+ {
+  "quiz": "tox",
+  "quizName": "M9 · Licit & illicit drugs, toxicology",
+  "sys": "tox",
+  "q": "A patient on regular morphine says it no longer controls their pain at the same dose. This is most likely",
+  "options": [
+   "Addiction",
+   "Tolerance",
+   "Drug abuse",
+   "An allergic reaction"
+  ],
+  "correct": 1,
+  "why": "Tolerance: repeated doses cause decreasing effects, or the dose must rise to keep the same effect. Morphine users develop tolerance rapidly; marijuana causes little.",
+  "src": "deck Licit and Illicit Drugs (Module 9), slide 13"
+ },
+ {
+  "quiz": "tox",
+  "quizName": "M9 · Licit & illicit drugs, toxicology",
+  "sys": "tox",
+  "q": "Which manual do clinicians use to diagnose a substance use disorder?",
+  "options": [
+   "The New Zealand Formulary",
+   "The DSM-5",
+   "The Medicines Act 1981",
+   "The National Medication Chart"
+  ],
+  "correct": 1,
+  "why": "The DSM-5 (Diagnostic and Statistical Manual of Mental Disorders) — diagnosis and severity depend on the number of its criteria met.",
+  "src": "deck Licit and Illicit Drugs (Module 9), slides 14–15"
+ },
+ {
+  "quiz": "tox",
+  "quizName": "M9 · Licit & illicit drugs, toxicology",
+  "sys": "tox",
+  "q": "Alcohol, GHB, sedatives such as lorazepam, and nitrous oxide are all",
+  "options": [
+   "Stimulants",
+   "Depressants",
+   "Both stimulant and depressant",
+   "Psychedelics"
+  ],
+  "correct": 1,
+  "why": "Depressants (“downers”) slow the central nervous system. On her chart, MDMA and methamphetamine are stimulants; nicotine, marijuana, psychedelics and synthetic cannabinoids are both. A Pusheen slide: the concept, not every row.",
+  "src": "deck Licit and Illicit Drugs (Module 9), slides 20–21 (Pusheen slides) and the speaker notes"
+ },
+ {
+  "quiz": "tox",
+  "quizName": "M9 · Licit & illicit drugs, toxicology",
+  "sys": "tox",
+  "q": "Where can a nurse check for an interaction between a prescribed medicine and alcohol, marijuana or nicotine?",
+  "options": [
+   "The New Zealand Formulary Interactions checker",
+   "The DSM-5",
+   "The patient’s discharge summary",
+   "The Misuse of Drugs Act 1975"
+  ],
+  "correct": 0,
+  "why": "The deck has you use the NZ Formulary’s Interactions tab: it lists some licit and illicit “drugs”, such as alcohol, marijuana and nicotine.",
+  "src": "deck Licit and Illicit Drugs (Module 9), slides 25–26"
+ },
+ {
+  "quiz": "tox",
+  "quizName": "M9 · Licit & illicit drugs, toxicology",
+  "sys": "tox",
+  "q": "Te Ātea Marinō is",
+  "options": [
+   "A Pasifika rehabilitation house",
+   "The Māori Community Alcohol and Drug Service (CADS)",
+   "The National Poisons Centre",
+   "A drug-checking service at festivals"
+  ],
+  "correct": 1,
+  "why": "CADS services in Auckland: Te Ātea Marinō (Māori), Tupu (Pasifika) and Altered High (youth).",
+  "src": "deck Licit and Illicit Drugs (Module 9), slide 34"
+ },
+ {
+  "quiz": "tox",
+  "quizName": "M9 · Licit & illicit drugs, toxicology",
+  "sys": "tox",
+  "q": "Which is ACUTE poisoning?",
+  "options": [
+   "Heavy metals building up in the body over years",
+   "A poison entering the body in a short time",
+   "Needing more of a drug for the same effect",
+   "A bee sting"
+  ],
+  "correct": 1,
+  "why": "Acute: the poison enters the body in a short time. Chronic: it accumulates gradually.",
+  "src": "deck Licit and Illicit Drugs (Module 9), slide 37"
+ },
+ {
+  "quiz": "tox",
+  "quizName": "M9 · Licit & illicit drugs, toxicology",
+  "sys": "tox",
+  "q": "Something that bites or stings you and you get hurt is",
+  "options": [
+   "Poisonous",
+   "Venomous",
+   "Illicit",
+   "Toxic only if eaten"
+  ],
+  "correct": 1,
+  "why": "Venomous: it bites or stings you. Poisonous: you touch or eat it.",
+  "src": "deck Licit and Illicit Drugs (Module 9), slide 36"
+ },
+ {
+  "quiz": "tox",
+  "quizName": "M9 · Licit & illicit drugs, toxicology",
+  "sys": "tox",
+  "q": "The National Poisons Centre is",
+  "options": [
+   "0800 764 766, free and 24 hours",
+   "111, for advice only",
+   "Open business hours, through a GP referral",
+   "A service only for recreational drug use"
+  ],
+  "correct": 0,
+  "why": "0800 764 766 (0800 POISON), free, 24 hours: swallowed medicines or products, an overdose, inhaled fumes, a splash on eyes or skin, symptoms from a recreational drug. Call 111 if the person is unconscious or not breathing.",
+  "src": "deck Licit and Illicit Drugs (Module 9), slide 38 and the speaker notes"
+ },
+ {
+  "quiz": "tox",
+  "quizName": "M9 · Licit & illicit drugs, toxicology",
+  "sys": "tox",
+  "q": "Naloxone (Narcan) reverses an opioid overdose because it is",
+  "options": [
+   "An opioid agonist",
+   "An opioid antagonist",
+   "A binder that absorbs the opioid in the gut",
+   "An enzyme that speeds up opioid metabolism"
+  ],
+  "correct": 1,
+  "why": "Naloxone blocks the opioid receptors — an antagonist (receptor blocking is one of the ways antidotes work).",
+  "src": "deck Licit and Illicit Drugs (Module 9), slide 40"
+ },
+ {
+  "quiz": "tox",
+  "quizName": "M9 · Licit & illicit drugs, toxicology",
+  "sys": "tox",
+  "q": "N-acetylcysteine (NAC) is the antidote for an overdose of",
+  "options": [
+   "Morphine",
+   "Paracetamol",
+   "Alcohol",
+   "Benzodiazepines"
+  ],
+  "correct": 1,
+  "why": "NAC reduces the production of the toxic metabolites made from paracetamol.",
+  "src": "deck Licit and Illicit Drugs (Module 9), slide 40"
+ },
+ {
+  "quiz": "tox",
+  "quizName": "M9 · Licit & illicit drugs, toxicology",
+  "sys": "tox",
+  "q": "Activated charcoal works as an antidote by",
+  "options": [
+   "Blocking receptors",
+   "Speeding up an enzyme",
+   "Binding the toxin to reduce free toxin levels",
+   "Increasing urine output"
+  ],
+  "correct": 2,
+  "why": "The four mechanisms on her slide: binders (activated charcoal), enzyme inhibition, enzyme activation, and blocking receptors (antagonists).",
+  "src": "deck Licit and Illicit Drugs (Module 9), slide 39"
  }
 ];

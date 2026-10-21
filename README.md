@@ -28,14 +28,15 @@ There are still **no Canvas quizzes on pharmacology**: the only ones are medicat
 tests. Everything else is the tool's, from two sources, and each names the slide or lecture moment that
 supplies its answer:
 
-- **96 short answers in Joan's stated format** — a definition plus an example, 2–3 marks. Hand-written
+- **112 short answers in Joan's stated format** — a definition plus an example, 2–3 marks. Hand-written
   (19 Sep 2026) in `content/joan/`, one file per topic, from her own Escape Room answer sheet, her recorded
   16 Sep Legal & Ethical lecture (cited by timestamp), deck 13 (the self-directed Drug Development
   package), the Rongoā Māori deck, and the definitions in the Module 1–6 decks. **Module 8** (immunology,
   vaccines & allergy) followed on 20 Oct 2026 in `content/joan/imm.js`: 21 short answers plus **18
   multi-choice**, from its three Canvas files (Allergic Reactions · Vaccinations & Recognising Allergy ·
   Immunology for Nurses), each naming its deck and slide. A topic file may export `MCQS` beside `SAQS`;
-  `content/joan-saqs.js` collects both.
+  `content/joan-saqs.js` collects both. **Module 9** (licit & illicit drugs, toxicology) followed on 21 Oct
+  in `content/joan/tox.js`: 16 short answers plus **17 multi-choice** (below).
 - **289 questions — 100 multi-choice, 189 written — from the
   [intro-pharm](https://jeremyspm.github.io/intro-pharm/) hub**, written from the 14 lecture decks and
   carried across unchanged. Each multi-choice carries a short explanation that is the tool's.
@@ -66,14 +67,22 @@ written-answers trainer locks it at k lines. Her 18 short answers have short ver
   template keeping at least a mark for every slot still to fill — 200 test deals all came out 30 + 11 = 20).
   It does **not** yet group them into three clinical scenarios, and the page says so. Once on 20 Oct she
   said "there are 60" [0:14:30]; her slide and her own count four minutes later say 41.
-- **The tool's own questions cover Modules 1–8 plus Rongoā Māori.** Module 8 (Immunology, Vaccines &
+- **The tool's own questions cover Modules 1–9 plus Rongoā Māori.** Module 8 (Immunology, Vaccines &
   Allergy, taught 7 Oct) was built from its decks on 20 Oct: the tool wrote the questions, not Joan or the
-  presenters, and its 18 multi-choice are the only tool-written multi-choice outside the intro-pharm hub.
+  presenters, and its 18 multi-choice (with Module 9's 17) are the only tool-written multi-choice outside the intro-pharm hub.
   Two of its decks are mostly pictures (the schedule card, the ASCIA signs), read by eye; the Immunology
   deck's deeper material (MHC classes, T-cell types, antibody genetics) is left out on purpose — the
-  allergy row's `cap` says so. Module 10 part 2 (CAM, self-directed 14 Oct) and Module 9 (Licit & Illicit, moved to a
-  self-directed session Wed 21 Oct, 1–5 pm, because of the strike; its Canvas module was empty on 20 Oct)
-  have only her formative questions. All examinable.
+  allergy row's `cap` says so. Module 10 part 2 (CAM, self-directed 14 Oct) has only her formative questions.
+  All examinable.
+- **Module 9, Licit & Illicit Drugs & Toxicology** (self-directed Wed 21 Oct, because of the strike; the deck
+  went up on Canvas that afternoon and was never lectured). `content/joan/tox.js`: 16 short answers in her
+  format and 17 multi-choice, every one naming its slide, from the 41-slide deck, the For-interest articles
+  its Canvas page points to (overdose deaths, drug checking), and her 20 Oct correction: **dependence is
+  withdrawal when a drug is stopped; compulsive use despite harm is addiction**. Her rule on slide 3: a slide
+  with **Pusheen the cat** is tested on the concept, not its statistics or finer details (slides 3, 11,
+  15–16, 20–21, 23–24, 27–28, 30–32), so nothing here asks a statistic, a slang name or a criteria count.
+  Also: a one-page summary, `m9-summary.pdf` (source `m9-summary.html`), and an audio episode in the
+  [SAQ podcast](https://jeremyspm.github.io/hs2-podcast/#pm9).
 - **Deck 13, Drug Development & Marketing, was never lectured** — a self-directed online package.
 - **The focus checklist** (`content/focus.js`, 19 rows) is built: per topic what you must be able to DO,
   the shape Joan described, where it stops. The build counts each row's questions and fails unless every

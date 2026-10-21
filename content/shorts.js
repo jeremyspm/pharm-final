@@ -7,11 +7,13 @@
      shorts/joan.js     — the 75 short answers in Joan's format (listed first on the page, as the paper asks them)
      shorts/topics-a.js — the topic rows' written questions, Modules 1–5 (concepts to administration)
      shorts/topics-b.js — the topic rows' written questions, Modules 5–8 (patient education to anaphylaxis)
-     shorts/imm.js      — the 21 Module 8 short answers in Joan's format (immunology, vaccines & allergy) */
+     shorts/imm.js      — the 21 Module 8 short answers in Joan's format (immunology, vaccines & allergy)
+     shorts/tox.js      — the 16 Module 9 short answers in Joan's format (licit & illicit drugs, toxicology) */
 import { HERS } from './shorts/hers.js';
 import { JOAN } from './shorts/joan.js';
 import { TOPICS_A } from './shorts/topics-a.js';
 import { TOPICS_B } from './shorts/topics-b.js';
 import { IMM } from './shorts/imm.js';
+import { TOX } from './shorts/tox.js';
 
-export const SHORTS = [...HERS, ...JOAN, ...IMM, ...TOPICS_A, ...TOPICS_B];
+export const SHORTS = [...HERS, ...JOAN, ...IMM, ...TOX, ...TOPICS_A, ...TOPICS_B];

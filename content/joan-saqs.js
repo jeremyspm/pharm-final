@@ -15,7 +15,8 @@ import * as ethics from './joan/ethics.js';
 import * as devmkt from './joan/devmkt.js';
 import * as cam from './joan/cam.js';
 import * as imm from './joan/imm.js';
+import * as tox from './joan/tox.js';
 
-const TOPICS = [foundPkpd, adminLife, law, ethics, devmkt, imm, cam];
+const TOPICS = [foundPkpd, adminLife, law, ethics, devmkt, imm, tox, cam];
 export const JOAN_SAQS = TOPICS.flatMap(m => m.SAQS);
 export const JOAN_MCQS = TOPICS.flatMap(m => m.MCQS || []);

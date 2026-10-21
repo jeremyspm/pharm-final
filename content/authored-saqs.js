@@ -3924,6 +3924,200 @@ export const AUTHORED_SAQS = [
   "src": "the Vaccinations & Recognising Allergy deck (Module 8), slide 10 (University of Otago, NZ Pharmacovigilance Centre, 2024); Immunology for Nurses (Emma Lambert, Module 8), slide 38"
  },
  {
+  "sys": "tox",
+  "quiz": "joan-tox",
+  "quizName": "In Joan’s format · Licit & illicit drugs, toxicology",
+  "pts": 2,
+  "q": "Define a licit drug and an illicit drug, with an example of each.",
+  "steps": [
+   "Licit: a medication or drug that is lawful and permitted — prescription, restricted, pharmacy-only and general sale medicines, and some controlled drugs (some Class B and C). Example: alcohol, or an opioid analgesic taken as prescribed.",
+   "Illicit: a drug that is unlawful or otherwise not permitted — every Class A controlled drug, some Class B and a few Class C. Example: methamphetamine (Class A)."
+  ],
+  "src": "deck Licit and Illicit Drugs (Module 9), slides 7 and 19"
+ },
+ {
+  "sys": "tox",
+  "quiz": "joan-tox",
+  "quizName": "In Joan’s format · Licit & illicit drugs, toxicology",
+  "pts": 2,
+  "q": "Define drug misuse and give an example.",
+  "steps": [
+   "Definition: the use of any substance for a purpose that is different from legal or medical guidelines (World Health Organization). Under Aotearoa New Zealand law it means any illegal, harmful or unauthorised use of a controlled drug under the Misuse of Drugs Act 1975.",
+   "Example: taking a medicine prescribed for someone else, or taking a prescribed medicine for a purpose it was not prescribed for, such as to get high."
+  ],
+  "src": "deck Licit and Illicit Drugs (Module 9), slide 8"
+ },
+ {
+  "sys": "tox",
+  "quiz": "joan-tox",
+  "quizName": "In Joan’s format · Licit & illicit drugs, toxicology",
+  "pts": 2,
+  "q": "Define drug abuse and give an example. How is it different from misuse?",
+  "steps": [
+   "Definition: self-administration of a drug or substance in chronically excessive amounts, in a way that differs from approved medical use or the usual social patterns of the culture, and that results in physical or psychological harm.",
+   "Example and difference: drinking heavily every day until it damages health, work or relationships. Misuse is use outside legal or medical guidelines; abuse adds chronically excessive amounts and harm — and what counts as abuse depends on a society’s laws, history, religion and ethos."
+  ],
+  "src": "deck Licit and Illicit Drugs (Module 9), slides 8–9 and the speaker notes"
+ },
+ {
+  "sys": "tox",
+  "quiz": "joan-tox",
+  "quizName": "In Joan’s format · Licit & illicit drugs, toxicology",
+  "pts": 3,
+  "q": "Define drug dependence. What is the difference between psychological and physical dependence? Give an example.",
+  "steps": [
+   "Definition: a drug is pursued compulsively, without a therapeutic indication (no medical need), and despite adverse effects — psychological, social and/or physical.",
+   "Psychological dependence: out-of-control cravings, often with denial. Physical dependence: not using the drug causes withdrawal symptoms — her formative’s answer: withdrawal symptoms if a prescribed drug is stopped abruptly.",
+   "Example: a person who has taken an opioid for months gets withdrawal symptoms when it is stopped suddenly, so it is weaned. A person can also be medically dependent on a medicine, such as insulin or a daily inhaler — that is not addiction."
+  ],
+  "src": "deck Licit and Illicit Drugs (Module 9), slide 10 and the speaker notes · her Formative mini-exam 1 Q4 and Joan in class, Tue 20 Oct 2026 [1:48:07–1:50:15]"
+ },
+ {
+  "sys": "tox",
+  "quiz": "joan-tox",
+  "quizName": "In Joan’s format · Licit & illicit drugs, toxicology",
+  "pts": 3,
+  "q": "Define drug addiction and give an example. How is addiction different from dependence?",
+  "steps": [
+   "Definition: a behavioural pattern of drug use — overwhelming involvement in getting the drug and using the drug, with impairment in three functional systems (motivation-reward, mood and behavioural inhibition) and a high tendency to relapse.",
+   "Example: a person who keeps using despite losing their job and relationships, and relapses after stopping. The same behavioural pattern can occur in gambling, disordered eating or shopping.",
+   "Difference: addiction is compulsive use with craving, loss of control and continued use despite harm; dependence is withdrawal symptoms when the drug is stopped. Someone on a daily inhaler is dependent on it, not addicted to it."
+  ],
+  "src": "deck Licit and Illicit Drugs (Module 9), slide 12 · Joan in class, Tue 20 Oct 2026 [1:48:29–1:50:15] · her Formative test three Q5"
+ },
+ {
+  "sys": "tox",
+  "quiz": "joan-tox",
+  "quizName": "In Joan’s format · Licit & illicit drugs, toxicology",
+  "pts": 2,
+  "q": "Define drug tolerance and give an example.",
+  "steps": [
+   "Definition: a physical state in which repeated doses of a drug cause decreasing effects, or the dose must be increased to maintain the same effect (receptor downregulation, from pharmacodynamics).",
+   "Example: a person on regular morphine needs higher doses for the same pain relief — morphine users develop tolerance rapidly, whereas marijuana causes little tolerance. Not every drug causes it."
+  ],
+  "src": "deck Licit and Illicit Drugs (Module 9), slide 13"
+ },
+ {
+  "sys": "tox",
+  "quiz": "joan-tox",
+  "quizName": "In Joan’s format · Licit & illicit drugs, toxicology",
+  "pts": 2,
+  "q": "What is withdrawal? Give an example of its symptoms and what affects how severe it is.",
+  "steps": [
+   "Definition: the symptoms when a person who is physically dependent stops or cuts down a substance. It ranges from mild to severe and lasts days or weeks, depending on the substance, how long it was used, age, other conditions and psychological state, and whether it was weaned or stopped “cold turkey”.",
+   "Example: general symptoms such as insomnia, fatigue, irritability and cravings; severe withdrawal can bring paranoia, confusion, tremors and disorientation."
+  ],
+  "src": "deck Licit and Illicit Drugs (Module 9), slide 11 (a Pusheen slide: the concept, not the full symptom list)"
+ },
+ {
+  "sys": "tox",
+  "quiz": "joan-tox",
+  "quizName": "In Joan’s format · Licit & illicit drugs, toxicology",
+  "pts": 2,
+  "q": "What is a substance use disorder, and how is it diagnosed?",
+  "steps": [
+   "Definition: a mental health condition, diagnosed with the DSM-5 (the Diagnostic and Statistical Manual of Mental Disorders), in which use of a substance causes problems in a person’s life.",
+   "Diagnosis: by the number of the eleven criteria met — the more criteria, the more severe (mild, moderate, severe). Example criteria: cravings, failing to cut down, needing more for the same effect (tolerance), withdrawal symptoms."
+  ],
+  "src": "deck Licit and Illicit Drugs (Module 9), slides 14–16 (15–16 are Pusheen slides: the concept, not the criteria counts)"
+ },
+ {
+  "sys": "tox",
+  "quiz": "joan-tox",
+  "quizName": "In Joan’s format · Licit & illicit drugs, toxicology",
+  "pts": 2,
+  "q": "Name the four groups of risk factors for substance abuse in young adults, and give an example of one.",
+  "steps": [
+   "The four groups: family-related, individual, social and environmental, and behavioural.",
+   "Example (any one): family — relatives who use, stress at home, childhood trauma; individual — an impulsive personality, mental ill health, access through a prescription after an injury; social — peer influence, cultural and societal acceptance, the law; behavioural — frequent use, at first “socially”."
+  ],
+  "src": "deck Licit and Illicit Drugs (Module 9), slide 17 and the brainstorm notes on slide 14 (Alhammad et al., 2022)"
+ },
+ {
+  "sys": "tox",
+  "quiz": "joan-tox",
+  "quizName": "In Joan’s format · Licit & illicit drugs, toxicology",
+  "pts": 2,
+  "q": "What is a medication–drug interaction, and how can a nurse check for one? Give an example.",
+  "steps": [
+   "Definition: a licit or illicit substance (alcohol, marijuana, nicotine, sedatives, opioids) changes the effect of a medication, or the two together cause harm. The nurse checks with the New Zealand Formulary’s Interactions checker.",
+   "Example: alcohol taken with another depressant, such as an opioid or a benzodiazepine, raises the risk of overdose — over a third of New Zealand’s fatal overdoses involved alcohol."
+  ],
+  "src": "deck Licit and Illicit Drugs (Module 9), slides 25–28 · For-interest article “Drug overdose deaths rising in NZ” (NZ Herald, 2024)"
+ },
+ {
+  "sys": "tox",
+  "quiz": "joan-tox",
+  "quizName": "In Joan’s format · Licit & illicit drugs, toxicology",
+  "pts": 2,
+  "q": "What is the nurse’s role with a person whose substance use is a concern? Give an example of where a nurse can refer them.",
+  "steps": [
+   "Role: anyone can take drugs, so avoid stereotyping; ask about use, give a brief intervention, offer referrals, follow up and advocate — and use it as a chance for harm-reduction education.",
+   "Example: Community Alcohol and Drug Services (CADS), including Te Ātea Marinō (the Māori CADS service), Tupu (Pasifika) and Altered High (youth), or a rehabilitation provider such as Odyssey House; information at the Drug Foundation, The Level and Alcohol Drug Help websites."
+  ],
+  "src": "deck Licit and Illicit Drugs (Module 9), speaker notes on slide 3, slides 27 and 33–34"
+ },
+ {
+  "sys": "tox",
+  "quiz": "joan-tox",
+  "quizName": "In Joan’s format · Licit & illicit drugs, toxicology",
+  "pts": 2,
+  "q": "What is harm reduction? Give an example from Aotearoa New Zealand.",
+  "steps": [
+   "Definition: reducing the harm of drug use for people who are going to use anyway, rather than only telling them not to — for example education about which combinations are dangerous.",
+   "Example: free, legal drug checking at festivals and clinics (Know Your Stuff NZ, legal since the Misuse of Drugs Act was changed), or making naloxone available to people at risk of an opioid overdose."
+  ],
+  "src": "deck Licit and Illicit Drugs (Module 9), slide 27 · For-interest articles on drug checking (NZ Herald, 2023; Stuff, 2022) and overdose deaths (NZ Herald, 2024)"
+ },
+ {
+  "sys": "tox",
+  "quiz": "joan-tox",
+  "quizName": "In Joan’s format · Licit & illicit drugs, toxicology",
+  "pts": 2,
+  "q": "Define poisoning. What is the difference between acute and chronic poisoning? Give an example.",
+  "steps": [
+   "Definition: harm from a substance taken in or contacted — by ingestion or contact with chemicals such as heavy metals, pesticides or household cleaners; usually accidental. Most things can be poisonous, depending on how much is taken, the person’s age and size, whether they are already unwell, and other medicines it may react with.",
+   "Acute: the poison enters the body in a short time — for example a child swallows household cleaner. Chronic: it builds up gradually in the body — for example heavy metals over months."
+  ],
+  "src": "deck Licit and Illicit Drugs (Module 9), slide 37"
+ },
+ {
+  "sys": "tox",
+  "quiz": "joan-tox",
+  "quizName": "In Joan’s format · Licit & illicit drugs, toxicology",
+  "pts": 2,
+  "q": "What is the difference between poisonous and venomous? Give an example of each.",
+  "steps": [
+   "Poisonous: you touch or eat it and you get hurt — for example a poisonous plant, berry or mushroom.",
+   "Venomous: it bites or stings you and you get hurt — for example a bee, a wasp or the katipō spider (New Zealand has very few venomous creatures)."
+  ],
+  "src": "deck Licit and Illicit Drugs (Module 9), slide 36 and the speaker notes"
+ },
+ {
+  "sys": "tox",
+  "quiz": "joan-tox",
+  "quizName": "In Joan’s format · Licit & illicit drugs, toxicology",
+  "pts": 2,
+  "q": "What is the National Poisons Centre, and when should someone call it? Give an example.",
+  "steps": [
+   "Definition: a free, 24-hour advice line — 0800 764 766 (0800 POISON). Call 111 instead if the person is unconscious or has stopped breathing.",
+   "When (any one): someone has swallowed a medicine, household product, chemical or poisonous plant, berry or mushroom; taken too much medication (an overdose); inhaled harmful fumes; splashed a toxic substance on the eyes or skin; or has symptoms from a “recreational” drug."
+  ],
+  "src": "deck Licit and Illicit Drugs (Module 9), slide 38 and the speaker notes"
+ },
+ {
+  "sys": "tox",
+  "quiz": "joan-tox",
+  "quizName": "In Joan’s format · Licit & illicit drugs, toxicology",
+  "pts": 2,
+  "q": "Define an antidote and give an example.",
+  "steps": [
+   "Definition: a substance that counteracts a poison — by binding it to reduce the free toxin, by slowing or speeding an enzyme, or by blocking its receptors (an antagonist).",
+   "Example: naloxone (Narcan) is an opioid antagonist that reverses an opioid overdose; N-acetylcysteine (NAC) reduces the toxic metabolites made from paracetamol in a paracetamol overdose."
+  ],
+  "src": "deck Licit and Illicit Drugs (Module 9), slides 39–40"
+ },
+ {
   "sys": "cam",
   "quiz": "joan-cam",
   "quizName": "In Joan’s format · Rongoā Māori",
