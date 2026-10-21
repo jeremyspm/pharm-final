@@ -81,8 +81,7 @@ written-answers trainer locks it at k lines. Her 18 short answers have short ver
   withdrawal when a drug is stopped; compulsive use despite harm is addiction**. Her rule on slide 3: a slide
   with **Pusheen the cat** is tested on the concept, not its statistics or finer details (slides 3, 11,
   15–16, 20–21, 23–24, 27–28, 30–32), so nothing here asks a statistic, a slang name or a criteria count.
-  Also: a one-page summary, `m9-summary.pdf` (source `m9-summary.html`), and an audio episode in the
-  [SAQ podcast](https://jeremyspm.github.io/hs2-podcast/#pm9).
+  Also: a one-page summary, `m9-summary.pdf` (source `m9-summary.html`).
 - **Deck 13, Drug Development & Marketing, was never lectured** — a self-directed online package.
 - **The focus checklist** (`content/focus.js`, 19 rows) is built: per topic what you must be able to DO,
   the shape Joan described, where it stops. The build counts each row's questions and fails unless every
