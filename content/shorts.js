@@ -4,16 +4,15 @@
    own parts, with a memory hook. Gated by shorts.mjs: every **bold** word must be in the step (`of`) it is cut from,
    every step needs a line, a line is at most 14 words, and every written question needs a short version.
      shorts/hers.js     — Joan's OWN 18 short answers, her three Formative mini-exams (her model answers, cut by the tool)
-     shorts/joan.js     — the 75 short answers in Joan's format (listed first on the page, as the paper asks them)
-     shorts/topics-a.js — the topic rows' written questions, Modules 1–5 (concepts to administration)
-     shorts/topics-b.js — the topic rows' written questions, Modules 5–8 (patient education to anaphylaxis)
-     shorts/imm.js      — the 21 Module 8 short answers in Joan's format (immunology, vaccines & allergy)
-     shorts/tox.js      — the 16 Module 9 short answers in Joan's format (licit & illicit drugs, toxicology) */
+     shorts/joan.js     — the 22 short answers in Joan's format (listed first on the page, as the paper asks them)
+     shorts/imm.js      — the 6 Module 8 short answers in Joan's format (immunology, vaccines & allergy)
+     shorts/tox.js      — the 5 Module 9 short answers in Joan's format (licit & illicit drugs, toxicology)
+     shorts/drugs.js    — the one written question on the drugs she named on 20 Oct
+   27 Oct 2026: topics-a.js and topics-b.js went with the intro-pharm questions they were cut from. */
 import { HERS } from './shorts/hers.js';
 import { JOAN } from './shorts/joan.js';
-import { TOPICS_A } from './shorts/topics-a.js';
-import { TOPICS_B } from './shorts/topics-b.js';
 import { IMM } from './shorts/imm.js';
 import { TOX } from './shorts/tox.js';
+import { DRUGS } from './shorts/drugs.js';
 
-export const SHORTS = [...HERS, ...JOAN, ...IMM, ...TOX, ...TOPICS_A, ...TOPICS_B];
+export const SHORTS = [...HERS, ...JOAN, ...IMM, ...TOX, ...DRUGS];

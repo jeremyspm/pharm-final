@@ -25,24 +25,31 @@ working, which leaked into mini-exam 3 Q8's stem, is moved into its explanation.
 are the tool's, written from her spoken feedback that morning and cited by timestamp.
 
 There are still **no Canvas quizzes on pharmacology**: the only ones are medication-calculation practice
-tests. Everything else is the tool's, from two sources, and each names the slide or lecture moment that
-supplies its answer:
+tests. Everything else is the tool's, and each names the slide or lecture moment that supplies its answer.
 
-- **112 short answers in Joan's stated format** — a definition plus an example, 2–3 marks. Hand-written
-  (19 Sep 2026) in `content/joan/`, one file per topic, from her own Escape Room answer sheet, her recorded
-  16 Sep Legal & Ethical lecture (cited by timestamp), deck 13 (the self-directed Drug Development
-  package), the Rongoā Māori deck, and the definitions in the Module 1–6 decks. **Module 8** (immunology,
-  vaccines & allergy) followed on 20 Oct 2026 in `content/joan/imm.js`: 21 short answers plus **18
-  multi-choice**, from its three Canvas files (Allergic Reactions · Vaccinations & Recognising Allergy ·
-  Immunology for Nurses), each naming its deck and slide. A topic file may export `MCQS` beside `SAQS`;
-  `content/joan-saqs.js` collects both. **Module 9** (licit & illicit drugs, toxicology) followed on 21 Oct
-  in `content/joan/tox.js`: 16 short answers plus **17 multi-choice** (below).
-- **289 questions — 100 multi-choice, 189 written — from the
-  [intro-pharm](https://jeremyspm.github.io/intro-pharm/) hub**, written from the 14 lecture decks and
-  carried across unchanged. Each multi-choice carries a short explanation that is the tool's.
+**27 Oct 2026: the tool's questions were cut from about 470 to 50.** Most of them were padding: 289 carried
+across from the [intro-pharm](https://jeremyspm.github.io/intro-pharm/) hub (5–6 mark list questions, not her
+shape) and ~180 in "Joan's format" that mostly re-asked what her 54 already ask. What is left is what her
+formatives do not cover, in their shape:
 
-`port-intro-pharm.mjs` merges the two into the generated `content/authored-*.js`. The home screen says all
-this in a banner, not in a footnote.
+- **33 short answers in Joan's stated format** — a definition plus an example, 2–3 marks — in
+  `content/joan/`, one file per topic: contraindication, interactions, local/systemic, bioavailability,
+  protein binding, half-life, therapeutic range, medication error, CARM, polypharmacy, breast milk,
+  children, controlled drugs, scope of practice, privacy, autonomy, concealing an error, bioequivalence,
+  Phase 4, advertising, immunity (active, passive, herd), live vaccines, fever before a vaccine, allergy
+  prevention, licit/illicit, tolerance, withdrawal, harm reduction, antidotes, rongoā. Their sources are
+  unchanged: her Escape Room answer sheet, her recorded 16 Sep lecture (by timestamp), and the decks.
+- **The drugs she named on 20 Oct** (`content/joan/drugs.js`): six multi-choice — GTN's route, warfarin with
+  aspirin, salbutamol with metoprolol, morphine's class, "-cillin", paracetamol in pregnancy — and one short
+  answer (paracetamol under 3 months), each from the slide it names; plus **two easy calculations** in her
+  mini-exams' shape (paracetamol suspension, diluted morphine). They are the intro-pharm questions on those
+  drugs, rewritten short. Nothing goes past what a slide says about a drug.
+- **Eight multi-choice** on Modules 8 and 9 (live vaccines, the oral vaccine, Type IV, anaphylaxis signs,
+  tolerance, acute poisoning, naloxone, NAC), rewritten to her mini-exams' length.
+
+`gen-authored.mjs` writes them into the generated `content/authored-*.js`. **Every deal — Learn, a topic
+drill, a mock — serves her questions before the tool's** among equally-seen questions (`pickN` in the shared
+template). The home screen says all this in a banner, not in a footnote.
 
 ### Her questions, and the shared pipeline
 
@@ -58,25 +65,21 @@ written-answers trainer locks it at k lines. Her 18 short answers have short ver
 
 - **The Joan-format questions are the tool's reading of her format, not her questions.** Her one worked
   example ("what is the meaning of contraindication, and give an example") is the first of them.
-- **intro-pharm's written questions pre-date her description of the exam.** They all stay under Pick my
-  rep, but a mock leaves out 95 of the 189: any that carry 4+ marks, name a drug she has NOT named as
-  examinable, ask for the lecture's own drug examples, or are worked calculations. On 20 Oct she named the
-  classes that will come up, so paracetamol, aspirin, morphine, amoxicillin and adrenaline no longer keep a
-  question out (`OFFLIST` in `port-intro-pharm.mjs`; `--list` prints every hit).
 - **The mock's written section** deals 11 questions up to 20 marks (`shape.saq` + `shape.saqMarks`, the
-  template keeping at least a mark for every slot still to fill — 200 test deals all came out 30 + 11 = 20).
+  template keeping at least a mark for every slot still to fill). Since 27 Oct its first pass takes one per
+  topic group, not one per quiz row (her 18 sit in three mini-exam rows, so one per row had filled the rest
+  with the tool's), and a second pass takes nothing smaller than the marks still owed per open slot (her
+  answers are mostly 1–2 marks). 300 test deals in a fresh browser: all 30 + 11 = 20 marks, 3 of the tool's
+  multi-choice and 0–3 of its written questions in each.
   It does **not** yet group them into three clinical scenarios, and the page says so. Once on 20 Oct she
   said "there are 60" [0:14:30]; her slide and her own count four minutes later say 41.
-- **The tool's own questions cover Modules 1–9 plus Rongoā Māori.** Module 8 (Immunology, Vaccines &
-  Allergy, taught 7 Oct) was built from its decks on 20 Oct: the tool wrote the questions, not Joan or the
-  presenters, and its 18 multi-choice (with Module 9's 17) are the only tool-written multi-choice outside the intro-pharm hub.
-  Two of its decks are mostly pictures (the schedule card, the ASCIA signs), read by eye; the Immunology
-  deck's deeper material (MHC classes, T-cell types, antibody genetics) is left out on purpose — the
-  allergy row's `cap` says so. Module 10 part 2 (CAM, self-directed 14 Oct) has only her formative questions.
+- **The tool's own questions cover Modules 1–10**, thinly on purpose (27 Oct cull, above). Module 8's deeper
+  Immunology material (MHC classes, T-cell types, antibody genetics) is left out — the allergy row's `cap`
+  says so. Module 10 part 2 (CAM, self-directed 14 Oct) has only her formative questions.
   All examinable.
 - **Module 9, Licit & Illicit Drugs & Toxicology** (self-directed Wed 21 Oct, because of the strike; the deck
-  went up on Canvas that afternoon and was never lectured). `content/joan/tox.js`: 16 short answers in her
-  format and 17 multi-choice, every one naming its slide, from the 41-slide deck, the For-interest articles
+  went up on Canvas that afternoon and was never lectured). `content/joan/tox.js` (16 short answers and 17
+  multi-choice when written; 5 + 4 after the 27 Oct cull), every one naming its slide, from the 41-slide deck, the For-interest articles
   its Canvas page points to (overdose deaths, drug checking), and her 20 Oct correction: **dependence is
   withdrawal when a drug is stopped; compulsive use despite harm is addiction**. Her rule on slide 3: a slide
   with **Pusheen the cat** is tested on the concept, not its statistics or finer details (slides 3, 11,
@@ -204,19 +207,30 @@ signature sits in a box a round asks the student to fill, or anything is signed 
 where it put it; or if a stroke drawn across a box is not placed in it. The modules are inlined as namespaces (never retyped) and the page's
 script is parsed before it ships. Progress lives under `phf.chart.*`; `phf.more.chart` feeds the home row.
 
+## Learn the short answers (`rep.html`, 27 Oct 2026)
+
+The written section as key words (`content/rep.js`): **Joan's 18 short answers first** — her three Formative
+mini-exams, her model answers, cut into short lines in `content/shorts/hers.js` — then the tool's 34 in her format,
+tagged. One group per topic. 52 pieces, 207 key-word lines. Where her model answer lists alternatives (`any: k`), the
+page asks for all of them: you learn every option, and the "I had it in other words" button is there for the rest.
+It is HS2 Final's guided-recall page ("Learn the cases"), ported into the shared pipeline: `rep-engine.mjs` is
+that page's engine, unchanged (typed key words, marked by the page; a day counts after 2 from-memory hits in a row;
+solid after 3 days running); `rep.js`, `rep.template.html`, `rep.css` and `rep.build.mjs` are its page made
+general, driven by `content/rep.js`. All five are shared files (`shared-check.mjs`). `build.mjs` and
+`resplice.mjs` regenerate `rep.html` (or `node rep.build.mjs` alone); **do not edit the generated `rep.html`**.
+Progress lives under `<prefix>relearn.v1`, apart from the Paper Sim scores, with export and import. The home screen
+has it as a featured card, and the hub's exam opens on it (its Learn side).
+
 ## How it is built
 
 Template + `sim.config.mjs` + `content/`, on the shared pipeline (`node shared-check.mjs` proves
 the shared files match the sibling sims byte for byte). With no captures, `PATHS.bank` and
-`PATHS.cap` are null and every question comes from `content/authored-*.js`.
+`PATHS.cap` are null: her questions come from `content/hers.js`, the tool's from `content/authored-*.js`.cap` are null and every question comes from `content/authored-*.js`.
 
 ```
-node port-intro-pharm.mjs    # bank/intro-pharm.json + content/joan-saqs.js -> content/authored-*.js
-node port-intro-pharm.mjs --list   # every written question the noMock rule keeps out of a mock
+node gen-authored.mjs        # content/joan-saqs.js -> content/authored-*.js
 node build.mjs               # -> index.html, gates fail both ways
 node resplice.mjs            # only the template changed
 ```
-
-`bank/intro-pharm.json` is `const DATA` lifted out of `../intro-pharm/index.html`, untouched.
 
 State lives in this browser only (`phf.*`). Nothing is sent anywhere.

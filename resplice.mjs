@@ -31,3 +31,6 @@ fs.writeFileSync(path.join(HERE, 'index.html'), out);
 console.log(`index.html re-spliced: ${m[1].length / 1024 | 0} KB bank · ${fs.statSync(path.join(HERE, 'index.html')).size / 1024 | 0} KB total · script parses`);
 console.log(none ? 'short versions: none yet (no content/shorts.js), so written questions tick their full model answers'
   : `short versions: ${Object.keys(shorts).length} of ${D.questions.filter(q => q.saq).length} written questions`);
+
+/* the guided-recall page for the written section (rep.build.mjs; a sim without content/rep.js has none) */
+await import('./rep.build.mjs');

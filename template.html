@@ -507,9 +507,10 @@ const anyNote = q => q.saq&&q.saq.any?`<div class="note">The model answer lists 
 function pickN(pool, n, excl){
   const fresh = pool.filter(q=>!excl.has(q.id));
   /* Least-seen first: rank = times dealt, so nothing repeats an (n+1)th time
-     until the whole pool has been dealt n times. Misses jump the queue (-2),
-     Math.random() only breaks ties among equally-seen questions. */
-  const rank = q => (S.miss[q.id]?-2:0) + (S.seen[q.id]||0) + Math.random();
+     until the whole pool has been dealt n times. Misses jump the queue (-2).
+     Among equally-seen questions the lecturer's own come before the tool's
+     (+0.5), and Math.random() only breaks ties within each. */
+  const rank = q => (S.miss[q.id]?-2:0) + (S.seen[q.id]||0) + (q.authored?0.5:0) + Math.random()/2;
   return fresh.sort((a,b)=>rank(a)-rank(b)).slice(0,n);
 }
 function dealStratified(n, pool=MOCKABLE){
@@ -550,9 +551,15 @@ function dealFull(){
     /* when the paper ALSO publishes the count (shape.saq), stop at that many, and leave at least a mark for each slot
        still to fill — 11 questions for 20 marks cannot open on a run of 3-markers */
     const N=META.shape.saq||Infinity, room=()=>META.shape.saqMarks-m-(N===Infinity?0:N-out.length-1);
-    for(let pass=0; pass<2 && m<META.shape.saqMarks && out.length<N; pass++) for(const q of ranked){
+    /* second pass: no question smaller than the marks still owed per open slot, so a run of 1-markers cannot fill
+       the count short of the marks; the third takes whatever still fits */
+    const owed=()=>N===Infinity?0:Math.floor((META.shape.saqMarks-m)/(N-out.length));
+    for(let pass=0; pass<3 && m<META.shape.saqMarks && out.length<N; pass++) for(const q of ranked){
       if(used.has(q.id)||q.pts>room()) continue;
-      if(!pass && out.some(x=>x.quiz===q.quiz)) continue;      // first pass: one per topic
+      if(pass===1 && q.pts<owed()) continue;
+      /* first pass: one per topic (group, not quiz row — a lecturer's mini-exam is one row across every topic,
+         so one per row would cap her questions at one per mini-exam and fill the rest with the tool's) */
+      if(!pass && out.some(x=>x.sys===q.sys)) continue;
       out.push(q); used.add(q.id); m+=q.pts; if(m>=META.shape.saqMarks||out.length>=N) break; }
     return closed.concat(shuffle(out));
   }

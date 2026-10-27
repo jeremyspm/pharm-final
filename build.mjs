@@ -444,3 +444,6 @@ const byT = {}; for (const q of questions) byT[q.type] = (byT[q.type] || 0) + 1;
 console.log('bank:', questions.length, 'questions ·', quizzes.length, 'quizzes ·', used.size, 'images ·', held.length, 'held');
 console.log('by system:', JSON.stringify(by), '\nby type:', JSON.stringify(byT));
 console.log('index.html', (fs.statSync(path.join(HERE, 'index.html')).size / 1024 | 0) + ' KB');
+
+/* the guided-recall page for the written section (rep.build.mjs; a sim without content/rep.js has none) */
+await import('./rep.build.mjs');
