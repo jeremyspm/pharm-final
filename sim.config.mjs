@@ -56,11 +56,11 @@ export const META = {
   /* other pages of this tool, as home rows (template: META.more). Chart Speak — every abbreviation and term on a med
      chart, drilled — is terms.html, built by build-terms.mjs from content/terms/; it leaves its progress line under
      phf.more.terms, which replaces `s` once it exists. */
-  more: [{ sec: 'Learn', href: 'rep.html', ic: '🧠', t: 'Learn the short answers',
+  more: [{ sec: 'Learn', href: 'rep.html', ic: '🧠', t: 'Write the short answers',
     s: 'Joan’s own 18 short answers, verbatim, as key words that come back over the days' },
     { sec: 'Learn', href: 'cards.html', ic: '🗂', t: 'Flashcards',
     s: 'Anki, stripped down: the must-know abbreviations and the tool’s short answers',
-    hl: { c: '#9333ea', c2: '#c084fc', kick: '✨ New · spaced repetition', go: 'Study ›' } },
+    hl: { c: '#9333ea', c2: '#c084fc', kick: 'Spaced repetition', go: 'Study ›' } },
     { sec: 'Read a med chart', href: 'terms.html', ic: '💬', key: 'terms', t: 'Chart Speak',
     s: 'OD, BD, TDS, PRN, stat… every med-chart term, drilled' },
     /* Chart Sim — the NZ 8-Day National Medication Chart redrawn, to read and to chart on (tap or handwrite) — is
@@ -68,7 +68,7 @@ export const META = {
        featured card on home (his pick, 2 Oct 2026) so people know to open it. */
     { sec: 'Read a med chart', href: 'chart.html', ic: '📋', key: 'chart', t: 'Chart Sim',
       s: 'The real NZ 8-day chart: read it, then chart the med round — tap or handwrite',
-      hl: { c: '#ea580c', c2: '#fbbf24', kick: '✨ New · hands-on', go: 'Try it ›' } }],
+      hl: { c: '#ea580c', c2: '#fbbf24', kick: 'Hands-on', go: 'Try it ›' } }],
   banner: '<b>Joan’s own questions come first.</b> Her three Formative mini-exams — 36 multi-choice and 18 short answers with her answer key and model answers, published 20 Oct — are the first rows, verbatim, and every practice run and mock deals them before anything else. <b>The tool’s questions are a small set</b> on what hers do not already ask: the 22 abbreviations she said you must know, the drugs she named on 20 Oct, and short answers in the format she described. Each names the slide or lecture moment its answer comes from and is tagged “tool’s question”.',
   pickIntro: 'The first three rows are <b>Joan’s own Formative mini-exams</b> — her questions, her key, her model answers. Below them, the tool’s questions: the must-know abbreviations, the drugs she named on 20 Oct, then short answers <b>in the format she described</b> (a definition plus an example), one row per topic.',
   help: {

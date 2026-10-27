@@ -40,19 +40,13 @@ header .back{text-decoration:none;white-space:nowrap}
   header .btn{grid-row:1/span 2;padding:8px 10px;min-width:40px}
 }
 /* ── the paper's colour (15 Oct 2026: "it should SCREAM Test 3, not look like INP"). --tool is the PAPER's colour,
-   the same one jeremyspm.github.io uses (HS2 blue, INP green, Pharm purple), set from TOOL at load. The header bar
-   wears it solid, the page a soft tint (--bg is mixed from --bg0), buttons and links take it as --primary, and the
-   home banner says the tool's name in giant type. ── */
-:root{--bg:color-mix(in srgb,var(--tool,var(--bg0)) 7%,var(--bg0));
+   the same one jeremyspm.github.io uses (HS2 blue, INP green, Pharm purple), set from TOOL at load. 27 Oct: toned
+   down ("the CSS is way too much"): a line under the header, a faint page tint, buttons and links as --primary. ── */
+:root{--bg:color-mix(in srgb,var(--tool,var(--bg0)) 3%,var(--bg0));
   --tool-deep:color-mix(in srgb,var(--tool,#4f46e5) 72%,#000);
   --primary:color-mix(in srgb,var(--tool,hsl(218 91% 64%)) 70%,#fff)}
 :root[data-theme=light]{--primary:color-mix(in srgb,var(--tool,hsl(218 91% 64%)) 88%,#000)}
-header{background:linear-gradient(100deg,var(--tool-deep),color-mix(in srgb,var(--tool,#4f46e5) 88%,#000));color:#fff;
-  border-bottom:0;box-shadow:0 4px 18px -8px color-mix(in srgb,var(--tool,#4f46e5) 60%,transparent)}
-header h1{color:#fff;letter-spacing:-.01em}
-header .d,header a.d{color:rgb(255 255 255 / .85)}
-header .btn{color:#fff;border-color:rgb(255 255 255 / .3);background:rgb(255 255 255 / .1)}
-header .btn:hover{background:rgb(255 255 255 / .2)}
+header{border-bottom:2px solid var(--tool,var(--border))}
 main{max-width:720px;margin:0 auto;padding:14px 14px 90px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
   padding:14px;margin:0 0 12px}
@@ -271,22 +265,14 @@ a{color:var(--primary)}
 .lch{flex:0 0 auto;color:var(--muted-fg);font-size:1.3rem;line-height:1}
 a.lrow{text-decoration:none}   /* a row that opens another page of this tool (META.more) */
 /* a featured row (META.more[].hl, 2 Oct 2026 — his pick "B, exactly like B" for pharm-final's Chart Sim): a taller card
-   in its own colour (--hl, with --hl2 for the gradient), a kicker line, a pill button and specks drifting up behind it */
-.lrow.fb{position:relative;overflow:hidden;padding:14px;gap:14px;border-color:color-mix(in srgb,var(--hl) 60%,var(--border));
-  background:radial-gradient(120% 140% at 0% 0%,color-mix(in srgb,var(--hl) 34%,var(--card)),var(--card) 70%)}
+   in its own colour (--hl, --hl2 for the text), a kicker line and a go link; since 27 Oct no gradient, glow or specks */
+.lrow.fb{border-color:color-mix(in srgb,var(--hl) 45%,var(--border))}
 .lrow.fb:hover{border-color:var(--hl)}
-.fb .lic{flex-basis:52px;height:52px;border-radius:14px;font-size:1.6rem;background:linear-gradient(135deg,var(--hl),var(--hl2));
-  box-shadow:0 6px 18px -6px var(--hl)}
-.fb .ltx b{font-size:1.05rem}
-.fb .kick{display:block;font-size:.68rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--hl2)}
-.fb .go{flex:0 0 auto;font-size:.8rem;font-weight:700;padding:7px 12px;border-radius:99px;background:var(--hl);color:#fff;white-space:nowrap}
-.fb .dot{position:absolute;width:4px;height:4px;border-radius:50%;background:#fff;opacity:0;pointer-events:none;animation:fbrise 4s linear infinite}
-.fb .d1{left:62%}.fb .d2{left:74%;animation-delay:1.3s;width:3px;height:3px}
-.fb .d3{left:86%;animation-delay:2.6s}.fb .d4{left:55%;animation-delay:3.3s;width:2px;height:2px}
-@keyframes fbrise{0%{bottom:-4px;opacity:0}20%{opacity:.9}100%{bottom:100%;opacity:0}}
-:root[data-theme=light] .fb .kick{color:color-mix(in srgb,var(--hl) 80%,#000)}
-:root[data-theme=light] .fb .dot{background:var(--hl)}
-@media(prefers-reduced-motion:reduce){.fb .dot{animation:none}}
+.fb .lic{color:var(--hl);background:color-mix(in srgb,var(--hl) 16%,transparent)}
+.fb .kick{display:block;font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--hl2)}
+.fb .go{flex:0 0 auto;font-size:.8rem;font-weight:650;color:var(--hl2);white-space:nowrap}
+.fb .dot{display:none}
+:root[data-theme=light] .fb .kick,:root[data-theme=light] .fb .go{color:color-mix(in srgb,var(--hl) 80%,#000)}
 /* the paper's banner on home: its bold first sentence always shows, the rest is one tap away */
 .bnote{margin:0 0 10px}
 .bnote>summary{cursor:pointer;list-style:none}
@@ -295,26 +281,15 @@ a.lrow{text-decoration:none}   /* a row that opens another page of this tool (ME
 .bnote[open]>summary::after{content:''}
 .shead{display:flex;align-items:center;gap:10px;margin:0 0 12px}
 .shead h2{margin:0;font-size:1.1rem;flex:1}
-/* the tool's own name (26 Sep 2026; loud since 15 Oct): four Paper Sims share one layout, so the home banner says
-   which one this is in giant type on the paper's colour, with the tool's emoji as a watermark and the countdown. */
-.idcard{position:relative;overflow:hidden;display:flex;align-items:center;margin:0 0 14px;padding:20px 22px;border-radius:18px;color:#fff;
-  background:radial-gradient(90% 130% at 100% 0%,rgb(255 255 255 / .2),transparent 60%),
-    linear-gradient(135deg,color-mix(in srgb,var(--tool) 94%,#fff),var(--tool-deep));
-  box-shadow:0 14px 34px -16px color-mix(in srgb,var(--tool) 80%,transparent)}
-.idic{position:absolute;right:-8px;bottom:-30px;font-size:7.5rem;line-height:1;opacity:.22;transform:rotate(-14deg);pointer-events:none}
-.idtx{position:relative;min-width:0}
-.idtx small{display:block;font-size:.72rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgb(255 255 255 / .86)}
-.idtx b{display:block;font-size:clamp(2.3rem,7vw,3.4rem);line-height:.95;margin:6px 0 8px;font-weight:900;letter-spacing:-.03em;text-transform:uppercase}
-.idtx>span{display:block;font-size:.88rem;color:rgb(255 255 255 / .9);line-height:1.35}
-.idtx .idwhen{display:inline-flex;margin-top:12px;padding:5px 12px;border-radius:999px;background:rgb(255 255 255 / .18);
-  border:1px solid rgb(255 255 255 / .32);font-size:.8rem;font-weight:700;color:#fff}
+/* the tool's own name (26 Sep 2026): a plain title block since 27 Oct, no banner, no watermark */
+.idcard{margin:4px 2px 14px}
+.idic{display:none}
+.idtx small{display:block;font-size:.75rem;font-weight:600;color:var(--muted-fg)}
+.idtx b{display:block;font-size:1.45rem;line-height:1.2;margin:2px 0 4px;font-weight:750;letter-spacing:-.01em}
+.idtx>span{display:block;font-size:.88rem;color:var(--muted-fg);line-height:1.4}
+.idtx .idwhen{display:inline-block;margin-top:6px;font-size:.8rem;font-weight:650;color:var(--primary)}
 /* phone: the banner and the rows tighten so home still fits one 375x812 screen as near as it can */
 @media(max-width:560px){
-  .idcard{padding:14px 16px;margin-bottom:10px;border-radius:14px}
-  .idic{font-size:5.5rem;bottom:-20px}
-  .idtx b{font-size:2.1rem;margin:4px 0 6px}
-  .idtx>span{font-size:.8rem}
-  .idtx .idwhen{margin-top:8px;font-size:.76rem}
   .lrow{padding:6px 12px;margin-bottom:5px}
   .lrow.fb{padding:10px 12px}
   .lic{flex-basis:36px;height:36px}

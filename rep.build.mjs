@@ -109,7 +109,7 @@ else {
 
   const date = META.sitting.date, d = new Date(date + 'T12:00:00'); d.setDate(d.getDate() - 1);
   const last = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  const meta = { prefix: META.prefix, hue: META.tool.hue, icon: META.tool.icon, kick: META.tool.kick, name: REP.name || 'Learn the short answers',
+  const meta = { prefix: META.prefix, hue: META.tool.hue, icon: META.tool.icon, kick: META.tool.kick, name: REP.name || 'Write the short answers',
     sub: REP.sub || '', exam: date, last, examDay: REP.examDay || date, who: META.who || 'the lecturer', groupWord: REP.groupWord || 'topics',
     how: REP.how || '', home: './' };
   const counts = Object.fromEntries(Object.entries(kinds).map(([k, v]) => [k, v.length]));
@@ -117,7 +117,7 @@ else {
   const json = JSON.stringify(d2).replace(/<\//g, '<\\/');
   const V = crypto.createHash('sha1').update(['rep.js', 'rep.css', 'rep-engine.mjs'].map(f => fs.readFileSync(path.join(HERE, f), 'utf8')).join('')).digest('hex').slice(0, 8);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const fill = { TITLE: `${META.short || META.title} · ${meta.name}`, PREFIX: META.prefix, HUB: `https://jeremyspm.github.io/#${META.hub}/learn`,
+  const fill = { TITLE: `${META.short || META.title} · ${meta.name}`, PREFIX: META.prefix, HUB: `https://jeremyspm.github.io/#${META.hub}/write`,
     SHORT: META.tool.name, H1: meta.name, FOOT: REP.foot || 'Student-made revision. Not MIT material. Progress stays in this browser.', V };
   let out = fs.readFileSync(path.join(HERE, 'rep.template.html'), 'utf8');
   for (const [k, v] of Object.entries(fill)) out = out.split('@' + k + '@').join(k === 'FOOT' ? v : esc(v));

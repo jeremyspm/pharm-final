@@ -34,7 +34,7 @@ const pieces = [
 ];
 
 export const REP = {
-  name: 'Learn the short answers',
+  name: 'Write the short answers',
   sub: 'Joan’s own 18 short answers, verbatim · read it, type it, it comes back',
   groupWord: 'topics',
   how: 'Only Joan’s own short answers are here — her three Formative mini-exams, her questions and her model answers. Everything else (the must-know abbreviations, the tool’s short answers in her format) is in Flashcards.',
