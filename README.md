@@ -46,6 +46,14 @@ formatives do not cover, in their shape:
   drugs, rewritten short. Nothing goes past what a slide says about a drug.
 - **Eight multi-choice** on Modules 8 and 9 (live vaccines, the oral vaccine, Type IV, anaphylaxis signs,
   tolerance, acute poisoning, naloxone, NAC), rewritten to her mini-exams' length.
+- **The 22 must-know abbreviations** (added 27 Oct, `content/joan/abbr.js`): she said "you must, must, must know
+  your abbreviations" (20 Oct [1:18:40]). The course's own Must-Know list (Must Know: Medication & Prescription
+  Abbreviations 01.26, Concepts (2) slides 77–80: OD, BD, QID, q4h, PRN, stat, mane, nocte, ac, pc, PO, SL, SC, IM, IV,
+  PR, NKA, NKDA) plus the four more she named on the tape — Q6H [1:19:01], EC, SR, CR [1:33:06–1:33:25]. TDS is her
+  own mini-exam 1 Q1, so it is not repeated. One multi-choice each in her Q1's wording, the wrong options Chart Speak's
+  classic confusions, keys spread over A–D in no visible order. **They are `noMock`**: drilled in Learn as you go and
+  Pick my rep (their own row), but a mock deals none — the paper will hold one or two, and 22 would swamp its mix. The
+  template's mock note says so (`META.help.noMockClosed`).
 
 `gen-authored.mjs` writes them into the generated `content/authored-*.js`. **Every deal — Learn, a topic
 drill, a mock — serves her questions before the tool's** among equally-seen questions (`pickN` in the shared
@@ -210,8 +218,9 @@ script is parsed before it ships. Progress lives under `phf.chart.*`; `phf.more.
 ## Learn the short answers (`rep.html`, 27 Oct 2026)
 
 The written section as key words (`content/rep.js`): **Joan's 18 short answers first** — her three Formative
-mini-exams, her model answers, cut into short lines in `content/shorts/hers.js` — then the tool's 34 in her format,
-tagged. One group per topic. 52 pieces, 207 key-word lines. Where her model answer lists alternatives (`any: k`), the
+mini-exams, her model answers, cut into short lines in `content/shorts/hers.js` — then **the 23 must-know
+abbreviations** (TDS included) as seven small key-word cards in their own group, then the tool's 34 in her format,
+tagged. One group per topic. 59 pieces, 230 key-word lines. Where her model answer lists alternatives (`any: k`), the
 page asks for all of them: you learn every option, and the "I had it in other words" button is there for the rest.
 It is HS2 Final's guided-recall page ("Learn the cases"), ported into the shared pipeline: `rep-engine.mjs` is
 that page's engine, unchanged (typed key words, marked by the page; a day counts after 2 from-memory hits in a row;

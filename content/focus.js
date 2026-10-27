@@ -126,7 +126,7 @@ export const FOCUS = [
 
 /* ══════════ TIER 2 — taught and examinable, named by no assessed outcome ══════════ */
 { id:'concepts2', sys:'found', tier:0, t:'Classification, routes, formulations and abbreviations', flag:'tape LO1',
-  from:[S('joan-found', /Pharmacology Concepts \(2\)/), F({1:[1,10], 2:[6], 3:[1,6,9,10]})],
+  from:[S('joan-found', /Pharmacology Concepts \(2\)/), { quiz:['joan-abbr'] }, F({1:[1,10], 2:[6], 3:[1,6,9,10]})],
   done:'Name the ways medicines are classified; tell a local from a systemic effect; compare routes (oral, IV, IM, subcutaneous, inhaled, topical, rectal) for speed and drawbacks; define dissolution, excipient and enteric coating and say why a coated tablet is not crushed; read the common prescription abbreviations (prn, bd, tds, qid, mane, nocte, stat, PO, SL, SC, IM, IV, PR, NKDA).',
   ask:'Abbreviations: “you must, must, must know your abbreviations … you’ve got to leave this course knowing how to read a prescription” [1:18:39]. Expect a prescription to interpret — drug, route, time, frequency — not “what does PO mean”, which is “too easy” [0:43:27]. Four of her formative questions are exactly that (TDS · BD prn · QID PR · EC). Why formulations differ — GTN sublingual, morphine in six or seven forms — was her worked example [0:44:37–0:47:27]. Chart Speak drills every abbreviation.',
   cap:'An eleven-abbreviation recall list is a five-mark list question — drillable, never dealt into a mock. The nurse cannot legally change a route: check with the prescriber [0:48:09].',

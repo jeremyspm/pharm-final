@@ -1718,7 +1718,7 @@ $('#helpBtn').onclick=()=>{const H=META.help||{}, nAuth=DATA.questions.filter(q=
   ${ESSAYS.some(q=>!q.authored&&!q.her)?`Written questions from Canvas have <b>model answers written by this tool</b> (Canvas publishes none), one mark per step, each naming its source. `:''}
   ${nAuth?(H.authored||`<b>${nAuth} written questions were written by this tool</b> from the lecture decks, because the real paper has a written section and the quizzes have none; each is labelled as the tool’s and names its deck. `):''}
   ${DATA.chains.length?'Warm-up chains are scaffolds built from the decks, not the lecturer’s material. ':''}
-  ${nNm?`${nNm} questions are about being a student on this course rather than the subject (attendance, extensions, online-exam rules); they stay under Pick my rep but are never dealt into a mock paper. `:''}
+  ${nNm?(H.noMockClosed||`${nNm} questions are about being a student on this course rather than the subject (attendance, extensions, online-exam rules); they stay under Pick my rep but are never dealt into a mock paper. `):''}
   ${nNmW?(H.noMockWritten||`${nNmW} written questions stay under Pick my rep but are never dealt into a mock paper. `):''}</p>
   ${H.groups?`<p>${H.groups}</p>`:''}
   <h3>Learn mode</h3>

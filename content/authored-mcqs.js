@@ -2,6 +2,358 @@
    None are the lecturer's questions; each names the slide or lecture moment that supplies its answer. */
 export const AUTHORED_MCQS = [
  {
+  "quiz": "joan-abbr",
+  "quizName": "Must-know abbreviations · the tool’s questions",
+  "sys": "found",
+  "q": "The term “OD” on a medication chart means:",
+  "options": [
+   "Twice a day",
+   "Every 4 hours",
+   "Once a day",
+   "Three times a day"
+  ],
+  "correct": 2,
+  "why": "Latin omni die, “every day”. It is on the course list, so you must be able to read it — but many charting standards now say write “daily” instead.",
+  "src": "The course’s Must Know: Medication & Prescription Abbreviations list (01.26) and Pharmacology Concepts (2) slides 77–80 · Joan’s 20 Oct revision session [1:18:40]",
+  "noMock": true
+ },
+ {
+  "quiz": "joan-abbr",
+  "quizName": "Must-know abbreviations · the tool’s questions",
+  "sys": "found",
+  "q": "The term “BD” on a medication chart means:",
+  "options": [
+   "Twice a day",
+   "Three times a day",
+   "Once a day",
+   "Four times a day"
+  ],
+  "correct": 0,
+  "why": "Latin bis die / bis in die. The NZ chart’s recommended times: 0800 and 2000. Not quite the same as q12h, which runs strictly by the clock.",
+  "src": "The course’s Must Know: Medication & Prescription Abbreviations list (01.26) and Pharmacology Concepts (2) slides 77–80 · Joan’s 20 Oct revision session [1:18:40]",
+  "noMock": true
+ },
+ {
+  "quiz": "joan-abbr",
+  "quizName": "Must-know abbreviations · the tool’s questions",
+  "sys": "found",
+  "q": "The term “QID” on a medication chart means:",
+  "options": [
+   "Every 4 hours",
+   "Three times a day",
+   "Every 6 hours",
+   "Four times a day"
+  ],
+  "correct": 3,
+  "why": "Latin quater in die. The NZ chart’s recommended times: 0600, 1200, 1800 and 2200 — nearly 6-hourly, but it ends at 2200 so the night is left alone. q6h runs by the clock: 0600, 1200, 1800 and 2400.",
+  "src": "The course’s Must Know: Medication & Prescription Abbreviations list (01.26) and Pharmacology Concepts (2) slides 77–80 · Joan’s 20 Oct revision session [1:18:40]",
+  "noMock": true
+ },
+ {
+  "quiz": "joan-abbr",
+  "quizName": "Must-know abbreviations · the tool’s questions",
+  "sys": "found",
+  "q": "The term “q4h” on a medication chart means:",
+  "options": [
+   "Four times a day",
+   "Every 4 hours",
+   "Every 6 hours",
+   "Every 2 hours"
+  ],
+  "correct": 1,
+  "why": "q is Latin quaque, “every”; qqh is quaque quarta hora, “every fourth hour” — both on the course list. Around the clock, so up to 6 doses in 24 hours: on a PRN order, check the 24-hour maximum before every dose.",
+  "src": "The course’s Must Know: Medication & Prescription Abbreviations list (01.26) and Pharmacology Concepts (2) slides 77–80 · Joan’s 20 Oct revision session [1:18:40]",
+  "noMock": true
+ },
+ {
+  "quiz": "joan-abbr",
+  "quizName": "Must-know abbreviations · the tool’s questions",
+  "sys": "found",
+  "q": "The term “q6h” on a medication chart means:",
+  "options": [
+   "Four times a day",
+   "Every 6 hours",
+   "Every 4 hours",
+   "Every 8 hours"
+  ],
+  "correct": 1,
+  "why": "By the clock, day and night — the NZ chart recommends 0600, 1200, 1800 and 2400 for 6-hourly antibiotics. QID is also four doses, but ends at 2200.",
+  "src": "Joan’s 20 Oct revision session [1:19:01] (“QID, TDS, Q6H, BD”)",
+  "noMock": true
+ },
+ {
+  "quiz": "joan-abbr",
+  "quizName": "Must-know abbreviations · the tool’s questions",
+  "sys": "found",
+  "q": "The term “PRN” on a medication chart means:",
+  "options": [
+   "Immediately",
+   "Once a day",
+   "Twice a day",
+   "When required"
+  ],
+  "correct": 3,
+  "why": "Latin pro re nata, “as the occasion arises” (the course list: “if necessary”). A PRN order must say what it is for and the most you may give in 24 hours. You assess before you give it and evaluate after — and Joan called PRN an ethical problem, because “as necessary” rests on the nurse’s judgement.",
+  "src": "The course’s Must Know: Medication & Prescription Abbreviations list (01.26) and Pharmacology Concepts (2) slides 77–80 · Joan’s 20 Oct revision session [1:18:40]",
+  "noMock": true
+ },
+ {
+  "quiz": "joan-abbr",
+  "quizName": "Must-know abbreviations · the tool’s questions",
+  "sys": "found",
+  "q": "The term “stat” on a medication chart means:",
+  "options": [
+   "Immediately",
+   "When required",
+   "Once a day",
+   "Twice a day"
+  ],
+  "correct": 0,
+  "why": "Latin statim, “at once” (the course list: “immediately”). A one-off dose, written in the once-only section of the chart and given straight away.",
+  "src": "The course’s Must Know: Medication & Prescription Abbreviations list (01.26) and Pharmacology Concepts (2) slides 77–80 · Joan’s 20 Oct revision session [1:18:40]",
+  "noMock": true
+ },
+ {
+  "quiz": "joan-abbr",
+  "quizName": "Must-know abbreviations · the tool’s questions",
+  "sys": "found",
+  "q": "The term “mane” on a medication chart means:",
+  "options": [
+   "At night",
+   "At midday",
+   "In the morning",
+   "Before meals"
+  ],
+  "correct": 2,
+  "why": "Latin for “in the morning”. The NZ chart’s recommended time: 0800.",
+  "src": "The course’s Must Know: Medication & Prescription Abbreviations list (01.26) and Pharmacology Concepts (2) slides 77–80 · Joan’s 20 Oct revision session [1:18:40]",
+  "noMock": true
+ },
+ {
+  "quiz": "joan-abbr",
+  "quizName": "Must-know abbreviations · the tool’s questions",
+  "sys": "found",
+  "q": "The term “nocte” on a medication chart means:",
+  "options": [
+   "In the morning",
+   "At midday",
+   "After meals",
+   "At night"
+  ],
+  "correct": 3,
+  "why": "Latin for “at night”. The NZ chart recommends 1800 or 2000; your ward sets which.",
+  "src": "The course’s Must Know: Medication & Prescription Abbreviations list (01.26) and Pharmacology Concepts (2) slides 77–80 · Joan’s 20 Oct revision session [1:18:40]",
+  "noMock": true
+ },
+ {
+  "quiz": "joan-abbr",
+  "quizName": "Must-know abbreviations · the tool’s questions",
+  "sys": "found",
+  "q": "The term “ac” on a medication chart means:",
+  "options": [
+   "After meals",
+   "In the morning",
+   "Before meals",
+   "At night"
+  ],
+  "correct": 2,
+  "why": "Latin ante cibum, “before food” — often 30–60 minutes before eating, for medicines that absorb better on an empty stomach, or that have to be in place before food arrives (e.g. mealtime insulin, which is time-critical).",
+  "src": "The course’s Must Know: Medication & Prescription Abbreviations list (01.26) and Pharmacology Concepts (2) slides 77–80 · Joan’s 20 Oct revision session [1:18:40]",
+  "noMock": true
+ },
+ {
+  "quiz": "joan-abbr",
+  "quizName": "Must-know abbreviations · the tool’s questions",
+  "sys": "found",
+  "q": "The term “pc” on a medication chart means:",
+  "options": [
+   "After meals",
+   "Before meals",
+   "At night",
+   "In the morning"
+  ],
+  "correct": 0,
+  "why": "Latin post cibum, “after food” — for medicines that upset an empty stomach or absorb better with food.",
+  "src": "The course’s Must Know: Medication & Prescription Abbreviations list (01.26) and Pharmacology Concepts (2) slides 77–80 · Joan’s 20 Oct revision session [1:18:40]",
+  "noMock": true
+ },
+ {
+  "quiz": "joan-abbr",
+  "quizName": "Must-know abbreviations · the tool’s questions",
+  "sys": "found",
+  "q": "The term “PO” on a medication chart means:",
+  "options": [
+   "Into the rectum",
+   "By mouth (swallowed)",
+   "Under the tongue (sublingual)",
+   "Between the cheek and gum (buccal)"
+  ],
+  "correct": 1,
+  "why": "Latin per os. Enteral — absorbed from the gut, and it passes through the liver before reaching the body (the first-pass effect), which is why oral doses are often bigger than IV ones.",
+  "src": "The course’s Must Know: Medication & Prescription Abbreviations list (01.26) and Pharmacology Concepts (2) slides 77–80 · Joan’s 20 Oct revision session [1:18:40]",
+  "noMock": true
+ },
+ {
+  "quiz": "joan-abbr",
+  "quizName": "Must-know abbreviations · the tool’s questions",
+  "sys": "found",
+  "q": "The term “SL” on a medication chart means:",
+  "options": [
+   "Under the tongue (sublingual)",
+   "Between the cheek and gum (buccal)",
+   "Under the skin (subcutaneous)",
+   "By mouth (swallowed)"
+  ],
+  "correct": 0,
+  "why": "Dissolves under the tongue and goes straight into the blood, skipping the liver — fast. The deck’s example: GTN spray for angina.",
+  "src": "The course’s Must Know: Medication & Prescription Abbreviations list (01.26) and Pharmacology Concepts (2) slides 77–80 · Joan’s 20 Oct revision session [1:18:40]",
+  "noMock": true
+ },
+ {
+  "quiz": "joan-abbr",
+  "quizName": "Must-know abbreviations · the tool’s questions",
+  "sys": "found",
+  "q": "The term “SC” on a medication chart means:",
+  "options": [
+   "Under the tongue (sublingual)",
+   "Under the skin (subcutaneous)",
+   "Into a muscle (intramuscular)",
+   "Into the skin itself (intradermal)"
+  ],
+  "correct": 1,
+  "why": "Into the fatty tissue just under the dermis — e.g. insulin and enoxaparin. Slower and less reliable than IM, small volumes only.",
+  "src": "The course’s Must Know: Medication & Prescription Abbreviations list (01.26) and Pharmacology Concepts (2) slides 77–80 · Joan’s 20 Oct revision session [1:18:40]",
+  "noMock": true
+ },
+ {
+  "quiz": "joan-abbr",
+  "quizName": "Must-know abbreviations · the tool’s questions",
+  "sys": "found",
+  "q": "The term “IM” on a medication chart means:",
+  "options": [
+   "Into a vein (intravenous)",
+   "Under the skin (subcutaneous)",
+   "Into the skin itself (intradermal)",
+   "Into a muscle (intramuscular)"
+  ],
+  "correct": 3,
+  "why": "Absorbed from the blood vessels running through the muscle. The deck’s examples: a Depo-Provera injection, and an adrenaline auto-injector into the thigh.",
+  "src": "The course’s Must Know: Medication & Prescription Abbreviations list (01.26) and Pharmacology Concepts (2) slides 77–80 · Joan’s 20 Oct revision session [1:18:40]",
+  "noMock": true
+ },
+ {
+  "quiz": "joan-abbr",
+  "quizName": "Must-know abbreviations · the tool’s questions",
+  "sys": "found",
+  "q": "The term “IV” on a medication chart means:",
+  "options": [
+   "Into a muscle (intramuscular)",
+   "Into the bone marrow (intraosseous)",
+   "Into a vein (intravenous)",
+   "Under the skin (subcutaneous)"
+  ],
+  "correct": 2,
+  "why": "Straight into the bloodstream: no absorption needed, 100% bioavailable, onset immediate — and very hard to take back once it is in.",
+  "src": "The course’s Must Know: Medication & Prescription Abbreviations list (01.26) and Pharmacology Concepts (2) slides 77–80 · Joan’s 20 Oct revision session [1:18:40]",
+  "noMock": true
+ },
+ {
+  "quiz": "joan-abbr",
+  "quizName": "Must-know abbreviations · the tool’s questions",
+  "sys": "found",
+  "q": "The term “PR” on a medication chart means:",
+  "options": [
+   "Into the vagina",
+   "Into the rectum",
+   "By mouth (swallowed)",
+   "Under the tongue (sublingual)"
+  ],
+  "correct": 1,
+  "why": "Latin per rectum — suppositories and enemas.",
+  "src": "The course’s Must Know: Medication & Prescription Abbreviations list (01.26) and Pharmacology Concepts (2) slides 77–80 · Joan’s 20 Oct revision session [1:18:40]",
+  "noMock": true
+ },
+ {
+  "quiz": "joan-abbr",
+  "quizName": "Must-know abbreviations · the tool’s questions",
+  "sys": "found",
+  "q": "The term “NKA” on a medication chart means:",
+  "options": [
+   "No known allergies (of any kind)",
+   "No known drug allergies",
+   "Allergy status not yet known",
+   "National Health Index number"
+  ],
+  "correct": 0,
+  "why": "Still confirm it with the patient before you give anything.",
+  "src": "The course’s Must Know: Medication & Prescription Abbreviations list (01.26) and Pharmacology Concepts (2) slides 77–80 · Joan’s 20 Oct revision session [1:18:40]",
+  "noMock": true
+ },
+ {
+  "quiz": "joan-abbr",
+  "quizName": "Must-know abbreviations · the tool’s questions",
+  "sys": "found",
+  "q": "The term “NKDA” on a medication chart means:",
+  "options": [
+   "No known allergies (of any kind)",
+   "Allergy status not yet known",
+   "No known drug allergies",
+   "National Health Index number"
+  ],
+  "correct": 2,
+  "why": "Drug allergies only — the patient may still be allergic to food, latex or plasters. Confirm it by asking.",
+  "src": "The course’s Must Know: Medication & Prescription Abbreviations list (01.26) and Pharmacology Concepts (2) slides 77–80 · Joan’s 20 Oct revision session [1:18:40]",
+  "noMock": true
+ },
+ {
+  "quiz": "joan-abbr",
+  "quizName": "Must-know abbreviations · the tool’s questions",
+  "sys": "found",
+  "q": "The term “EC” on a medication chart means:",
+  "options": [
+   "Slow (sustained) release",
+   "Immediate release",
+   "Modified release",
+   "Enteric coated"
+  ],
+  "correct": 3,
+  "why": "The coating protects the drug from stomach acid, protects the stomach from the drug, or delays the action.",
+  "src": "Joan’s 20 Oct revision session [1:33:06–1:33:25] (“EC, SR, CR”) · Pharmacology Concepts (2) 2026, slide 66",
+  "noMock": true
+ },
+ {
+  "quiz": "joan-abbr",
+  "quizName": "Must-know abbreviations · the tool’s questions",
+  "sys": "found",
+  "q": "The term “SR” on a medication chart means:",
+  "options": [
+   "Immediate release",
+   "Enteric coated",
+   "Under the tongue (sublingual)",
+   "Slow (sustained) release"
+  ],
+  "correct": 3,
+  "why": "Releases the dose over many hours, so it can be given less often.",
+  "src": "Joan’s 20 Oct revision session [1:33:06–1:33:25] (“SR is slow release”)",
+  "noMock": true
+ },
+ {
+  "quiz": "joan-abbr",
+  "quizName": "Must-know abbreviations · the tool’s questions",
+  "sys": "found",
+  "q": "The term “CR” on a medication chart means:",
+  "options": [
+   "Controlled release",
+   "Immediate release",
+   "Enteric coated",
+   "Crush before giving"
+  ],
+  "correct": 0,
+  "why": "Releases the drug at a controlled rate over time, so it can be given less often. Like SR, MR and EC, it is never crushed. Joan, 20 Oct: “You’ve all learned CR, haven’t you, for the CLS assessment? CR is controlled release.”",
+  "src": "Joan’s 20 Oct revision session [1:33:06–1:33:25] (“CR is controlled release”)",
+  "noMock": true
+ },
+ {
   "quiz": "joan-drugs",
   "quizName": "The drugs she named · the tool’s questions",
   "sys": "found",

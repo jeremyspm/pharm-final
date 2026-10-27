@@ -14,7 +14,8 @@ import * as cam from './joan/cam.js';
 import * as imm from './joan/imm.js';
 import * as tox from './joan/tox.js';
 import * as drugs from './joan/drugs.js';
+import * as abbr from './joan/abbr.js';
 
-const TOPICS = [drugs, foundPkpd, adminLife, law, ethics, devmkt, imm, tox, cam];
+const TOPICS = [abbr, drugs, foundPkpd, adminLife, law, ethics, devmkt, imm, tox, cam];
 export const JOAN_SAQS = TOPICS.flatMap(m => m.SAQS);
 export const JOAN_MCQS = TOPICS.flatMap(m => m.MCQS || []);
