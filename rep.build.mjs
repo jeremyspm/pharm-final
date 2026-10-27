@@ -1,9 +1,15 @@
-/* rep.build.mjs — builds rep.html, the guided-recall page for the written section (ported 27 Oct 2026 from hs2-final's
-   "Learn the cases": read it, key words hidden one a line, then all, then key words typed from memory, drilled over days).
+/* rep.build.mjs — builds the two study pages for the written section from content/rep.js:
+     rep.html    the guided-recall ladder (ported 27 Oct 2026 from hs2-final's "Learn the cases": read it, key words hidden
+                 one a line, then all, then key words typed from memory, drilled over days) — VERBATIM material only: a
+                 question and its answer that both come from the lecturer (or the source she set).
+     cards.html  a stripped-down Anki (cards.js + srs-engine.mjs, 27 Oct 2026: "the rest of it becomes straight up SRS
+                 cards, copy anki basically") — everything else: the tool's questions, slide pieces whose question is
+                 the tool's framing, her quiz questions recalled without their options.
    A shared Paper Sim pipeline file (shared-check.mjs); build.mjs and resplice.mjs run it after the page is written.
    A sim without content/rep.js has no guided page, and this says so.
 
    What goes in, from content/rep.js (export const REP = {...}):
+     verbatim pieces (same shape as below) whose question AND answer are the lecturer's or her set source → the ladder
      pieces   the sim's own pieces, each written from a lecturer's slide in her words:
               {id, group, title, ask, src, facts:['a line with its **key words** bold', …], hook?, note?, who?:'hers'|'tool'}
      recall   the lecturer's own closed questions turned into recall — the stem asked without its options, her key as the
@@ -37,16 +43,17 @@ else {
   const groups = REP.groups || Object.entries(META.sys).map(([id, title]) => ({ id, title, hue: (META.hue || {})[id] ?? 220 }));
   const gIds = new Set(groups.map(g => g.id));
   const bolds = t => [...String(t).matchAll(/\*\*(.+?)\*\*/g)].map(x => x[1]);
-  const kinds = { pieces: [], hers: [], recall: [], tool: [] };
+  const kinds = { verbatim: [], pieces: [], hers: [], recall: [], tool: [] };
 
-  /* 1 · the sim's own pieces, from the lecturer's slides */
-  for (const p of REP.pieces || []) {
+  /* 1 · the sim's own pieces: verbatim ones (the ladder) and the rest (cards) */
+  for (const [kind, list] of [['verbatim', REP.verbatim || []], ['pieces', REP.pieces || []]]) for (const p of list) {
     const at = 'piece ' + p.id;
     if (!p.id || !p.title || !p.ask || !p.src) die(at + ': needs id, title, ask and src');
     if (!gIds.has(p.group)) die(at + ': no group ' + p.group);
     if (!Array.isArray(p.facts) || !p.facts.length) die(at + ': no facts');
     for (const t of p.facts) if (!bolds(t).length) die(`${at}: line "${t}" has no **key word**`);
-    kinds.pieces.push({ id: 'rv-' + p.id, group: p.group, who: p.who || 'hers', title: p.title, qt: p.ask, source: p.src, note: p.note || null,
+    if (p.split && p.facts.some(t => !t.includes(' — '))) die(at + ': a split piece needs "front — back" on every line');
+    kinds[kind].push({ id: 'rv-' + p.id, split: !!p.split, group: p.group, who: p.who || 'hers', title: p.title, qt: p.ask, source: p.src, note: p.note || null,
       short: { title: p.title, hook: p.hook || '', groups: [{ q: p.part || p.title, facts: p.facts.map((t, i) => ({ t, of: [i] })) }] } });
   }
 
@@ -92,10 +99,12 @@ else {
     }
   }
 
-  const order = REP.order || ['pieces', 'hers', 'recall', 'tool'];
-  const questions = order.flatMap(k => kinds[k] || []);
-  if (new Set(questions.map(q => q.id)).size !== questions.length) die('two pieces share an id');
-  for (const g of groups) if (!questions.some(q => q.group === g.id)) die('group ' + g.id + ' has nothing in it');
+  /* the ladder holds the verbatim material only; every other kind becomes cards */
+  const questions = ['hers', 'verbatim'].flatMap(k => kinds[k]);
+  const all = Object.values(kinds).flat();
+  if (new Set(all.map(q => q.id)).size !== all.length) die('two pieces share an id');
+  for (const g of groups) if (!all.some(q => q.group === g.id)) die('group ' + g.id + ' has nothing in it');
+  const ladderGroups = groups.filter(g => questions.some(q => q.group === g.id));
   const facts = questions.reduce((n, q) => n + q.short.groups.flatMap(g => g.facts).length, 0);
 
   const date = META.sitting.date, d = new Date(date + 'T12:00:00'); d.setDate(d.getDate() - 1);
@@ -104,7 +113,7 @@ else {
     sub: REP.sub || '', exam: date, last, examDay: REP.examDay || date, who: META.who || 'the lecturer', groupWord: REP.groupWord || 'topics',
     how: REP.how || '', home: './' };
   const counts = Object.fromEntries(Object.entries(kinds).map(([k, v]) => [k, v.length]));
-  const d2 = { version: 1, meta, groups, questions, counts, facts };
+  const d2 = { version: 1, meta, groups: ladderGroups, questions, counts, facts };
   const json = JSON.stringify(d2).replace(/<\//g, '<\\/');
   const V = crypto.createHash('sha1').update(['rep.js', 'rep.css', 'rep-engine.mjs'].map(f => fs.readFileSync(path.join(HERE, f), 'utf8')).join('')).digest('hex').slice(0, 8);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -114,5 +123,29 @@ else {
   for (const [k, v] of Object.entries(fill)) out = out.split('@' + k + '@').join(k === 'FOOT' ? v : esc(v));
   out = out.replace('/*@REP_DATA@*/', () => json);
   fs.writeFileSync(path.join(HERE, 'rep.html'), out);
-  console.log(`rep.html: ${questions.length} pieces (${Object.entries(counts).map(([k, v]) => v + ' ' + k).join(' · ')}), ${facts} key-word lines`);
+  console.log(`rep.html: ${questions.length} verbatim pieces (${counts.hers} written + ${counts.verbatim} from the source she set), ${facts} key-word lines`);
+
+  /* ── cards.html: everything that is not verbatim, one card per question ── */
+  const strip = s => String(s).replace(/^Question \w+\s+/, '');
+  const cards = [];
+  for (const k of REP.cardOrder || ['pieces', 'recall', 'tool']) for (const q of kinds[k]) {
+    if (k === 'recall') for (const [i, f] of q.short.groups[0].facts.entries()) cards.push({ id: 'r:' + q.id + ':' + i, deck: q.group, kind: 'Quiz question',
+      front: strip(f.ask), back: [f.t], src: q.source, who: 'hers' });
+    else if (q.split) for (const [i, f] of q.short.groups[0].facts.entries()) { const [fr, ...bk] = f.t.split(' — '); cards.push({ id: 'p:' + q.id + ':' + i, deck: q.group, kind: q.splitKind || 'Abbreviation', front: fr.replace(/\*\*/g, ''), back: [bk.join(' — ')], src: q.source, who: q.who }); }
+    else cards.push({ id: (k === 'tool' ? 'w:' : 'p:') + q.id, deck: q.group, kind: k === 'tool' ? 'Tool’s question' : 'Slide', title: q.title,
+      front: q.qt, back: q.short.groups.flatMap(g => g.facts.map(f => f.t)), heads: q.short.groups.length > 1 ? q.short.groups.map(g => [g.q, g.facts.length]) : null,
+      full: q.steps || null, src: q.source, who: q.who });
+  }
+  if (new Set(cards.map(c => c.id)).size !== cards.length) die('two cards share an id');
+  const decks = groups.filter(g => cards.some(c => c.deck === g.id)).map(g => ({ ...g, n: cards.filter(c => c.deck === g.id).length }));
+  const cmeta = { prefix: META.prefix, hue: META.tool.hue, icon: META.tool.icon, kick: META.tool.kick, name: REP.cardsName || 'Flashcards',
+    sub: REP.cardsSub || '', exam: date, how: REP.cardsHow || '' };
+  const cjson = JSON.stringify({ version: 1, meta: cmeta, decks, cards }).replace(/<\//g, '<\\/');
+  const CV = crypto.createHash('sha1').update(['cards.js', 'cards.css', 'srs-engine.mjs', 'rep.css'].map(f => fs.readFileSync(path.join(HERE, f), 'utf8')).join('')).digest('hex').slice(0, 8);
+  const cfill = { ...fill, TITLE: `${META.short || META.title} · ${cmeta.name}`, HUB: `https://jeremyspm.github.io/#${META.hub}/cards`, H1: cmeta.name, V: CV };
+  let cout = fs.readFileSync(path.join(HERE, 'cards.template.html'), 'utf8');
+  for (const [k, v] of Object.entries(cfill)) cout = cout.split('@' + k + '@').join(k === 'FOOT' ? v : esc(v));
+  cout = cout.replace('/*@CARD_DATA@*/', () => cjson);
+  fs.writeFileSync(path.join(HERE, 'cards.html'), cout);
+  console.log(`cards.html: ${cards.length} cards in ${decks.length} decks (${['pieces', 'recall', 'tool'].map(k => kinds[k].length + ' ' + k).join(' · ')})`);
 }

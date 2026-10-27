@@ -57,8 +57,10 @@ export const META = {
      chart, drilled — is terms.html, built by build-terms.mjs from content/terms/; it leaves its progress line under
      phf.more.terms, which replaces `s` once it exists. */
   more: [{ sec: 'Learn', href: 'rep.html', ic: '🧠', t: 'Learn the short answers',
-    s: 'Joan’s 18 short answers first, as key words that come back over the days',
-    hl: { c: '#9333ea', c2: '#c084fc', kick: '✨ New · the written section', go: 'Start ›' } },
+    s: 'Joan’s own 18 short answers, verbatim, as key words that come back over the days' },
+    { sec: 'Learn', href: 'cards.html', ic: '🗂', t: 'Flashcards',
+    s: 'Anki, stripped down: the must-know abbreviations and the tool’s short answers',
+    hl: { c: '#9333ea', c2: '#c084fc', kick: '✨ New · spaced repetition', go: 'Study ›' } },
     { sec: 'Read a med chart', href: 'terms.html', ic: '💬', key: 'terms', t: 'Chart Speak',
     s: 'OD, BD, TDS, PRN, stat… every med-chart term, drilled' },
     /* Chart Sim — the NZ 8-Day National Medication Chart redrawn, to read and to chart on (tap or handwrite) — is

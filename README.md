@@ -215,20 +215,30 @@ signature sits in a box a round asks the student to fill, or anything is signed 
 where it put it; or if a stroke drawn across a box is not placed in it. The modules are inlined as namespaces (never retyped) and the page's
 script is parsed before it ships. Progress lives under `phf.chart.*`; `phf.more.chart` feeds the home row.
 
-## Learn the short answers (`rep.html`, 27 Oct 2026)
+## Learn the short answers (`rep.html`) and Flashcards (`cards.html`)
 
-The written section as key words (`content/rep.js`): **Joan's 18 short answers first** — her three Formative
-mini-exams, her model answers, cut into short lines in `content/shorts/hers.js` — then **the 23 must-know
-abbreviations** (TDS included) as seven small key-word cards in their own group, then the tool's 34 in her format,
-tagged. One group per topic. 59 pieces, 230 key-word lines. Where her model answer lists alternatives (`any: k`), the
-page asks for all of them: you learn every option, and the "I had it in other words" button is there for the rest.
-It is HS2 Final's guided-recall page ("Learn the cases"), ported into the shared pipeline: `rep-engine.mjs` is
-that page's engine, unchanged (typed key words, marked by the page; a day counts after 2 from-memory hits in a row;
-solid after 3 days running); `rep.js`, `rep.template.html`, `rep.css` and `rep.build.mjs` are its page made
-general, driven by `content/rep.js`. All five are shared files (`shared-check.mjs`). `build.mjs` and
-`resplice.mjs` regenerate `rep.html` (or `node rep.build.mjs` alone); **do not edit the generated `rep.html`**.
-Progress lives under `<prefix>relearn.v1`, apart from the Paper Sim scores, with export and import. The home screen
-has it as a featured card, and the hub's exam opens on it (its Learn side).
+**The ladder holds the verbatim material only**: Joan's own 18 short answers from her three Formative mini-exams, her
+questions and her model answers, cut into short lines in `content/shorts/hers.js`.
+
+**Flashcards hold the rest, 57 cards in 9 decks**: the 23 must-know abbreviations one card each (the course's
+Must-Know list plus Q6H, EC, SR and CR from her 20 Oct session; a `split` piece in `content/rep.js`), and the tool's
+34 short answers in her format.
+
+**Flashcards (`cards.html`, 27 Oct 2026)** — his call the same evening: "we only leave the verbatim things the way
+HS2 is approached and the rest of it becomes straight up SRS cards, copy anki basically". A stripped-down Anki:
+decks with New · Learn · Due counts, a deck overview, the study screen (Show answer, then Again · Hard · Good · Easy,
+each showing its next interval; keys Space and 1–4), undo, bury, suspend, flag, mark, leeches (8 lapses suspends and
+tags), a card browser with search and filters, stats (today, card counts, a 30-day forecast, reviews a day, young and
+mature retention) and the options Anki has (new and review limits, learning and relearning steps, graduating and easy
+intervals, starting ease, easy bonus, hard interval, interval modifier, maximum interval, leech threshold, new-card
+order, the 4 am rollover), with export, import and reset. The scheduler is `srs-engine.mjs` — Anki's SM-2 with its v3
+defaults, not FSRS — and `node cards.check.mjs` checks it against Anki's rules. The Decks screen says when the
+new-card limit will not reach every card before the exam. Progress lives under `<prefix>srs.v1`.
+
+**The split.** `rep.build.mjs` builds both pages from `content/rep.js`: a question whose question AND answer come from
+the lecturer (or the source she set) goes on the ladder (`rep.html`); everything else becomes a card, one per question.
+`cards.template.html`, `cards.js`, `cards.css`, `srs-engine.mjs` and `cards.check.mjs` are shared files
+(`shared-check.mjs`). Do not edit the generated `rep.html` or `cards.html`.
 
 ## How it is built
 

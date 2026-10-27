@@ -1,0 +1,70 @@
+/* cards.css — the flashcards page (cards.html), on top of rep.css (the Paper Sim's skin and tokens). Anki's colours for
+   the counts: new blue, learning red, due green. */
+:root{--cn:hsl(210 90% 62%);--cl:hsl(0 80% 64%);--cr:hsl(140 60% 50%)}
+:root[data-theme=light]{--cn:hsl(214 85% 45%);--cl:hsl(0 70% 48%);--cr:hsl(140 65% 32%)}
+.tabs{display:flex;gap:4px;margin:0 0 12px;border-bottom:1px solid var(--border)}
+.tab{flex:1;background:none;border:0;border-bottom:3px solid transparent;padding:10px 4px;font-weight:650;color:var(--muted-fg);cursor:pointer}
+.tab.on{color:var(--fg);border-bottom-color:var(--primary)}
+.center{text-align:center}
+.cn{font-weight:750;font-variant-numeric:tabular-nums}
+.cn.n,.n strong,strong.n,th.n{color:var(--cn)} .cn.l,strong.l,th.l{color:var(--cl)} .cn.r,strong.r,th.r{color:var(--cr)}
+table.decks{width:100%;border-collapse:collapse;margin-bottom:12px}
+.decks th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;text-align:right;padding:6px 8px;color:var(--muted-fg)}
+.decks th:first-child{text-align:left}
+.decks td{padding:9px 8px;border-top:1px solid var(--border);text-align:right;font-variant-numeric:tabular-nums;font-weight:650}
+.decks td:first-child{text-align:left;font-weight:550}
+.decks td:nth-child(2){color:var(--cn)} .decks td:nth-child(3){color:var(--cl)} .decks td:nth-child(4){color:var(--cr)}
+.decks td.z{color:var(--muted-fg);opacity:.5;font-weight:400}
+.decks td small{color:var(--muted-fg);font-weight:400;margin-left:4px}
+.decks tr{cursor:pointer} .decks tbody tr:hover{background:var(--accent)}
+.decks tr.all td{border-top:0}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--cc);margin-right:8px;vertical-align:1px}
+.ov h2{margin:0 0 14px;font-size:1.25rem;text-align:center}
+.ovn{display:flex;justify-content:space-around;margin:0 0 16px}
+.ovn div{text-align:center} .ovn strong{display:block;font-size:2rem;line-height:1.1} .ovn span{font-size:.8rem;color:var(--muted-fg)}
+.ov .btn{margin-top:8px}
+.studybar{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.qn{flex:1;text-align:center;font-size:1.05rem} .qn i{font-style:normal;color:var(--muted-fg);margin:0 5px}
+.qn .cn.cur{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px}
+.tools2{min-width:40px;text-align:right}
+.flag{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.mark{font-style:normal;color:var(--warn)}
+.face{min-height:180px}
+.ctitle{font-size:.78rem;color:var(--muted-fg);margin:4px 0 0;text-transform:uppercase;letter-spacing:.05em}
+.front{font-size:1.15rem;line-height:1.5;margin:8px 0 4px;font-weight:600;overflow-wrap:anywhere}
+.face hr{border:0;border-top:1px solid var(--border);margin:14px 0}
+.bh{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted-fg);margin:10px 0 2px}
+ul.back{margin:6px 0;padding-left:20px} ul.back li{margin:6px 0;line-height:1.5} ul.back b{color:var(--primary)}
+.tag.new{color:var(--cn);background:color-mix(in srgb,var(--cn) 15%,transparent)}
+.answerbar{position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 30%);padding:14px 0 10px;z-index:3}
+.answerbar kbd{font:inherit;font-size:.7rem;opacity:.65;margin-left:8px;border:1px solid currentColor;border-radius:4px;padding:0 4px}
+.grades{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.ans{border:0;border-radius:10px;padding:8px 4px 10px;font-weight:750;font-size:.95rem;cursor:pointer;color:#fff;display:flex;flex-direction:column;align-items:center;gap:2px}
+.ans small{font-weight:600;font-size:.75rem;opacity:.9}
+.ans kbd{margin:2px 0 0;font-size:.65rem}
+.ans.again{background:hsl(0 70% 50%)} .ans.hard{background:hsl(220 10% 46%)} .ans.good{background:hsl(140 55% 36%)} .ans.easy{background:hsl(210 75% 46%)}
+.ans:active{transform:translateY(1px)}
+.more{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:6px 0}
+.more .btn:disabled{opacity:.4}
+.bfilters{display:grid;grid-template-columns:1fr;gap:8px}
+@media(min-width:560px){.bfilters{grid-template-columns:2fr 1fr 1fr}}
+.bfilters input,.bfilters select,#sd,.opt input,.opt select{background:var(--muted);border:1px solid var(--border);border-radius:8px;padding:9px 10px;color:var(--fg);width:100%}
+.blist{list-style:none;padding:0;margin:8px 0 0}
+.blist li{border-top:1px solid var(--border)}
+.brow{display:block;width:100%;text-align:left;background:none;border:0;padding:10px 4px;cursor:pointer}
+.brow .bf{display:block;font-weight:600;font-size:.92rem;line-height:1.35}
+.brow .bm{display:block;font-size:.75rem;color:var(--muted-fg);margin-top:2px}
+.brow .bm .dot{width:7px;height:7px;margin-right:5px}
+.bdet{padding:0 4px 12px}
+.row3{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.btn.danger{color:var(--danger)}
+.card h3{font-size:.8rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted-fg);margin:18px 0 6px}
+.card h3:first-child{margin-top:0}
+.bars{display:flex;align-items:flex-end;gap:2px;height:90px;padding:4px 0;border-bottom:1px solid var(--border)}
+.bars i{flex:1;background:var(--primary);border-radius:3px 3px 0 0;min-height:1px;opacity:.85}
+.stack{display:flex;height:14px;border-radius:99px;overflow:hidden;background:var(--muted)}
+.stack .n{background:var(--cn)} .stack .l{background:var(--cl)} .stack .y{background:hsl(140 45% 60%)} .stack .m{background:hsl(140 60% 32%)} .stack .s{background:var(--warn)}
+.opt{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 0}
+.opt span{flex:1;font-size:.92rem} .opt small{display:block;color:var(--muted-fg);font-size:.75rem}
+.opt input,.opt select{max-width:130px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--fg);color:var(--bg0);padding:8px 16px;border-radius:99px;font-size:.9rem;z-index:20}

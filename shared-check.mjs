@@ -10,7 +10,8 @@ import { fileURLToPath } from 'node:url';
 
 export const SHARED = ['template.html', 'build.mjs', 'stem-html.mjs', 'bind-images.mjs', 'resplice.mjs',
   'shared-check.mjs', 'shorts.mjs', 'content/explain.mjs',
-  'rep.build.mjs', 'rep.template.html', 'rep.js', 'rep.css', 'rep-engine.mjs'];
+  'rep.build.mjs', 'rep.template.html', 'rep.js', 'rep.css', 'rep-engine.mjs',
+  'cards.template.html', 'cards.js', 'cards.css', 'srs-engine.mjs', 'cards.check.mjs'];
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const parent = path.dirname(HERE);
